@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gn</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='black'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-family='Georgia,serif' font-size='22' fill='white'>g</text></svg>">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --accent-color: #2f81f7;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --border-color: #30363d;
+            --terminal-green: #7ee787;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            font-family: monospace;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .external-links {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+            padding: 0.75rem 1rem;
+            background-color: #010409;
+            border: 1px dashed var(--border-color);
+            border-radius: 6px;
+        }
+
+        .external-links a {
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--accent-color);
+            color: #ffffff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #216cd4;
+        }
+
+        .btn-container {
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .step-list {
+            list-style-type: none;
+        }
+
+        .step-item {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .step-num {
+            font-family: monospace;
+            background-color: var(--border-color);
+            color: var(--text-main);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 1.1rem;
+        }
+
+        .step-content {
+            margin-top: 0.75rem;
+            padding-left: 0.25rem;
+        }
+
+        pre {
+            background-color: #010409;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            font-size: 0.9rem;
+            margin: 0.75rem 0;
+            color: #e6edf3;
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            background-color: rgba(110, 118, 129, 0.4);
+            padding: 0.2rem 0.4rem;
+            border-radius: 6px;
+            font-size: 0.85em;
+        }
+
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            font-size: inherit;
+        }
+
+        .comment { color: #8b949e; }
+        .variable { color: #ff7b72; }
+        .keyword { color: #ff7b72; }
+        .string { color: #a5d6ff; }
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>gn</h1>
+        <div class="subtitle">Global Notes</div>
+    </header>
+
+    <section id="about">
+        <h2>What is "gn"?</h2>
+        <p><code>gn</code> (Global Notes) is a note-taking tool for people who prefer plain text over platforms. It uses Markdown files, your existing <code>$EDITOR</code>, and a private GitHub repository to create a simple, portable notes tool that works anywhere.</p>
+        <p>Open a note, write, save, and quit. <code>gn</code> handles the rest. It automatically pulls the latest version before you edit and securely commits and pushes your changes when you're done. No databases, no subscriptions, no vendor lock-in - just text files, Git, and your terminal.</p>
+    </section>
+
+    <section id="download">
+        <h2>Get the Script</h2>
+        <p>Download the script directly using the button below, or use the source code inline. Clicking the button will save it locally as <code>gn.sh</code>.</p>
+
+        <div class="btn-container">
+            <button class="btn" onclick="downloadScript()">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14H2.75Z"></path><path d="M7.25 1.75a.75.75 0 0 1 1.5 0v7.793l2.146-2.147a.75.75 0 1 1 1.06 1.06l-3.427 3.427a.75.75 0 0 1-1.06 0L4.043 8.457a.75.75 0 1 1 1.06-1.06l2.147 2.147V1.75Z"></path></svg>
+                Download gn.sh
+            </button>
+
+        </div>
+
+        <pre><code id="script-content"><span class="comment">#!/usr/bin/env bash</span>
+
+<span class="comment"># --- 1. Configuration ---</span>
+NOTES_DIR=<span class="string">"$HOME/gn"</span>
+REMOTE_BRANCH=<span class="string">"main"</span>
+
+<span class="keyword">mkdir</span> -p <span class="string">"$NOTES_DIR"</span>
+<span class="keyword">cd</span> <span class="string">"$NOTES_DIR"</span> || { <span class="keyword">echo</span> <span class="string">"Error: Could not access $NOTES_DIR"</span>; <span class="keyword">exit</span> 1; }
+
+<span class="comment"># --- Help Text Function ---</span>
+show_help() {
+    <span class="keyword">echo</span> <span class="string">"Usage: gn [options] [note_name]"</span>
+    <span class="keyword">echo</span> <span class="string">""</span>
+    <span class="keyword">echo</span> <span class="string">"Options:"</span>
+    <span class="keyword">echo</span> <span class="string">"  -h        Show this help message"</span>
+    <span class="keyword">echo</span> <span class="string">"  -l        List all notes in your notes directory"</span>
+    <span class="keyword">echo</span> <span class="string">"  -g QUERY  Search for text across all notes (grep)"</span>
+    <span class="keyword">echo</span> <span class="string">"  -t        Quickly open today's journal note (YYYY-MM-DD.md)"</span>
+    <span class="keyword">echo</span> <span class="string">""</span>
+    <span class="keyword">echo</span> <span class="string">"Examples:"</span>
+    <span class="keyword">echo</span> <span class="string">"  gn                  Opens index.md"</span>
+    <span class="keyword">echo</span> <span class="string">"  gn daily-log        Opens daily-log.md"</span>
+    <span class="keyword">echo</span> <span class="string">"  gn work/todo        Opens work/todo.md"</span>
+    <span class="keyword">echo</span> <span class="string">"  gn -g 'api key'     Searches notes for the term 'api key'"</span>
+    <span class="keyword">echo</span> <span class="string">"  gn -t               Opens a scratchpad for today's date"</span>
+    <span class="keyword">exit</span> 0
+}
+
+<span class="comment"># --- List Files Function ---</span>
+list_notes() {
+    <span class="keyword">echo</span> <span class="string">"📂 Current Notes in $NOTES_DIR:"</span>
+    <span class="keyword">if</span> [ -d <span class="string">"$NOTES_DIR"</span> ]; <span class="keyword">then</span>
+        find . -type f -not -path <span class="string">'*/.*'</span> | sed <span class="string">'s|^\./||'</span> | sort
+    <span class="keyword">fi</span>
+    <span class="keyword">exit</span> 0
+}
+
+<span class="comment"># --- Search Inside Notes Function ---</span>
+search_notes() {
+    <span class="keyword">echo</span> <span class="string">"🔍 Searching for '$1' inside notes..."</span>
+    grep -Rin <span class="string">"$1"</span> . --exclude-dir=<span class="string">".git"</span>
+    <span class="keyword">exit</span> 0
+}
+
+<span class="comment"># --- Parse Flags ---</span>
+<span class="keyword">while</span> <span class="keyword">getopts</span> <span class="string">"hlg:t"</span> opt; <span class="keyword">do</span>
+    <span class="keyword">case</span> <span class="variable">${opt}</span> <span class="keyword">in</span>
+        h ) show_help ;;
+        l ) list_notes ;;
+        g ) search_notes <span class="string">"$OPTARG"</span> ;;
+        t ) NOTE_NAME=$(date <span class="string">'+%Y-%m-%d'</span>) ;;
+        \? ) show_help ;;
+    esac
+<span class="keyword">done</span>
+<span class="keyword">shift</span> <span class="string">$((OPTIND -1))</span>
+
+<span class="comment"># If -t wasn't passed, get note name from command line arguments</span>
+<span class="keyword">if</span> [ -z <span class="string">"$NOTE_NAME"</span> ]; <span class="keyword">then</span>
+    NOTE_NAME=<span class="string">"${1:-index}"</span>
+<span class="keyword">fi</span>
+
+<span class="keyword">if</span> [[ <span class="string">"$NOTE_NAME"</span> != *.md ]]; <span class="keyword">then</span>
+    NOTE_NAME=<span class="string">"${NOTE_NAME}.md"</span>
+<span class="keyword">fi</span>
+
+NOTE_DIR_PATH=$(<span class="keyword">dirname</span> <span class="string">"$NOTE_NAME"</span>)
+<span class="keyword">if</span> [ <span class="string">"$NOTE_DIR_PATH"</span> != <span class="string">"."</span> ]; <span class="keyword">then</span>
+    <span class="keyword">mkdir</span> -p <span class="string">"$NOTE_DIR_PATH"</span>
+<span class="keyword">fi</span>
+
+<span class="comment"># --- Sync From Cloud ---</span>
+<span class="keyword">if</span> git rev-parse --is-inside-work-tree > /dev/null 2>&1; <span class="keyword">then</span>
+    <span class="keyword">echo</span> <span class="string">"🔄 Fetching latest cloud updates..."</span>
+    git pull origin <span class="string">"$REMOTE_BRANCH"</span> --ff-only --quiet
+<span class="keyword">fi</span>
+
+<span class="comment"># --- 3. Open the Editor ---</span>
+<span class="variable">${EDITOR:-nano}</span> <span class="string">"$NOTE_NAME"</span>
+
+<span class="comment"># --- 4. Sync Back to GitHub ---</span>
+<span class="keyword">if</span> git rev-parse --is-inside-work-tree > /dev/null 2>&1; <span class="keyword">then</span>
+    <span class="keyword">if</span> [[ -n $(git status --porcelain) ]]; <span class="keyword">then</span>
+        <span class="keyword">echo</span> <span class="string">"🚀 Syncing changes to GitHub..."</span>
+        git add -A
+        git commit -m <span class="string">"Note update: $NOTE_NAME on $(date '+%Y-%m-%d %H:%M:%S')"</span> --quiet
+        git push origin <span class="string">"$REMOTE_BRANCH"</span> --quiet
+        <span class="keyword">echo</span> <span class="string">"✅ Sync complete!"</span>
+    <span class="keyword">else</span>
+        <span class="keyword">echo</span> <span class="string">"💤 No changes detected. Notes are up to date."</span>
+    <span class="keyword">fi</span>
+<span class="keyword">else</span>
+    <span class="keyword">echo</span> <span class="string">"⚠️ Warning: This directory is not a Git repository yet. Sync skipped."</span>
+</span class="keyword">fi</span></code></pre>
+    </section>
+
+    <section id="setup">
+        <h2>Installation</h2>
+
+        <div class="step-list">
+            <div class="step-item">
+                <span class="step-num">1</span>
+                <span class="step-title">Prerequisites & GitHub Account Setup</span>
+                <div class="step-content">
+                    <p>Before launching, ensure you have a registered Github account and that Git version control is functional on your current system.</p>
+                    <div class="external-links">
+                        <a href="https://docs.github.com/en/get-started/start-your-journey/creating-an-account-on-github" target="_blank">🔗 How to create a GitHub account</a>
+                        <a href="https://github.com/git-guides/install-git" target="_blank">🔗 How to install Git on your computer</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <span class="step-num">2</span>
+                <span class="step-title">Create a Private GitHub Repository</span>
+                <div class="step-content">
+                    <p>Log into GitHub, click <strong>New Repository</strong>, and name it <code>gn</code>. Ensure you explicitly change visibility to <strong>Private</strong> so your data stays hidden. Do not initialize with a README, license, or .gitignore layout template.</p>
+                    <div class="external-links">
+                        <a href="https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository" target="_blank">🔗 Official documentation: Creating a remote repository</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <span class="step-num">3</span>
+                <span class="step-title">Set Up SSH Authentication</span>
+                <div class="step-content">
+                    <p><strong>Generate an SSH key</strong> (skip this if you already have one at <code>~/.ssh/id_ed25519</code>):</p>
+                    <pre><code>ssh-keygen -t ed25519 -C "you@example.com"</code></pre>
+                    <p>Press Enter to accept the default file location. Optionally add a passphrase when prompted.</p>
+                    <p><strong>Add the key to GitHub:</strong></p>
+                    <div class="external-links">
+                        <a href="https://github.com/settings/keys" target="_blank">🔗 GitHub → Settings → SSH Keys</a>
+                    </div>
+                    <p style="margin-top: 0.75rem;">Click <strong>New SSH key</strong>, then paste the contents of your public key:</p>
+                    <pre><code>cat ~/.ssh/id_ed25519.pub</code></pre>
+                    <p>Copy the output and paste it into the GitHub key field, then save.</p>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <span class="step-num">4</span>
+                <span class="step-title">Initialize Your Note Directory</span>
+                <div class="step-content">
+                    <p>Create the local repo and connect it to GitHub using your SSH remote URL (found on your repo page under <strong>Code → SSH</strong>):</p>
+                    <pre><code>mkdir -p ~/gn
+cd ~/gn
+git init -b main
+git remote add origin git@github.com:YOUR-USERNAME/gn.git
+echo "# Notes" > index.md
+git add index.md
+git commit -m "Initial commit"
+git push -u origin main</code></pre>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <span class="step-num">5</span>
+                <span class="step-title">Make the Script Runnable Globally</span>
+                <div class="step-content">
+                    <p>Make the script executable and copy it into <code>/usr/local/bin</code>, which is already on your PATH by default on Mac, Linux, and BSD - no profile editing needed:</p>
+                    <pre><code>chmod +x gn.sh
+sudo cp gn.sh /usr/local/bin/gn</code></pre>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <span class="step-num">6</span>
+                <span class="step-title">Usage Workflow Examples</span>
+                <div class="step-content">
+                    <p>Reload your session settings (<code>source ~/.zshrc</code>) and call the script from anywhere:</p>
+                    <pre><code>gn                  # Opens your main index.md
+gn daily-log        # Creates/Opens daily-log.md
+gn work/reminders   # Creates work/ directory and opens reminders.md
+gn -h               # Displays help page
+gn -l               # Lists all your notes
+gn -g "todo"        # Finds text matching "todo" inside any note
+gn -t               # Opens today's automated scratchpad entry</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="second-machine">
+        <h2>Setting Up a Second Computer</h2>
+        <p>Your notes already live in GitHub, so getting them on another machine is straightforward. You just need a new SSH key for that machine, clone the repo, and install gn.</p>
+
+        <div class="step-list">
+            <div class="step-item">
+                <span class="step-num">1</span>
+                <span class="step-title">Generate a new SSH key on the second machine</span>
+                <div class="step-content">
+                    <p>Each machine should have its own SSH key - don't copy the key from your first machine.</p>
+                    <pre><code>ssh-keygen -t ed25519 -C "you@example.com"</code></pre>
+                    <p>Then print the public key so you can copy it:</p>
+                    <pre><code>cat ~/.ssh/id_ed25519.pub</code></pre>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <span class="step-num">2</span>
+                <span class="step-title">Add the new key to GitHub</span>
+                <div class="step-content">
+                    <p>Go to <a href="https://github.com/settings/keys" target="_blank">github.com/settings/keys</a>, click <strong>New SSH key</strong>, paste the public key from the step above, and save. GitHub lets you have multiple SSH keys - one per machine is the right approach.</p>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <span class="step-num">3</span>
+                <span class="step-title">Clone your existing notes repo</span>
+                <div class="step-content">
+                    <p>Instead of <code>git init</code>, you clone the repo that already exists:</p>
+                    <pre><code>git clone git@github.com:YOUR-USERNAME/gn.git ~/gn</code></pre>
+                    <p>This creates <code>~/gn</code> with all your notes already inside, and the remote already configured.</p>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <span class="step-num">4</span>
+                <span class="step-title">Install gn</span>
+                <div class="step-content">
+                    <p>Download <code>setup.sh</code> using the button above and run it, or just install the script manually:</p>
+                    <pre><code>chmod +x gn.sh
+sudo cp gn.sh /usr/local/bin/gn</code></pre>
+                    <p>That's it - run <code>gn</code> from anywhere and it will pull the latest notes before opening the editor, just like on your first machine.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="web-editor">
+        <h2>Editing Notes in the Browser</h2>
+        <p>If you're on a machine without a terminal - or just want a quick edit from any browser - you can use <strong>github.dev</strong>, a full VS Code instance that runs entirely in the browser and commits directly to your repo.</p>
+
+        <div class="step-list">
+            <div class="step-item">
+                <span class="step-num">1</span>
+                <span class="step-title">Open your repo in github.dev</span>
+                <div class="step-content">
+                    <p>Navigate to your <code>gn</code> repo on GitHub, then press <code>.</code> (period) on your keyboard. The page reloads as a VS Code editor with all your notes in the file tree on the left.</p>
+                    <p>Or just swap <code>github.com</code> for <code>github.dev</code> in the URL directly:</p>
+                    <pre><code>https://github.dev/YOUR-USERNAME/gn</code></pre>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <span class="step-num">2</span>
+                <span class="step-title">Edit and commit your note</span>
+                <div class="step-content">
+                    <p>Open any <code>.md</code> file and make your edits. When done, open the Source Control panel (<code>Ctrl+Shift+G</code> / <code>Cmd+Shift+G</code>), enter a commit message, and click the checkmark. The change is pushed to your repo immediately.</p>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <span class="step-num">3</span>
+                <span class="step-title">Pull before your next terminal session</span>
+                <div class="step-content">
+                    <p>The next time you run <code>gn</code>, it automatically pulls any browser edits before opening the editor - no manual sync needed.</p>
+                    <p><strong>Note:</strong> if you edit the same note in github.dev and in the terminal without pulling first, git will flag a merge conflict. Always let <code>gn</code> finish its pull step before editing locally.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+</div>
+
+    <footer>
+        &copy; 2026 Barney Matthews. Released under the <a href="https://opensource.org/licenses/MIT" target="_blank" style="color: var(--text-muted); text-decoration: underline;">MIT License</a>.
+    </footer>
+</div>
+
+<script>
+    function downloadScript() {
+        const rawCode = `#!/usr/bin/env bash
+
+# --- 1. Configuration ---
+NOTES_DIR="\$HOME/gn"
+REMOTE_BRANCH="main"
+
+mkdir -p "\$NOTES_DIR"
+cd "\$NOTES_DIR" || { echo "Error: Could not access \$NOTES_DIR"; exit 1; }
+
+# --- Help Text Function ---
+show_help() {
+    echo "Usage: gn [options] [note_name]"
+    echo ""
+    echo "Options:"
+    echo "  -h        Show this help message"
+    echo "  -l        List all notes in your notes directory"
+    echo "  -g QUERY  Search for text across all notes (grep)"
+    echo "  -t        Quickly open today's journal note (YYYY-MM-DD.md)"
+    echo ""
+    echo "Examples:"
+    echo "  gn                  Opens index.md"
+    echo "  gn daily-log        Opens daily-log.md"
+    echo "  gn work/todo        Opens work/todo.md"
+    echo "  gn -g 'api key'     Searches notes for the term 'api key'"
+    echo "  gn -t               Opens a scratchpad for today's date"
+    exit 0
+}
+
+# --- List Files Function ---
+list_notes() {
+    echo "📂 Current Notes in \$NOTES_DIR:"
+    if [ -d "\$NOTES_DIR" ]; then
+        find . -type f -not -path '*/.*' | sed 's|^\./||' | sort
+    fi
+    exit 0
+}
+
+# --- Search Inside Notes Function ---
+search_notes() {
+    echo "🔍 Searching for '\$1' inside notes..."
+    grep -Rin "\$1" . --exclude-dir=".git"
+    exit 0
+}
+
+# --- Parse Flags ---
+while getopts "hlg:t" opt; do
+    case \${opt} in
+        h ) show_help ;;
+        l ) list_notes ;;
+        g ) search_notes "\$OPTARG" ;;
+        t ) NOTE_NAME=\$(date '+%Y-%m-%d') ;;
+        \\? ) show_help ;;
+    esac
+done
+shift \$((OPTIND -1))
+
+# If -t wasn't passed, get note name from command line arguments
+if [ -z "\$NOTE_NAME" ]; then
+    NOTE_NAME="\${1:-index}"
+fi
+
+if [[ "\$NOTE_NAME" != *.md ]]; then
+    NOTE_NAME="\${NOTE_NAME}.md"
+fi
+
+NOTE_DIR_PATH=\$(dirname "\$NOTE_NAME")
+if [ "\$NOTE_DIR_PATH" != "." ]; then
+    mkdir -p "\$NOTE_DIR_PATH"
+fi
+
+# --- Sync From Cloud ---
+if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+    echo "🔄 Fetching latest cloud updates..."
+    git pull origin "\$REMOTE_BRANCH" --ff-only --quiet
+fi
+
+# --- 3. Open the Editor ---
+\${EDITOR:-nano} "\$NOTE_NAME"
+
+# --- 4. Sync Back to GitHub ---
+if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+    if [[ -n \$(git status --porcelain) ]]; then
+        echo "🚀 Syncing changes to GitHub..."
+        git add -A
+        git commit -m "Note update: \$NOTE_NAME on \$(date '+%Y-%m-%d %H:%M:%S')" --quiet
+        git push origin "\$REMOTE_BRANCH" --quiet
+        echo "✅ Sync complete!"
+    else
+        echo "💤 No changes detected. Notes are up to date."
+    fi
+else
+    echo "⚠️ Warning: This directory is not a Git repository yet. Sync skipped."
+fi`;
+
+        const element = document.createElement('a');
+        const file = new Blob([rawCode], {type: 'text/plain'});
+        element.href = URL.createObjectURL(file);
+        element.download = "gn.sh";
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
+</script>
+</body>
+</html>
