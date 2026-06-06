@@ -1,11 +1,49 @@
 #!/usr/bin/env bash
 
-# --- 1. Configuration ---
+# --- Configuration ---
 NOTES_DIR="$HOME/gn"
-REMOTE_BRANCH="main"
+
+# --- Load Config ---
+CONFIG_FILE="$NOTES_DIR/gn.conf"
+if [ -f "$CONFIG_FILE" ]; then
+    . "$CONFIG_FILE"
+else
+    echo "Error: No config found at $CONFIG_FILE"
+    echo "Create it with:"
+    echo "  GH_TOKEN=yourtoken"
+    echo "  GH_OWNER=yourusername"
+    echo "  GH_REPO=yourrepo"
+    exit 1
+fi
+
+GH_API="https://api.github.com/repos/$GH_OWNER/$GH_REPO/contents"
 
 mkdir -p "$NOTES_DIR"
 cd "$NOTES_DIR" || { echo "Error: Could not access $NOTES_DIR"; exit 1; }
+
+# --- GitHub API Sync Functions (used when git is not available) ---
+pull_from_github() {
+    local file="$1"
+    local response content
+    response=$(curl -s -H "Authorization: token $GH_TOKEN" "$GH_API/$file")
+    content=$(echo "$response" | grep '"content"' | sed 's/.*"content": *"\(.*\)".*/\1/' | tr -d '\\n')
+    if [ -n "$content" ]; then
+        echo "$content" | base64 -d > "$file" 2>/dev/null || echo "$content" | base64 -D > "$file"
+    fi
+}
+
+push_to_github() {
+    local file="$1"
+    local sha content msg api_url
+    api_url="$GH_API/$file"
+    sha=$(curl -s -H "Authorization: token $GH_TOKEN" "$api_url" | grep '"sha"' | head -1 | sed 's/.*"sha": *"\([^"]*\)".*/\1/')
+    content=$(base64 -w0 < "$file" 2>/dev/null || base64 < "$file")
+    msg="Note update: $file on $(date '+%Y-%m-%d %H:%M:%S')"
+    local sha_field=""
+    [ -n "$sha" ] && sha_field=",\"sha\":\"$sha\""
+    curl -s -X PUT -H "Authorization: token $GH_TOKEN" "$api_url" \
+        -d "{\"message\":\"$msg\",\"content\":\"$content\"$sha_field}" > /dev/null
+}
 
 # --- Help Text Function ---
 show_help() {
@@ -28,17 +66,17 @@ show_help() {
 
 # --- List Files Function ---
 list_notes() {
-    echo "📂 Current Notes in $NOTES_DIR:"
+    echo "Current Notes in $NOTES_DIR:"
     if [ -d "$NOTES_DIR" ]; then
-        find . -type f -not -path '*/.*' | sed 's|^./||' | sort
+        find . -type f -not -name "gn.conf" -not -path '*/.*' | sed 's|^./||' | sort
     fi
     exit 0
 }
 
 # --- Search Inside Notes Function ---
 search_notes() {
-    echo "🔍 Searching for '$1' inside notes..."
-    grep -Rin "$1" . --exclude-dir=".git"
+    echo "Searching for '$1' inside notes..."
+    grep -Rin "$1" . --exclude-dir=".git" --exclude="gn.conf"
     exit 0
 }
 
@@ -59,6 +97,11 @@ if [ -z "$NOTE_NAME" ]; then
     NOTE_NAME="${1:-index}"
 fi
 
+if [[ "$NOTE_NAME" == "gn.conf" ]]; then
+    echo "Error: Protection rule triggered. Cannot edit configuration file via gn script loop."
+    exit 1
+fi
+
 if [[ "$NOTE_NAME" != *.md ]]; then
     NOTE_NAME="${NOTE_NAME}.md"
 fi
@@ -69,25 +112,13 @@ if [ "$NOTE_DIR_PATH" != "." ]; then
 fi
 
 # --- Sync From Cloud ---
-if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
-    echo "🔄 Fetching latest cloud updates..."
-    git pull origin "$REMOTE_BRANCH" --ff-only --quiet
-fi
+echo "Fetching latest cloud updates..."
+pull_from_github "$NOTE_NAME"
 
-# --- 3. Open the Editor ---
+# --- Open the Editor ---
 ${EDITOR:-nano} "$NOTE_NAME"
 
-# --- 4. Sync Back to GitHub ---
-if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
-    if [[ -n $(git status --porcelain) ]]; then
-        echo "🚀 Syncing changes to GitHub..."
-        git add -A
-        git commit -m "Note update: $NOTE_NAME on $(date '+%Y-%m-%d %H:%M:%S')" --quiet
-        git push origin "$REMOTE_BRANCH" --quiet
-        echo "✅ Sync complete!"
-    else
-        echo "💤 No changes detected. Notes are up to date."
-    fi
-else
-    echo "⚠️ Warning: This directory is not a Git repository yet. Sync skipped."
-fi
+# --- Sync Back to GitHub ---
+echo "Syncing changes to GitHub..."
+push_to_github "$NOTE_NAME"
+echo "Sync complete!"
