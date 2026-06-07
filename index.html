@@ -488,17 +488,17 @@
                             over platforms. It uses Markdown files, your
                             existing <code>$EDITOR</code>, and a private GitHub
                             repository to create a simple, portable notes tool
-                            that works in any Bash environment &mdash; even if
-                            you don&apos;t have git installed.
+                            that works in any Bash environment - even if you
+                            don't have git installed.
                         </p>
                         <p>
                             Open a note, write, save, and quit.
                             <code>gn</code> handles the rest. It automatically
                             pulls the latest version before you edit and pushes
-                            your changes when you&apos;re done via the GitHub
-                            API &mdash; no Git required, just <code>curl</code>.
-                            No databases, no subscriptions, no vendor lock-in
-                            &mdash; just text files and your terminal.
+                            your changes when you're done via the GitHub API -
+                            no Git required, just <code>curl</code>. No
+                            databases, no subscriptions, no vendor lock-in -
+                            just text files and your terminal.
                         </p>
                     </div>
 
@@ -508,7 +508,7 @@
                             <div class="terminal-dot yellow"></div>
                             <div class="terminal-dot green"></div>
                             <span class="terminal-titlebar-label"
-                                >bash &mdash; 80&times;24</span
+                                >bash - 80&times;24</span
                             >
                         </div>
                         <div class="terminal-body" id="terminal-content">
@@ -521,7 +521,7 @@
                             <div id="scr-nano" class="terminal-screen">
                                 <div class="nano-buffer">
                                     <div class="nano-header">
-                                        GNU nano 7.2 &mdash; hello.md
+                                        GNU nano 7.2 - hello.md
                                     </div>
                                     <div class="nano-content">
                                         <span id="text-nano-body"></span
@@ -598,7 +598,9 @@
                                     &nbsp;&nbsp;-d NOTE&nbsp;&nbsp;&nbsp;Delete
                                     a note locally and from GitHub<br />
                                     &nbsp;&nbsp;-r OLD NEW Rename a note locally
-                                    and on GitHub<br /><br />
+                                    and on GitHub<br />
+                                    &nbsp;&nbsp;-p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pull
+                                    all notes from GitHub to local<br /><br />
                                     Examples:<br />
                                     &nbsp;&nbsp;gn&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Opens
                                     index.md<br />
@@ -632,8 +634,8 @@
                         <span class="step-title">GitHub Account Setup</span>
                         <div class="step-content">
                             <p>
-                                You need a GitHub account and a GitHub personal
-                                access token. Git is not required.
+                                You will need a GitHub account and a GitHub
+                                personal access token.
                             </p>
                             <div class="external-links">
                                 <a
@@ -648,10 +650,12 @@
                                 >
                             </div>
                             <p style="margin-top: 0.75rem">
-                                When creating the token, grant it the
-                                <strong>repo</strong> scope (full control of
-                                private repositories). Save the token - you'll
-                                need it in the configuration setup step below.
+                                Set Expiration to "No expiration." Under Select
+                                scope check "repo" (Full control of private
+                                repositories.) Generate the token. NOTE: Copy
+                                the token now - it is only displayed once.
+                                You'll need it in the configuration setup step
+                                below.
                             </p>
                         </div>
                     </div>
@@ -674,7 +678,7 @@
                                 <a
                                     href="https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository"
                                     target="_blank"
-                                    >🔗 Creating a remote repository</a
+                                    >🔗 Creating a Github repository</a
                                 >
                             </div>
                         </div>
@@ -685,7 +689,7 @@
             <section id="get-started">
                 <h2>Download gn</h2>
                 <p>
-                    Download the automated installer or manually configure
+                    Download the install script or manually configure
                     <code>gn</code> using the directions below.
                 </p>
 
@@ -693,7 +697,8 @@
                     <h3>Option A: Installer (Recommended)</h3>
                     <p style="font-size: 0.9rem; color: var(--text-muted)">
                         Download an <code>install.sh</code> that prompts you for
-                        your GitHub credentials during installation.
+                        your GitHub credentials during installation and fully
+                        sets up <code>gn</code> for you.
                     </p>
 
                     <div class="btn-container" style="margin-bottom: 0">
@@ -797,7 +802,7 @@ gh_curl() {
     <span class="keyword">return</span> $rc
 }
 
-<span class="comment"># --- GitHub API Sync Functions (used when git is not available) ---</span>
+<span class="comment"># --- GitHub API Sync Functions ---</span>
 pull_from_github() {
     <span class="keyword">local</span> file=<span class="string">"$1"</span>
     <span class="keyword">local</span> response content http_code
@@ -847,6 +852,7 @@ show_help() {
     <span class="keyword">echo</span> <span class="string">"  -t        Quickly open today's journal note (YYYY-MM-DD.md)"</span>
     <span class="keyword">echo</span> <span class="string">"  -d NOTE   Delete a note locally and from GitHub"</span>
     <span class="keyword">echo</span> <span class="string">"  -r OLD NEW  Rename a note locally and on GitHub"</span>
+    <span class="keyword">echo</span> <span class="string">"  -p        Pull all notes from GitHub to local"</span>
     <span class="keyword">echo</span> <span class="string">""</span>
     <span class="keyword">echo</span> <span class="string">"Examples:"</span>
     <span class="keyword">echo</span> <span class="string">"  gn                  Opens index.md"</span>
@@ -855,6 +861,7 @@ show_help() {
     <span class="keyword">echo</span> <span class="string">"  gn work/todo        Opens work/todo.md"</span>
     <span class="keyword">echo</span> <span class="string">"  gn -g 'api key'     Searches all notes for the term 'api key'"</span>
     <span class="keyword">echo</span> <span class="string">"  gn -t               Creates a note named today's date"</span>
+    <span class="keyword">echo</span> <span class="string">"  gn -p               Pulls all notes from GitHub to local"</span>
     <span class="keyword">exit</span> 0
 }
 
@@ -937,8 +944,35 @@ rename_note() {
     <span class="keyword">exit</span> 0
 }
 
+<span class="comment"># --- Pull All Notes From GitHub ---</span>
+pull_all_from_github() {
+    <span class="keyword">local</span> response http_code files file
+    <span class="keyword">echo</span> <span class="string">"Fetching file list from GitHub..."</span>
+    response=$(gh_curl -w <span class="string">"\n%{http_code}"</span> <span class="string">"$GH_API"</span>)
+    http_code=$(echo <span class="string">"$response"</span> | tail -1)
+    response=$(echo <span class="string">"$response"</span> | head -n -1)
+    <span class="keyword">if</span> [ <span class="string">"$http_code"</span> != <span class="string">"200"</span> ]; <span class="keyword">then</span>
+        <span class="keyword">echo</span> <span class="string">"Error: could not list remote files (HTTP $http_code). Check your token and repo name."</span> >&2
+        <span class="keyword">exit</span> 1
+    <span class="keyword">fi</span>
+    files=$(echo <span class="string">"$response"</span> | grep <span class="string">'"name"'</span> | sed <span class="string">'s/.*"name": *"\([^"]*\)".*/\1/'</span>)
+    <span class="keyword">if</span> [ -z <span class="string">"$files"</span> ]; <span class="keyword">then</span>
+        <span class="keyword">echo</span> <span class="string">"No notes found in remote repo."</span>
+        <span class="keyword">exit</span> 0
+    <span class="keyword">fi</span>
+    <span class="keyword">local</span> count=0
+    <span class="keyword">while</span> IFS= read -r file; <span class="keyword">do</span>
+        [[ <span class="string">"$file"</span> == *.md ]] || <span class="keyword">continue</span>
+        <span class="keyword">echo</span> <span class="string">"  pulling $file..."</span>
+        pull_from_github <span class="string">"$file"</span>
+        count=$((count + 1))
+    <span class="keyword">done</span> <<< <span class="string">"$files"</span>
+    <span class="keyword">echo</span> <span class="string">"Done. $count note(s) synced locally."</span>
+    <span class="keyword">exit</span> 0
+}
+
 <span class="comment"># --- Parse Flags ---</span>
-<span class="keyword">while</span> <span class="keyword">getopts</span> <span class="string">"hlg:td:r:"</span> opt; <span class="keyword">do</span>
+<span class="keyword">while</span> <span class="keyword">getopts</span> <span class="string">"hlg:td:r:p"</span> opt; <span class="keyword">do</span>
     <span class="keyword">case</span> <span class="variable">${opt}</span> <span class="keyword">in</span>
         h ) show_help ;;
         l ) list_notes ;;
@@ -946,6 +980,7 @@ rename_note() {
         t ) NOTE_NAME=$(date <span class="string">'+%Y-%m-%d'</span>) ;;
         d ) delete_note <span class="string">"$OPTARG"</span> ;;
         r ) rename_note <span class="string">"$OPTARG"</span> <span class="string">"${@:$OPTIND:1}"</span> ;;
+        p ) pull_all_from_github ;;
         \? ) show_help ;;
     esac
 <span class="keyword">done</span>
@@ -997,9 +1032,9 @@ push_to_github <span class="string">"$NOTE_NAME"</span>
                         <span class="step-title">Create the Config File</span>
                         <div class="step-content">
                             <p>
-                                The config file lives inside your notes
-                                directory as a .conf file. Create the directory
-                                first, then the config:
+                                The config file lives inside your gn directory
+                                as a .conf file. Create the directory first,
+                                then the config:
                             </p>
                             <pre><code>mkdir -p ~/gn
 nano ~/gn/gn.conf</code></pre>
@@ -1070,7 +1105,8 @@ gn -l               # Lists all your notes
 gn -g "todo"        # Finds text matching "todo" inside any note
 gn -t               # Opens today's automated scratchpad entry
 gn -d daily-log     # Deletes daily-log.md locally and from GitHub
-gn -r old new       # Renames old.md to new.md locally and on GitHub</code></pre>
+gn -r old new       # Renames old.md to new.md locally and on GitHub
+gn -p               # Pulls all notes from GitHub (first-time setup)</code></pre>
                         </div>
                     </div>
                 </div>
@@ -1110,9 +1146,9 @@ GH_REPO=gn</code></pre>
                             <pre><code>chmod +x gn.sh
 sudo cp gn.sh /usr/local/bin/gn</code></pre>
                             <p>
-                                That's it - run <code>gn</code> and it will pull
-                                your notes before opening the editor, just like
-                                on your first machine.
+                                That's it. Run <code>gn -p</code> to pull all
+                                your existing notes down at once, then use
+                                <code>gn</code> normally from there.
                             </p>
                         </div>
                     </div>
@@ -1371,7 +1407,7 @@ gh_curl() {
     return \$rc
 }
 
-# --- GitHub API Sync Functions (used when git is not available) ---
+# --- GitHub API Sync Functions ---
 pull_from_github() {
     local file="\$1"
     local response content http_code
@@ -1385,7 +1421,7 @@ pull_from_github() {
         echo "Error: pull failed (HTTP \$http_code). Check your token and repo name." >&2
         exit 1
     fi
-    content=\$(echo "\$response" | grep '"content"' | sed 's/.*"content": *"\\(.*\\)".*/\1/' | tr -d '\\\\n')
+    content=\$(echo "\$response" | grep '"content"' | sed 's/.*"content": *"\\(.*\\)".*/\\1/' | tr -d '\\n')
     if [ -n "\$content" ]; then
         echo "\$content" | base64 -d > "\$file" 2>/dev/null || echo "\$content" | base64 -D > "\$file"
     fi
@@ -1395,7 +1431,7 @@ push_to_github() {
     local file="\$1"
     local sha content msg api_url sha_response push_response http_code
     api_url="\$GH_API/\$file"
-    sha=\$(echo "\$sha_response" | grep '"sha"' | head -1 | sed 's/.*"sha": *"\\([^"]*\\)".*/\1/')
+    sha=\$(echo "\$sha_response" | grep '"sha"' | head -1 | sed 's/.*"sha": *"\\([^"]*\\)".*/\\1/')
     content=\$(base64 -w0 < "\$file" 2>/dev/null || base64 < "\$file")
     msg="Note update: \$file on \$(date '+%Y-%m-%d %H:%M:%S')"
     local sha_field=""
@@ -1420,6 +1456,7 @@ show_help() {
     echo "  -t        Quickly open today's journal note (YYYY-MM-DD.md)"
     echo "  -d NOTE   Delete a note locally and from GitHub"
     echo "  -r OLD NEW  Rename a note locally and on GitHub"
+    echo "  -p        Pull all notes from GitHub to local"
     echo ""
     echo "Examples:"
     echo "  gn                  Opens index.md"
@@ -1428,6 +1465,7 @@ show_help() {
     echo "  gn work/todo        Opens work/todo.md"
     echo "  gn -g 'api key'     Searches notes for the term 'api key'"
     echo "  gn -t               Creates a note named today's date"
+    echo "  gn -p               Pulls all notes from GitHub to local"
     exit 0
 }
 
@@ -1461,7 +1499,7 @@ delete_note() {
     [[ "\$confirm" =~ ^[Yy]\$ ]] || { echo "Aborted."; exit 0; }
     local sha api_url
     api_url="\$GH_API/\$file"
-    sha=\$(gh_curl "\$api_url" | grep '"sha"' | head -1 | sed 's/.*"sha": *"\\([^"]*\\)".*/\1/')
+    sha=\$(gh_curl "\$api_url" | grep '"sha"' | head -1 | sed 's/.*"sha": *"\\([^"]*\\)".*/\\1/')
     if [ -n "\$sha" ]; then
         gh_curl -X DELETE "\$api_url" \\
             -d "{\\"message\\":\\"Delete \$file\\",\\"sha\\":\\"\$sha\\"}" > /dev/null
@@ -1495,7 +1533,7 @@ rename_note() {
     local sha old_api_url new_api_url content
     old_api_url="\$GH_API/\$old_name"
     new_api_url="\$GH_API/\$new_name"
-    sha=\$(gh_curl "\$old_api_url" | grep '"sha"' | head -1 | sed 's/.*"sha": *"\\([^"]*\\)".*/\1/')
+    sha=\$(gh_curl "\$old_api_url" | grep '"sha"' | head -1 | sed 's/.*"sha": *"\\([^"]*\\)".*/\\1/')
     content=\$(base64 -w0 < "\$NOTES_DIR/\$old_name" 2>/dev/null || base64 < "\$NOTES_DIR/\$old_name")
     gh_curl -X PUT "\$new_api_url" \\
         -d "{\\"message\\":\\"Rename \$old_name to \$new_name\\",\\"content\\":\\"\$content\\"}" > /dev/null
@@ -1508,8 +1546,35 @@ rename_note() {
     exit 0
 }
 
+# --- Pull All Notes From GitHub ---
+pull_all_from_github() {
+    local response http_code files file
+    echo "Fetching file list from GitHub..."
+    response=\$(gh_curl -w "\\n%{http_code}" "\$GH_API")
+    http_code=\$(echo "\$response" | tail -1)
+    response=\$(echo "\$response" | head -n -1)
+    if [ "\$http_code" != "200" ]; then
+        echo "Error: could not list remote files (HTTP \$http_code). Check your token and repo name." >&2
+        exit 1
+    fi
+    files=\$(echo "\$response" | grep '"name"' | sed 's/.*"name": *"\\([^"]*\\)".*/\\1/')
+    if [ -z "\$files" ]; then
+        echo "No notes found in remote repo."
+        exit 0
+    fi
+    local count=0
+    while IFS= read -r file; do
+        [[ "\$file" == *.md ]] || continue
+        echo "  pulling \$file..."
+        pull_from_github "\$file"
+        count=\$((count + 1))
+    done <<< "\$files"
+    echo "Done. \$count note(s) synced locally."
+    exit 0
+}
+
 # --- Parse Flags ---
-while getopts "hlg:td:r:" opt; do
+while getopts "hlg:td:r:p" opt; do
     case \${opt} in
         h ) show_help ;;
         l ) list_notes ;;
@@ -1517,6 +1582,7 @@ while getopts "hlg:td:r:" opt; do
         t ) NOTE_NAME=\$(date '+%Y-%m-%d') ;;
         d ) delete_note "\$OPTARG" ;;
         r ) rename_note "\$OPTARG" "\${@:\$OPTIND:1}" ;;
+        p ) pull_all_from_github ;;
         \\? ) show_help ;;
     esac
 done
