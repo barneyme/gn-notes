@@ -1,464 +1,123 @@
 # gn
 
-**GET NOTES**
+**get_notes.md**
 
-A simple CLI note-taking tool for people who prefer plain text over platforms.
+`gn` (Get Notes) is a zero-dependency CLI note utility that saves your markdown files directly to a private GitHub, GitLab, or Codeberg repository. It acts as a lightweight sync layer using nothing but native Bash and curl — no local Git installation or setup required.
 
-`gn` uses Markdown files, your existing `$EDITOR`, and a private GitHub repository to create a portable note system that works in any Bash environment—even if Git is not installed.
+When you run `gn note-name`, it pulls the latest file version from your Git host via HTTP API, opens it in your default `$EDITOR`, and automatically pushes your changes back when you save and exit.
 
-Open a note, write, save, and quit.
-
-`gn` handles the rest.
-
-It automatically pulls the latest version before you edit and pushes your changes when you're done using the GitHub API and `curl`.
-
-No databases. No subscriptions. No vendor lock-in.
-
-Just text files and your terminal.
+It runs completely in the foreground with zero background daemons, no local databases, and no tracking.
 
 ---
 
-# Features
+## Prerequisites & Provider Configuration
 
-- Plain Markdown notes
-- Uses your existing `$EDITOR`
-- Automatic GitHub synchronization
-- No Git installation required
-- Works anywhere Bash and `curl` are available
-- Nested note directories supported
-- Full-text note searching
-- Daily journal notes
-- Note renaming
-- Note deletion
-- Private GitHub repository storage
+`gn` requires a private remote repository and a personal access token generated from your chosen host provider.
 
----
+### 0. Git Cloud Workspace Account
 
-# Prerequisites
+Create an account with GitHub, GitLab, or Codeberg.
 
-Before installing `gn`, you'll need a GitHub account and a private repository.
+### 1. GitHub Configuration
 
-## 1. Create a GitHub Account
+Create a private repository named `gn` and generate a token with full `repo` permissions.
 
-If you don't already have one, create a GitHub account.
+- GitHub PAT Token Docs
+- Direct Token Generation Link
 
-You will also need a GitHub Personal Access Token with repository permissions.
+### 2. GitLab Configuration
 
-### Required Permission
+Create a private project named `gn` and generate a Personal Access Token with the `api` scope.
 
-```
-repo
-```
+### 3. Codeberg Configuration
 
-This grants access to your private repository.
-
-Save the token somewhere safe—you'll need it during setup.
+Create a private repository named `gn` and generate a token with repository access permissions.
 
 ---
 
-## 2. Create a Private Repository
+## Download gn
 
-Create a new repository named:
-
-```text
-gn
-```
-
-Recommended settings:
-
-- Repository name: `gn`
-- Visibility: **Private**
-- Do not initialize with:
-  - README
-  - License
-  - .gitignore
-
----
-
-# Installation
-
-## Option A: Automated Installer
-
-Generate and download the installer from the project website.
-
-Then run:
+### Option A: One-liner (Recommended)
 
 ```bash
-chmod +x install.sh
-./install.sh
+curl -fsSL https://gn-notes.pages.dev/install.sh -o install.sh && chmod +x install.sh && ./install.sh
 ```
 
-The installer will:
+### Option B: Manual Setup
 
-1. Create the notes directory
-2. Generate `gn.conf`
-3. Install `gn`
-4. Register it globally
+Download:
+
+- `gn.sh`
+- `gn.conf`
 
 ---
 
-## Option B: Manual Installation
+## Manual Installation
 
-### Step 1 — Create the Notes Directory
+### 1. Create the Config File
 
 ```bash
 mkdir -p ~/gn
-```
-
----
-
-### Step 2 — Create the Configuration File
-
-```bash
 nano ~/gn/gn.conf
+chmod 600 ~/gn/gn.conf
 ```
-
-Add:
 
 ```bash
-GH_TOKEN=ghp_yourpersonalaccesstoken
-GH_OWNER=GITHUB-USERNAME
-GH_REPO=gn
+GIT_PROVIDER=github
+GIT_TOKEN=your_personal_access_token_here
+GIT_OWNER=your_username
+GIT_REPO=gn
 ```
 
-### Configuration Variables
-
-| Variable | Description |
-|-----------|-------------|
-| `GH_TOKEN` | GitHub Personal Access Token with `repo` permission |
-| `GH_OWNER` | Your GitHub username |
-| `GH_REPO` | Repository name (usually `gn`) |
-
----
-
-### Step 3 — Install the Script
-
-Make the script executable:
-
-```bash
-chmod +x gn.sh
-```
-
-Install globally:
-
-```bash
-sudo cp gn.sh /usr/local/bin/gn
-```
-
-You can now run:
-
-```bash
-gn
-```
-
-from anywhere.
-
----
-
-# Usage
-
-## Open Your Main Note
-
-```bash
-gn
-```
-
-Opens:
-
-```text
-index.md
-```
-
----
-
-## Create or Open a Note
-
-```bash
-gn daily-log
-```
-
-Creates or opens:
-
-```text
-daily-log.md
-```
-
----
-
-## Create Notes in Directories
-
-```bash
-gn work/reminders
-```
-
-Creates:
-
-```text
-work/reminders.md
-```
-
-and any missing directories automatically.
-
----
-
-# Command Reference
-
-## Help
-
-```bash
-gn -h
-```
-
-Displays help information.
-
----
-
-## List Notes
-
-```bash
-gn -l
-```
-
-Lists all notes.
-
----
-
-## Search Notes
-
-```bash
-gn -g "todo"
-```
-
-Searches every note for:
-
-```text
-todo
-```
-
----
-
-## Open Today's Journal
-
-```bash
-gn -t
-```
-
-Creates or opens:
-
-```text
-YYYY-MM-DD.md
-```
-
-Example:
-
-```text
-2026-06-07.md
-```
-
----
-
-## Delete a Note
-
-```bash
-gn -d daily-log
-```
-
-Deletes:
-
-```text
-daily-log.md
-```
-
-Locally and from GitHub.
-
-You will be prompted for confirmation.
-
----
-
-## Rename a Note
-
-```bash
-gn -r old new
-```
-
-Renames:
-
-```text
-old.md
-```
-
-to:
-
-```text
-new.md
-```
-
-Locally and on GitHub.
-
----
-
-# Example Workflow
-
-Create a note:
-
-```bash
-gn ideas
-```
-
-Edit:
-
-```markdown
-# Project Ideas
-
-- Build a CLI dashboard
-- Create a static site generator
-```
-
-Save and quit.
-
-`gn` automatically:
-
-1. Pulls the latest version
-2. Opens your editor
-3. Detects changes
-4. Pushes updates to GitHub
-
-No additional commands required.
-
----
-
-# Setting Up a Second Computer
-
-Since notes are stored in GitHub, there is nothing to clone.
-
-Create the directory:
-
-```bash
-mkdir -p ~/gn
-```
-
-Create:
-
-```bash
-nano ~/gn/gn.conf
-```
-
-Add:
-
-```bash
-GH_TOKEN=ghp_yourpersonalaccesstoken
-GH_OWNER=GITHUB-USERNAME
-GH_REPO=gn
-```
-
-Install:
+### 2. Make the Script Available Globally
 
 ```bash
 chmod +x gn.sh
 sudo cp gn.sh /usr/local/bin/gn
 ```
 
-Run:
+### 3. Using gn
 
 ```bash
-gn
+gn                  # Opens your main index.md
+gn daily-log        # Creates/Opens daily-log.md
+gn work/reminders   # Creates work/ directory and opens reminders.md
+gn -h               # Displays help page
+gn -l               # Lists all your notes
+gn -g "todo"        # Finds text matching "todo" inside any note
+gn -t               # Opens today's automated scratchpad entry
+gn -d daily-log     # Deletes daily-log.md locally and from cloud remote
+gn -r old new       # Renames old.md to new.md locally and on cloud remote
 ```
-
-Your notes will automatically sync from GitHub.
 
 ---
 
-# Browser Editing
+## Setting Up a Second Computer
 
-You can edit notes without a terminal using GitHub's browser-based editor.
-
-## Open github.dev
-
-Visit:
-
-```text
-https://github.dev/YOUR-USERNAME/gn
-```
-
-or open your repository on GitHub and press:
-
-```text
-.
-```
-
-(period)
-
-This launches a browser-based VS Code environment.
-
----
-
-## Commit Changes
-
-After editing:
-
-1. Open Source Control
-2. Enter a commit message
-3. Commit the change
-
-Your note is immediately saved to GitHub.
-
----
-
-## Synchronization
-
-The next time you run:
+### 1. Create the notes directory and config file
 
 ```bash
-gn
+mkdir -p ~/gn
+nano ~/gn/gn.conf
+chmod 600 ~/gn/gn.conf
 ```
 
-the latest version of the note is pulled automatically.
-
-### Important
-
-`gn` syncs per file.
-
-If the same note is edited simultaneously in two places, the most recent change wins.
-
----
-
-# Notes Directory Structure
-
-Example:
-
-```text
-~/gn
-├── gn.conf
-├── index.md
-├── daily-log.md
-├── ideas.md
-└── work
-    ├── todo.md
-    └── meetings.md
+```bash
+GIT_PROVIDER=github
+GIT_TOKEN=your_personal_access_token_here
+GIT_OWNER=your_username
+GIT_REPO=gn
 ```
 
----
+### 2. Install gn
 
-# Philosophy
+```bash
+chmod +x gn.sh
+sudo cp gn.sh /usr/local/bin/gn
+```
 
-`gn` is built around a simple idea:
-
-> Notes should be plain text files that belong to you.
-
-No proprietary formats.
-
-No databases.
-
-No cloud subscriptions.
-
-No lock-in.
-
-Just Markdown, GitHub, and the terminal.
+That's it. Run `gn` and it will pull your notes before opening the editor.
 
 ---
 
-# License
-
-MIT License
-
-Copyright © 2026 Barney Matthews
+© 2026 Barney Matthews. Released under the MIT License.
