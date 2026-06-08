@@ -449,6 +449,25 @@
                 font-size: inherit;
             }
 
+            pre.scrollable-code {
+                max-height: calc(1.6em * 30 + 2rem); /* ~30 lines + padding */
+                overflow-y: scroll;
+                overflow-x: auto;
+                scrollbar-width: thin;
+                scrollbar-color: var(--border-color) transparent;
+            }
+            pre.scrollable-code::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+            pre.scrollable-code::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            pre.scrollable-code::-webkit-scrollbar-thumb {
+                background-color: var(--border-color);
+                border-radius: 3px;
+            }
+
             .comment {
                 color: #8b949e;
             }
@@ -688,41 +707,38 @@
             <section id="get-started">
                 <h2>Download gn</h2>
                 <p>
-                    Download the automated installer or manually configure
-                    <code>gn</code> using the directions below.
+                    Run the one-liner below, or manually configure
+                    <code>gn</code> using the directions further down.
                 </p>
 
                 <div class="installer-panel">
-                    <h3>Option A: Installer (Recommended)</h3>
+                    <h3>Option A: One-liner (Recommended)</h3>
                     <p style="font-size: 0.9rem; color: var(--text-muted)">
-                        Download an <code>install.sh</code> that prompts you for
-                        your GitHub credentials during installation.
+                        Paste this into your terminal. It downloads
+                        <code>install.sh</code>, makes it executable, and runs
+                        it. You will be prompted for your GitHub credentials.
                     </p>
-
-                    <div class="btn-container" style="margin-bottom: 0">
-                        <a
-                            class="btn btn-success"
-                            href="install.sh"
-                            download="install.sh"
-                        >
-                            <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 16 16"
-                                fill="currentColor"
-                            >
-                                <path
-                                    d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5Z"
-                                ></path>
-                            </svg>
-                            Download Installer
-                        </a>
-                    </div>
-
                     <div class="run-instructions">
-                        <p>Make Executable And Run</p>
-                        <code>chmod +x install.sh && ./install.sh</code>
+                        <p>Paste Into Terminal</p>
+                        <code
+                            >curl -fsSL https://gn-notes.pages.dev/install.sh -o
+                            install.sh && chmod +x install.sh &&
+                            ./install.sh</code
+                        >
                     </div>
+                    <p
+                        style="
+                            font-size: 0.8rem;
+                            color: var(--text-muted);
+                            margin: 0.75rem 0 0;
+                        "
+                    >
+                        Prefer to inspect before running?
+                        <a href="install.sh" download="install.sh"
+                            >Download install.sh</a
+                        >
+                        first.
+                    </p>
                 </div>
 
                 <div
@@ -767,7 +783,9 @@
                     </div>
                 </div>
 
-                <pre><code id="script-content"><span class="comment">#!/usr/bin/env bash</span>
+                <pre
+                    class="scrollable-code"
+                ><code id="script-content"><span class="comment">#!/usr/bin/env bash</span>
 
 <span class="comment"># --- Configuration ---</span>
 NOTES_DIR=<span class="string">"$HOME/gn"</span>

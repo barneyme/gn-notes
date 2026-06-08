@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+# gn - Get Notes
+# A zero-dependency CLI note utility that syncs markdown files to GitHub
+#
+# Author: Barney Matthews
+# License: MIT
+# https://gn-notes.pages.dev
 
 # --- Configuration ---
 NOTES_DIR="$HOME/gn"
@@ -6,6 +12,7 @@ NOTES_DIR="$HOME/gn"
 # --- Load Config ---
 CONFIG_FILE="$NOTES_DIR/gn.conf"
 if [ -f "$CONFIG_FILE" ]; then
+    chmod 600 "$CONFIG_FILE"
     . "$CONFIG_FILE"
 else
     echo "Error: No config found at $CONFIG_FILE"
@@ -17,6 +24,11 @@ else
 fi
 
 GH_API="https://api.github.com/repos/$GH_OWNER/$GH_REPO/contents"
+
+if [ -z "$GH_TOKEN" ] || [ -z "$GH_OWNER" ] || [ -z "$GH_REPO" ]; then
+    echo "Error: gn.conf is incomplete. Check GH_TOKEN, GH_OWNER, and GH_REPO."
+    exit 1
+fi
 
 mkdir -p "$NOTES_DIR"
 cd "$NOTES_DIR" || { echo "Error: Could not access $NOTES_DIR"; exit 1; }
@@ -39,7 +51,7 @@ pull_from_github() {
     local response content http_code
     response=$(gh_curl -w "\n%{http_code}" "$GH_API/$file")
     http_code=$(echo "$response" | tail -1)
-    response=$(echo "$response" | head -n -1)
+    response=$(echo "$response" | sed '$d')
     if [ "$http_code" = "404" ]; then
         return 0
     fi
@@ -86,8 +98,7 @@ show_help() {
     echo ""
     echo "Examples:"
     echo "  gn                  Opens index.md"
-    echo "  gn log              Creates log.md"
-    echo "  gn log              Opens log.md"
+    echo "  gn log              Creates or opens log.md"
     echo "  gn work/todo        Opens work/todo.md"
     echo "  gn -g 'api key'     Searches notes for the term 'api key'"
     echo "  gn -t               Creates a note named today's date"
@@ -98,7 +109,7 @@ show_help() {
 list_notes() {
     echo "Current Notes in $NOTES_DIR:"
     if [ -d "$NOTES_DIR" ]; then
-        find . -type f -not -name "gn.conf" -not -path '*/.*' | sed 's|^./||' | sort
+        find . -type f -not -name "gn.conf" -not -name "gn.sh" -not -path '*/.*' | sed 's|^./||' | sort
     fi
     exit 0
 }
@@ -155,13 +166,18 @@ rename_note() {
         echo "Error: '$new_name' already exists."
         exit 1
     fi
-    local sha old_api_url new_api_url content
+    local sha old_api_url new_api_url content push_response http_code
     old_api_url="$GH_API/$old_name"
     new_api_url="$GH_API/$new_name"
     sha=$(gh_curl "$old_api_url" | grep '"sha"' | head -1 | sed 's/.*"sha": *"\([^"]*\)".*/\1/')
     content=$(base64 -w0 < "$NOTES_DIR/$old_name" 2>/dev/null || base64 < "$NOTES_DIR/$old_name")
-    gh_curl -X PUT "$new_api_url" \
-        -d "{\"message\":\"Rename $old_name to $new_name\",\"content\":\"$content\"}" > /dev/null
+    push_response=$(gh_curl -w "\n%{http_code}" -X PUT "$new_api_url" \
+        -d "{\"message\":\"Rename $old_name to $new_name\",\"content\":\"$content\"}")
+    http_code=$(echo "$push_response" | tail -1)
+    if [ "$http_code" != "200" ] && [ "$http_code" != "201" ]; then
+        echo "Error: Failed to create '$new_name' on GitHub (HTTP $http_code). No changes made." >&2
+        exit 1
+    fi
     if [ -n "$sha" ]; then
         gh_curl -X DELETE "$old_api_url" \
             -d "{\"message\":\"Rename $old_name to $new_name\",\"sha\":\"$sha\"}" > /dev/null
@@ -179,7 +195,12 @@ while getopts "hlg:td:r:" opt; do
         g ) search_notes "$OPTARG" ;;
         t ) NOTE_NAME=$(date '+%Y-%m-%d') ;;
         d ) delete_note "$OPTARG" ;;
-        r ) rename_note "$OPTARG" "${@:$OPTIND:1}" ;;
+        r ) 
+            if [ -z "${@:$OPTIND:1}" ]; then
+                echo "Error: -r requires two arguments: gn -r OLD NEW"
+                exit 1
+            fi
+            rename_note "$OPTARG" "${@:$OPTIND:1}" ;;
         \? ) show_help ;;
     esac
 done
