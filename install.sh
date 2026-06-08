@@ -20,20 +20,33 @@ mkdir -p "$NOTES_DIR"
 
 echo "-> Writing configuration..."
 cat << CONF > "$NOTES_DIR/gn.conf"
-# Replace these values with your own
-GH_TOKEN=$GH_TOKEN
-GH_OWNER=$GH_OWNER
-GH_REPO=$GH_REPO
+# Configuration rules for gn command line tool
+GH_TOKEN="$GH_TOKEN"
+GH_OWNER="$GH_OWNER"
+GH_REPO="$GH_REPO"
 CONF
 chmod 600 "$NOTES_DIR/gn.conf"
 echo "   Saved: $NOTES_DIR/gn.conf"
 
-echo "-> Downloading gn.sh..."
-curl -fsSL "https://gn-notes.pages.dev/gn.sh" -o "$NOTES_DIR/gn.sh"
-chmod +x "$NOTES_DIR/gn.sh"
-echo "   Saved: $NOTES_DIR/gn.sh"
+# Guard safety rails to prevent local dev overwriting
+if [ -f "$NOTES_DIR/gn.sh" ]; then
+    echo "-> Warning: A local script copy already exists at $NOTES_DIR/gn.sh"
+    read -rp "   Do you want to overwrite it with the remote production build? [y/N] " overwrite
+    if [[ "$overwrite" =~ ^[Yy]$ ]]; then
+        echo "-> Downloading production gn.sh..."
+        curl -fsSL "https://gn-notes.pages.dev/gn.sh" -o "$NOTES_DIR/gn.sh"
+    else
+        echo "   Skipped downloading gn.sh to preserve local shifts."
+    fi
+else
+    echo "-> Downloading gn.sh..."
+    curl -fsSL "https://gn-notes.pages.dev/gn.sh" -o "$NOTES_DIR/gn.sh"
+fi
 
-echo "-> Installing gn..."
+chmod +x "$NOTES_DIR/gn.sh"
+echo "   Ready: $NOTES_DIR/gn.sh"
+
+echo "-> Installing binary target executable..."
 if [ -d "$INSTALL_DIR" ] && [ -w "$INSTALL_DIR" ]; then
     cp "$NOTES_DIR/gn.sh" "$INSTALL_DIR/gn"
 else
