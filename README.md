@@ -2,7 +2,7 @@
 
 **get_notes.md**
 
-`gn` (Get Notes) is a zero-dependency CLI note utility that saves your markdown files directly to a private GitHub, GitLab, Codeberg or Bitbucket repository. It acts as a lightweight sync layer using nothing but native Bash and curl - no local Git installation or setup required.
+`gn` (Get Notes) is a zero-dependency CLI note utility that saves your markdown files directly to a private GitHub, GitLab or Codeberg repository. It acts as a lightweight sync layer using nothing but native Bash and curl - no local Git installation or setup required.
 
 When you run `gn note-name`, it pulls the latest file version from your Git host via HTTP API, opens it in your default `$EDITOR`, and automatically pushes your changes back when you save and exit.
 
@@ -32,11 +32,6 @@ Create a private project named `gn` and generate a Personal Access Token with th
 ### C. Codeberg Configuration
 
 Create a private repository named `gn` and generate a token with repository access permissions.
-
-
-### D. Bitbucket Configuration
-
-Create a private repository named gn. Bitbucket uses App Passwords rather than personal access tokens - generate one under your account settings with Repositories: Read and Write permissions checked. Use your Bitbucket username as GIT_OWNER and the App Password as GIT_TOKEN.
 
 ---
 
