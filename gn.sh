@@ -53,7 +53,7 @@ fi
 
 EDITOR="${EDITOR:-nano}"
 
-for cmd in curl grep sed base64 tr; do
+for cmd in curl grep sed awk base64 tr; do
     command -v "$cmd" &>/dev/null || { echo "Error: '$cmd' is required but not installed." >&2; exit 1; }
 done
 
@@ -69,7 +69,7 @@ Usage: gn [options] [note]
   -d NOTE     Delete a note
   -r OLD NEW  Rename a note
 
-Defaults to 'index' if no note is given.
+Defaults to 'note' if no note is given.
 EOF
     exit 0
 }
@@ -96,15 +96,9 @@ api_url() {
         || echo "${GIT_API}/$file"
 }
 
-# Extract HTTP status from a curl -w "%{http_code}" response, return body via $REPLY
-http_split() {
-    REPLY=$(echo "$1" | sed '$d')
-    echo "$1" | tail -n 1
-}
-
 # Delete a file from the remote; used by delete_note and rename_note
 remote_delete() {
-    local file="$1" msg="$2" url sha sha_resp http_code resp pfile
+    local file="$1" msg="$2" url sha sha_resp http_code resp pfile REPLY
     url=$(api_url "$file")
     pfile=$(mktemp); chmod 600 "$pfile"
 
@@ -112,29 +106,37 @@ remote_delete() {
         printf '{"branch":"main","commit_message":"%s"}' "$msg" > "$pfile"
     else
         sha_resp=$(api_curl -s "$url")
-        [[ "$sha_resp" =~ \"sha\":\ *\"([^\"]+)\" ]] && sha="${BASH_REMATCH[1]}"
+        sha=$(echo "$sha_resp" | awk -F'"' '{for(i=1;i<=NF;i++) if($i=="sha") {print $(i+2); exit}}')
         if [ -z "$sha" ]; then rm -f "$pfile"; return 0; fi
         printf '{"message":"%s","sha":"%s","branch":"main"}' "$msg" "$sha" > "$pfile"
     fi
 
     resp=$(api_curl -w "\n%{http_code}" -X DELETE -H "Content-Type: application/json" --data-binary "@$pfile" "$url")
     rm -f "$pfile"
-    http_code=$(http_split "$resp")
+
+    # Pure Bash Split (Bypasses line limits and subshell scope bugs completely)
+    http_code="${resp##*$'\n'}"
+    REPLY="${resp%$'\n'*}"
+
     [[ "$http_code" =~ ^(200|204)$ ]] || echo "Warning: Remote delete failed (HTTP $http_code)." >&2
 }
 
 pull_note() {
-    local file="$1" url resp http_code content
+    local file="$1" url resp http_code content REPLY
     url=$(api_url "$file")
     [ "$GIT_PROVIDER" = "gitlab" ] && url="${url}?ref=main"
 
     resp=$(api_curl -w "\n%{http_code}" "$url")
-    http_code=$(http_split "$resp")
+
+    # Pure Bash Split (Bypasses line limits and subshell scope bugs completely)
+    http_code="${resp##*$'\n'}"
+    REPLY="${resp%$'\n'*}"
+
     [ "$http_code" = "404" ] && return 0
     [ "$http_code" != "200" ] && { echo "Error: Pull failed (HTTP $http_code): $REPLY" >&2; exit 1; }
 
-    content=$(echo "$REPLY" | grep '"content"' | head -n 1 \
-        | sed 's/.*"content": *"\(.*\)".*/\1/' | tr -d '\\ n[:space:]"')
+    # Token-based JSON field extraction via awk
+    content=$(echo "$REPLY" | awk -F'"' '{for(i=1;i<=NF;i++) if($i=="content") {print $(i+2); exit}}' | tr -d '\\ n[:space:]"')
 
     [ -n "$content" ] && [ "$content" != "null" ] && {
         echo "$content" | base64 -d > "$file" 2>/dev/null \
@@ -143,29 +145,28 @@ pull_note() {
 }
 
 push_note() {
-    local file="$1" url sha sha_resp http_code req_method resp content msg pfile
+    local file="$1" url sha sha_resp http_code req_method resp content msg pfile REPLY
     msg="gn: update $file $(date '+%Y-%m-%d %H:%M:%S')"
     url=$(api_url "$file")
 
-    # Codeberg/Gitea requires chunked base64; GitHub and GitLab accept stripped
     if [ "$GIT_PROVIDER" = "codeberg" ]; then
         content=$(base64 < "$file" | tr -d '\n\r')
     else
         content=$(base64 -w0 < "$file" 2>/dev/null || base64 < "$file" | tr -d '\n')
     fi
 
-    # Write payload to temp file — avoids shell mangling of base64 content in JSON
     pfile=$(mktemp); chmod 600 "$pfile"
 
     if [ "$GIT_PROVIDER" = "gitlab" ]; then
         resp=$(api_curl -w "\n%{http_code}" "${url}?ref=main")
-        http_code=$(http_split "$resp")
+        http_code="${resp##*$'\n'}"
+        REPLY="${resp%$'\n'*}"
         [ "$http_code" = "200" ] && req_method="PUT" || req_method="POST"
         printf '{"branch":"main","commit_message":"%s","content":"%s","encoding":"base64"}' \
             "$msg" "$content" > "$pfile"
     else
         sha_resp=$(api_curl -s "$url")
-        [[ "$sha_resp" =~ \"sha\":\ *\"([^\"]+)\" ]] && sha="${BASH_REMATCH[1]}"
+        sha=$(echo "$sha_resp" | awk -F'"' '{for(i=1;i<=NF;i++) if($i=="sha") {print $(i+2); exit}}')
         req_method="PUT"
         if [ -n "$sha" ]; then
             printf '{"message":"%s","content":"%s","sha":"%s","branch":"main"}' \
@@ -178,8 +179,11 @@ push_note() {
 
     resp=$(api_curl -w "\n%{http_code}" -X "$req_method" -H "Content-Type: application/json" --data-binary "@$pfile" "$url")
     rm -f "$pfile"
-    http_code=$(http_split "$resp")
-    [[ "$http_code" =~ ^(200|201)$ ]] || { echo "Error: Push failed (HTTP $http_code): $(echo "$resp" | sed '$d')" >&2; exit 1; }
+
+    http_code="${resp##*$'\n'}"
+    REPLY="${resp%$'\n'*}"
+
+    [[ "$http_code" =~ ^(200|201)$ ]] || { echo "Error: Push failed (HTTP $http_code): $REPLY" >&2; exit 1; }
 }
 
 list_notes() {
@@ -239,7 +243,7 @@ while getopts "hlg:td:" opt; do
 done
 shift $((OPTIND - 1))
 
-[ -z "$NOTE_NAME" ] && NOTE_NAME="${1:-index}"
+[ -z "$NOTE_NAME" ] && NOTE_NAME="${1:-note}"
 
 [[ "$NOTE_NAME" == "gn.conf" || "$NOTE_NAME" == "gn.sh" ]] && {
     echo "Error: Cannot open runtime files via gn."
