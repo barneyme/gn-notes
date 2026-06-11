@@ -651,6 +651,35 @@
                         install.sh && chmod +x install.sh && ./install.sh</code
                     >
                 </div>
+                <button
+                    class="btn btn-secondary copy-btn"
+                    style="
+                        margin-top: 0.75rem;
+                        font-size: 0.85rem;
+                        padding: 0.5rem 1rem;
+                    "
+                    onclick="
+                        copyText(
+                            'curl -fsSL https://gn-notes.pages.dev/install.sh -o install.sh && chmod +x install.sh && ./install.sh',
+                            this,
+                        )
+                    "
+                >
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 16 16"
+                        fill="currentColor"
+                    >
+                        <path
+                            d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"
+                        />
+                        <path
+                            d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"
+                        />
+                    </svg>
+                    Copy
+                </button>
             </section>
             <section id="setup-prerequisites">
                 <h2>Prerequisites & Git Cloud Configuration:</h2>
@@ -699,11 +728,9 @@
                         <span class="step-title">GitHub Configuration</span>
                         <div class="step-content">
                             <p>
-                                Generate a token with full
-                                <strong>repo</strong> permissions. The installer
-                                can create your repository automatically, or you
-                                can create a private repository named
-                                <code>gn</code> manually.
+                                Create a private repository named
+                                <code>gn</code> and generate a token with full
+                                <strong>repo</strong> permissions.
                             </p>
                             <div class="external-links">
                                 <a
@@ -725,13 +752,11 @@
                         <span class="step-title">GitLab Configuration</span>
                         <div class="step-content">
                             <p>
+                                Create a private project named <code>gn</code>.
                                 Generate a Personal Access Token inside your
                                 user settings and ensure you check the
                                 <strong>api</strong>
-                                scope permission box. The installer can create
-                                your project automatically, or you can create a
-                                private project named
-                                <code>gn</code> manually.
+                                scope permission box.
                             </p>
                             <div class="external-links">
                                 <a
@@ -753,12 +778,10 @@
                         <span class="step-title">Codeberg Configuration</span>
                         <div class="step-content">
                             <p>
-                                Go to Settings &rarr; Applications to generate a
-                                token with repository access permissions. The
-                                installer can create your repository
-                                automatically, or you can create a private
-                                repository named
-                                <code>gn</code> manually.
+                                Create a private repository named
+                                <code>gn</code>. Go to Settings &rarr;
+                                Applications to generate a token with repository
+                                access permissions.
                             </p>
                             <div class="external-links">
                                 <a
@@ -789,10 +812,8 @@
                     <p style="font-size: 0.9rem; color: var(--text-muted)">
                         Paste this into your terminal. It downloads
                         <code>install.sh</code>, makes it executable, and runs
-                        it. You will be prompted to select your platform, open
-                        the token generation page, and enter your credentials.
-                        The installer will validate your token and create your
-                        repository if it doesn't exist.
+                        it. You will be prompted to select your platform and
+                        credentials.
                     </p>
                     <div class="run-instructions">
                         <p>Paste Into Terminal</p>
