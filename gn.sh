@@ -2,7 +2,7 @@
 # gn - Get Notes
 # A zero-dependency CLI tool to manage and sync markdown notes to cloud git providers.
 # Author: Barney Matthews. License: MIT
-# https://gn-notes.pages.dev | https://github.com/barneyme/gn-notes
+# https://barneyme.github.io/gn-notes | https://gn-notes.pages.dev
 
 NOTES_DIR="$HOME/gn"
 CONFIG_FILE="$NOTES_DIR/gn.conf"
