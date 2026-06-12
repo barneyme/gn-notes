@@ -192,6 +192,21 @@ CONF
 chmod 600 "$NOTES_DIR/gn.conf"
 echo "   Config saved: $NOTES_DIR/gn.conf"
 
+# --- Fetch and Install Executable ---
+echo ""
+echo "-> Downloading gn.sh from production source..."
+if curl -s -f -o "$NOTES_DIR/gn.sh" "https://gn-notes.pages.dev/gn.sh"; then
+    chmod +x "$NOTES_DIR/gn.sh"
+    echo "   Saved and made executable: $NOTES_DIR/gn.sh"
+
+    echo "-> Deploying system binary to $INSTALL_DIR/gn (requires sudo)..."
+    sudo cp "$NOTES_DIR/gn.sh" "$INSTALL_DIR/gn"
+    echo "   Binary installed successfully."
+else
+    echo "Error: Failed to download gn.sh from https://gn-notes.pages.dev/gn.sh"
+    exit 1
+fi
+
 echo ""
 echo "========================================="
 echo "             Setup complete!             "
