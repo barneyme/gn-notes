@@ -19,6 +19,7 @@
                 --text-muted: #8b949e;
                 --border-color: #30363d;
                 --terminal-green: #7ee787;
+                --warning-yellow: #d4a72c;
             }
 
             * {
@@ -26,7 +27,6 @@
                 margin: 0;
                 padding: 0;
             }
-
             body {
                 font-family:
                     -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
@@ -36,30 +36,24 @@
                 line-height: 1.6;
                 padding: 2rem 1rem;
             }
-
             .container {
                 max-width: 800px;
                 margin: 0 auto;
             }
-
             @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap");
 
             header {
-                text-align: center;
+                text-align: left;
                 margin-bottom: 3rem;
                 border-bottom: 1px solid var(--border-color);
                 padding-bottom: 0;
             }
-
-            /* ── Hero ── */
             .hero {
                 padding: 3.5rem 0 2.5rem;
                 display: flex;
                 flex-direction: column;
-                align-items: center;
-                gap: 0;
+                align-items: flex-start;
             }
-
             .hero-wordmark {
                 font-family: "IBM Plex Mono", monospace;
                 font-size: 5rem;
@@ -69,6 +63,10 @@
                 line-height: 1;
                 position: relative;
                 display: inline-block;
+            }
+            .hero-brand {
+                width: 100%;
+                text-align: center;
             }
             .hero-wordmark::after {
                 content: "_";
@@ -92,31 +90,21 @@
             .hero-tagline span {
                 color: var(--terminal-green);
             }
-
-            /* ── Description Intro Block ── */
-            .intro-block {
-                text-align: left;
-                margin: 1rem 0 2rem 0;
-                max-width: 100%;
-            }
             .intro-block p {
+                text-align: left;
                 font-size: 1.05rem;
-                color: var(--text-main);
                 margin-bottom: 1.25rem;
                 line-height: 1.7;
             }
 
-            /* ── Terminal demo ── */
             .terminal-window {
                 width: 100%;
-                max-width: 100%;
                 background: #010409;
                 border: 1px solid var(--border-color);
                 border-radius: 10px;
                 overflow: hidden;
                 margin: 2rem 0 0;
                 box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-                text-align: left;
             }
             .terminal-titlebar {
                 background: #1c2128;
@@ -144,19 +132,17 @@
                 font-family: "IBM Plex Mono", monospace;
                 font-size: 0.72rem;
                 color: var(--text-muted);
-                margin-left: auto;
-                margin-right: auto;
+                margin: 0 auto;
                 padding-right: 24px;
             }
             .terminal-body {
                 padding: 1rem 1.25rem 1.25rem;
                 font-family: "IBM Plex Mono", monospace;
                 font-size: 0.85rem;
-                line-height: 1.75;
                 min-height: 440px;
-                position: relative;
                 color: #e6edf3;
             }
+
             .t-prompt {
                 color: var(--terminal-green);
             }
@@ -166,40 +152,32 @@
             .t-out {
                 color: var(--text-muted);
             }
-            .t-note {
-                color: var(--accent-color);
-            }
             .t-ok {
                 color: var(--terminal-green);
             }
-
             .cursor {
                 display: inline-block;
                 width: 8px;
                 height: 15px;
                 background-color: var(--terminal-green);
                 vertical-align: middle;
-                margin-left: 2px;
                 animation: blink 1s step-end infinite;
             }
             .cursor.white {
                 background-color: #ffffff;
             }
 
-            /* Terminal View Screen Sections */
             .terminal-screen {
                 display: none;
             }
             .terminal-screen.active {
                 display: block;
             }
-
-            /* Nano Editor Styling Structure */
             .nano-buffer {
                 background: #000000;
                 color: #ffffff;
                 margin: -1rem -1.25rem -1.25rem;
-                padding: 0.5rem 1rem 1rem;
+                padding: 0.5rem 1rem;
                 min-height: 440px;
                 display: flex;
                 flex-direction: column;
@@ -211,20 +189,16 @@
                 text-align: center;
                 font-size: 0.8rem;
                 font-weight: bold;
-                padding: 0 0.5rem;
             }
             .nano-content {
                 flex-grow: 1;
                 padding: 1rem 0;
-                color: #ffffff;
-                font-weight: normal;
             }
             .nano-footer {
                 display: grid;
                 grid-template-columns: repeat(4, 1fr);
                 gap: 0.25rem;
                 font-size: 0.75rem;
-                color: #ffffff;
             }
             .nano-key {
                 color: #00ff00;
@@ -232,64 +206,16 @@
                 margin-right: 0.25rem;
             }
 
-            h1 {
-                font-size: 3rem;
-                font-weight: 700;
-                color: #ffffff;
-                margin-bottom: 0.5rem;
-                font-family: monospace;
-            }
-
-            .subtitle {
-                color: var(--text-muted);
-                font-size: 1.2rem;
-            }
-
             section {
                 margin-bottom: 3rem;
             }
-
             h2 {
                 font-size: 1.5rem;
                 color: #ffffff;
                 margin-bottom: 1rem;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
+                border-bottom: 1px solid var(--border-color);
+                padding-bottom: 0.5rem;
             }
-
-            p {
-                margin-bottom: 1rem;
-                color: var(--text-main);
-            }
-
-            a {
-                color: var(--accent-color);
-                text-decoration: none;
-            }
-
-            a:hover {
-                text-decoration: underline;
-            }
-
-            .external-links {
-                display: flex;
-                gap: 1.5rem;
-                flex-wrap: wrap;
-                margin-top: 0.5rem;
-                padding: 0.75rem 1rem;
-                background-color: #010409;
-                border: 1px dashed var(--border-color);
-                border-radius: 6px;
-            }
-
-            .external-links a {
-                font-size: 0.9rem;
-                display: inline-flex;
-                align-items: center;
-                gap: 0.3rem;
-            }
-
             .installer-panel {
                 background-color: var(--panel-bg);
                 border: 1px solid var(--border-color);
@@ -297,11 +223,63 @@
                 padding: 1.5rem;
                 margin: 1.5rem 0;
             }
-
             .installer-panel h3 {
                 color: #ffffff;
                 margin-bottom: 1rem;
+            }
+
+            .setup-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+                margin: 1.5rem 0;
+            }
+            @media (max-width: 768px) {
+                .setup-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .setup-card {
+                background-color: var(--panel-bg);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 1.5rem;
+            }
+            .setup-card h3 {
                 font-size: 1.2rem;
+                color: #ffffff;
+                margin-bottom: 0.75rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .setup-card ul {
+                list-style-type: none;
+                padding-left: 0;
+            }
+            .setup-card li {
+                margin-bottom: 0.75rem;
+                font-size: 0.9rem;
+                position: relative;
+                padding-left: 1.25rem;
+            }
+            .setup-card li::before {
+                content: "→";
+                position: absolute;
+                left: 0;
+                color: var(--accent-color);
+            }
+            .setup-card li strong {
+                color: #ffffff;
+            }
+            .note-box {
+                margin-top: 1rem;
+                padding: 0.75rem;
+                background-color: rgba(212, 167, 44, 0.1);
+                border-left: 3px solid var(--warning-yellow);
+                border-radius: 4px;
+                font-size: 0.85rem;
+                color: #e3b341;
             }
 
             .btn {
@@ -317,96 +295,43 @@
                 border-radius: 6px;
                 cursor: pointer;
                 text-decoration: none;
-                transition: background 0.2s ease;
             }
-
             .btn:hover {
                 background-color: #216cd4;
             }
-
-            .btn-success {
-                background-color: var(--success-color);
-            }
-
-            .btn-success:hover {
-                background-color: var(--success-hover);
-            }
-
             .btn-secondary {
                 background-color: var(--panel-bg);
                 border: 1px solid var(--border-color);
                 color: var(--text-main);
             }
-
             .btn-secondary:hover {
                 background-color: #30363d;
             }
-
             .btn-container {
                 margin: 1.5rem 0;
                 display: flex;
-                justify-content: flex-start;
                 gap: 1rem;
                 flex-wrap: wrap;
             }
 
             .run-instructions {
-                margin-top: 1.25rem;
                 padding: 1rem;
                 background-color: #010409;
                 border: 1px solid var(--border-color);
                 border-left: 4px solid var(--terminal-green);
                 border-radius: 6px;
             }
-
             .run-instructions p {
                 font-size: 0.85rem;
                 color: var(--text-muted);
                 margin-bottom: 0.5rem;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
                 font-weight: 600;
+                text-transform: uppercase;
             }
-
             .run-instructions code {
                 display: block;
-                background-color: transparent;
-                padding: 0;
                 color: var(--terminal-green);
                 font-size: 0.95rem;
-            }
-
-            .step-list {
-                list-style-type: none;
-            }
-
-            .step-item {
-                background-color: var(--panel-bg);
-                border: 1px solid var(--border-color);
-                border-radius: 6px;
-                padding: 1.5rem;
-                margin-bottom: 1rem;
-            }
-
-            .step-num {
-                font-family: monospace;
-                background-color: var(--border-color);
-                color: var(--text-main);
-                padding: 0.2rem 0.5rem;
-                border-radius: 4px;
-                font-size: 0.9rem;
-                margin-right: 0.5rem;
-            }
-
-            .step-title {
-                font-weight: 600;
-                color: #ffffff;
-                font-size: 1.1rem;
-            }
-
-            .step-content {
-                margin-top: 0.75rem;
-                padding-left: 0.25rem;
             }
 
             pre {
@@ -415,72 +340,22 @@
                 border-radius: 6px;
                 padding: 1rem;
                 overflow-x: auto;
-                font-family:
-                    ui-monospace,
-                    SFMono-Regular,
-                    SF Mono,
-                    Menlo,
-                    Consolas,
-                    Liberation Mono,
-                    monospace;
                 font-size: 0.9rem;
                 margin: 0.75rem 0;
                 color: #e6edf3;
             }
-
             code {
-                font-family:
-                    ui-monospace,
-                    SFMono-Regular,
-                    SF Mono,
-                    Menlo,
-                    Consolas,
-                    Liberation Mono,
-                    monospace;
+                font-family: ui-monospace, SFMono-Regular, monospace;
                 background-color: rgba(110, 118, 129, 0.4);
                 padding: 0.2rem 0.4rem;
                 border-radius: 6px;
                 font-size: 0.85em;
             }
-
             pre code {
                 background-color: transparent;
                 padding: 0;
                 font-size: inherit;
             }
-
-            pre.scrollable-code {
-                max-height: calc(1.6em * 30 + 2rem); /* ~30 lines + padding */
-                overflow-y: scroll;
-                overflow-x: auto;
-                scrollbar-width: thin;
-                scrollbar-color: var(--border-color) transparent;
-            }
-            pre.scrollable-code::-webkit-scrollbar {
-                width: 6px;
-                height: 6px;
-            }
-            pre.scrollable-code::-webkit-scrollbar-track {
-                background: transparent;
-            }
-            pre.scrollable-code::-webkit-scrollbar-thumb {
-                background-color: var(--border-color);
-                border-radius: 3px;
-            }
-
-            .comment {
-                color: #8b949e;
-            }
-            .variable {
-                color: #ff7b72;
-            }
-            .keyword {
-                color: #ff7b72;
-            }
-            .string {
-                color: #a5d6ff;
-            }
-
             footer {
                 text-align: center;
                 margin-top: 4rem;
@@ -495,34 +370,29 @@
         <div class="container">
             <header>
                 <div class="hero">
-                    <div class="hero-wordmark">gn</div>
-                    <div class="hero-tagline">
-                        <span>get_notes.md</span>
+                    <div class="hero-brand">
+                        <div class="hero-wordmark">gn</div>
+                        <div class="hero-tagline">
+                            <span>get_notes.md</span>
+                        </div>
                     </div>
-
                     <div class="intro-block">
                         <p>
                             <code>gn</code> (Get Notes) is a zero-dependency CLI
                             note utility that saves your markdown files directly
-                            to a private GitHub, GitLab, or Codeberg repository.
-                            It acts as a lightweight sync layer using nothing
-                            but native Bash and curl - no local Git installation
-                            or setup required.
-                        </p>
-                        <p>
-                            When you run <code>gn</code> [note], it instantly
-                            pulls the latest file version from your Git host via
-                            HTTP API, opens it in your default
-                            <code>$EDITOR</code>, and automatically pushes your
-                            changes back immediately as soon as you save and
-                            exit.
-                        </p>
-                        <p>
-                            It runs completely in the foreground with zero
-                            background daemons, no local databases, and no
-                            tracking. It is built to give you seamless cloud
-                            backups while keeping your notes as raw, standalone
-                            text files under your own control.
+                            to a GitHub repository or Dropbox. It acts as a
+                            lightweight sync layer using nothing but native Bash
+                            and curl – no local Git installation or setup
+                            required. When you run gn [note], it instantly pulls
+                            the latest file version from your storage host via
+                            HTTP API, opens it in your default $EDITOR, and
+                            automatically pushes your changes back immediately
+                            as soon as you save and exit. It runs completely in
+                            the foreground with zero background daemons, no
+                            local databases, and no tracking. It is built to
+                            give you seamless cloud backups while keeping your
+                            notes as raw, standalone text files under your own
+                            control.
                         </p>
                     </div>
 
@@ -532,20 +402,19 @@
                             <div class="terminal-dot yellow"></div>
                             <div class="terminal-dot green"></div>
                             <span class="terminal-titlebar-label"
-                                >bash - 80&times;24</span
+                                >bash – 80&times;24</span
                             >
                         </div>
-                        <div class="terminal-body" id="terminal-content">
+                        <div class="terminal-body">
                             <div id="scr-type-1" class="terminal-screen active">
                                 <span class="t-prompt">user@terminal:~$</span>
                                 <span class="t-cmd" id="text-cmd-1"></span
                                 ><span class="cursor" id="cursor-1"></span>
                             </div>
-
                             <div id="scr-nano" class="terminal-screen">
                                 <div class="nano-buffer">
                                     <div class="nano-header">
-                                        GNU nano 7.2 - hello.md
+                                        GNU nano 7.2 - quicknote.md
                                     </div>
                                     <div class="nano-content">
                                         <span id="text-nano-body"></span
@@ -574,23 +443,21 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div id="scr-sync" class="terminal-screen">
                                 <span class="t-prompt">user@terminal:~$</span>
-                                <span class="t-cmd">gn hello</span><br />
+                                <span class="t-cmd">gn quicknote</span><br />
                                 <div id="sync-logs"></div>
                             </div>
-
                             <div id="scr-help" class="terminal-screen">
                                 <span class="t-prompt">user@terminal:~$</span>
-                                <span class="t-cmd">gn hello</span><br />
+                                <span class="t-cmd">gn quicknote</span><br />
                                 <span class="t-out"
-                                    >Fetching latest cloud updates...</span
+                                    >Fetching... [via GITHUB]</span
                                 ><br />
                                 <span class="t-out"
-                                    >Syncing changes to repository...</span
+                                    >Pushing... [via GITHUB]</span
                                 ><br />
-                                <span class="t-ok">Sync complete!</span><br />
+                                <span class="t-ok">Done.</span><br />
                                 <span
                                     class="t-prompt"
                                     style="
@@ -609,55 +476,127 @@
                                         color: var(--text-muted);
                                     "
                                 >
-                                    Usage: gn [options] [note_name]<br /><br />
-                                    Options:<br />
+                                    Usage: gn [options] [note]<br /><br />
                                     &nbsp;&nbsp;-h&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Show
-                                    this help message<br />
+                                    this help<br />
                                     &nbsp;&nbsp;-l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;List
-                                    all notes in your notes directory<br />
-                                    &nbsp;&nbsp;-g QUERY&nbsp;&nbsp;Search for
-                                    text across all notes (grep)<br />
-                                    &nbsp;&nbsp;-t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Quickly
-                                    open today's journal note (YYYY-MM-DD.md)<br />
+                                    notes<br />
+                                    &nbsp;&nbsp;-g PATTERN&nbsp;&nbsp;Search
+                                    notes (grep)<br />
+                                    &nbsp;&nbsp;-t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Open
+                                    today's note (YYYY-MM-DD)<br />
                                     &nbsp;&nbsp;-d NOTE&nbsp;&nbsp;&nbsp;Delete
-                                    a note locally and from cloud remote
-                                    repository<br />
-                                    &nbsp;&nbsp;-r OLD NEW Rename a note locally
-                                    and on cloud remote repository<br />
-                                    Examples:<br />
-                                    &nbsp;&nbsp;gn&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Opens
-                                    note.md<br />
-                                    &nbsp;&nbsp;gn
-                                    log&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Creates
-                                    log.md<br />
-                                    &nbsp;&nbsp;gn
-                                    work/todo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Opens
-                                    work/todo.md<br />
-                                    <span class="t-prompt"
-                                        >user@terminal:~$</span
-                                    >
-                                    <span class="cursor"></span>
+                                    a note<br />
+                                    &nbsp;&nbsp;-r OLD NEW&nbsp;Rename a note<br /><br />
+                                    Defaults to 'note' if no note is given.<br /><br />
+                                    Engine: GITHUB
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </header>
+
+            <section id="prerequisites">
+                <h2>Cloud Storage Setup Guide</h2>
+                <p
+                    style="
+                        font-size: 0.95rem;
+                        color: var(--text-muted);
+                        margin-bottom: 1rem;
+                    "
+                >
+                    Before you run the installation script below, please prepare
+                    your storage account using one of the two options:
+                </p>
+                <div class="setup-grid">
+                    <div class="setup-card">
+                        <h3>🐙 Option 1: GitHub</h3>
+                        <ul>
+                            <li>
+                                <strong>Personal Access Token:</strong> Go to
+                                <a
+                                    href="https://github.com/settings/tokens/new?scopes=repo&description=gn-cli"
+                                    target="_blank"
+                                    style="
+                                        color: var(--accent-color);
+                                        text-decoration: none;
+                                    "
+                                    >GitHub Token Settings</a
+                                >
+                                and generate a new Personal Access Token with
+                                the
+                                <code>repo</code> scope.
+                            </li>
+                            <li>
+                                <strong>Account &amp; Repository:</strong> Have
+                                your GitHub username ready, along with the name
+                                of the repository you want to store notes in.
+                                The setup script will offer to create a private
+                                repo for you if it doesn't already exist.
+                            </li>
+                            <li>
+                                <strong>Keep it handy:</strong> The setup script
+                                will ask you to paste this token in once so it
+                                can be saved to your local config file.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="setup-card">
+                        <h3>📦 Option 2: Dropbox API App</h3>
+                        <ul>
+                            <li>
+                                <strong>Create an App:</strong> Go to the
+                                <a
+                                    href="https://www.dropbox.com/developers/apps"
+                                    target="_blank"
+                                    style="
+                                        color: var(--accent-color);
+                                        text-decoration: none;
+                                    "
+                                    >Dropbox Developer Console</a
+                                >
+                                and click **Create App**. Select **Scoped
+                                access** and choose the **App folder** option.
+                            </li>
+                            <li>
+                                <strong>Set Permissions:</strong> Before
+                                finishing, click on the **Permissions** tab of
+                                your new app. Check the boxes for
+                                <code>files.content.write</code> and
+                                <code>files.content.read</code>, then click
+                                **Submit** at the bottom.
+                            </li>
+                            <li>
+                                <strong>Keys:</strong> Keep your app's **App
+                                key** and **App secret** open from your settings
+                                tab. The setup script will ask for them to
+                                connect securely.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="note-box">
+                    <strong>🔒 Privacy Note:</strong> Your credentials are kept
+                    completely private. The installer saves your choices into a
+                    configuration file and locks it down so that only your local
+                    computer user profile can read it.
+                </div>
+            </section>
+
             <section id="quick-install">
-                <div class="run-instructions">
-                    <p>Quick install:</p>
+                <h2>Quick Installation</h2>
+                <div class="run-instructions" style="margin-top: 1rem">
+                    <p>Run Installer Setup Command:</p>
                     <code
                         >curl -fsSL https://gn-notes.pages.dev/install.sh -o
                         install.sh && chmod +x install.sh && ./install.sh</code
                     >
                 </div>
                 <button
-                    class="btn btn-secondary copy-btn"
-                    style="
-                        margin-top: 0.75rem;
-                        font-size: 0.85rem;
-                        padding: 0.5rem 1rem;
-                    "
+                    class="btn btn-secondary"
+                    style="margin-top: 0.75rem"
                     onclick="
                         copyText(
                             'curl -fsSL https://gn-notes.pages.dev/install.sh -o install.sh && chmod +x install.sh && ./install.sh',
@@ -665,514 +604,138 @@
                         )
                     "
                 >
-                    <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 16 16"
-                        fill="currentColor"
-                    >
-                        <path
-                            d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"
-                        />
-                        <path
-                            d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"
-                        />
-                    </svg>
-                    Copy
+                    Copy Command
                 </button>
             </section>
-            <section id="setup-prerequisites">
-                <h2>Prerequisites & Git Cloud Configuration:</h2>
-                <p>
-                    <code>gn</code> requires a private repository and a personal
-                    access token generated from your chosen Git host.
-                </p>
 
-                <div class="step-list">
-                    <div class="step-item">
-                        <span class="step-num">1</span>
-                        <span class="step-title"
-                            >Git Cloud Workspace Account</span
-                        >
-                        <div class="step-content">
-                            <p>
-                                Create an account with
-                                <strong
-                                    ><a
-                                        href="https://github.com/signup"
-                                        target="_blank"
-                                        >GitHub</a
-                                    ></strong
-                                >,
-                                <strong
-                                    ><a
-                                        href="https://gitlab.com/users/sign_up"
-                                        target="_blank"
-                                        >GitLab</a
-                                    ></strong
-                                >, or
-                                <strong
-                                    ><a
-                                        href="https://codeberg.org/user/sign_up"
-                                        target="_blank"
-                                        >Codeberg</a
-                                    ></strong
-                                >
-                                if you do not already have one.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="step-item">
-                        <span class="step-num">A</span>
-                        <span class="step-title">GitHub Configuration</span>
-                        <div class="step-content">
-                            <p>
-                                Create a private repository named
-                                <code>gn</code> and generate a token with full
-                                <strong>repo</strong> permissions.
-                            </p>
-                            <div class="external-links">
-                                <a
-                                    href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens"
-                                    target="_blank"
-                                    >🔗 GitHub PAT Token Docs</a
-                                >
-                                <a
-                                    href="https://github.com/settings/tokens/new?scopes=repo&description=gn-cli"
-                                    target="_blank"
-                                    >🔑 Direct Token Generation Link</a
-                                >
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="step-item">
-                        <span class="step-num">B</span>
-                        <span class="step-title">GitLab Configuration</span>
-                        <div class="step-content">
-                            <p>
-                                Create a private project named <code>gn</code>.
-                                Generate a Personal Access Token inside your
-                                user settings and ensure you check the
-                                <strong>api</strong>
-                                scope permission box.
-                            </p>
-                            <div class="external-links">
-                                <a
-                                    href="https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html"
-                                    target="_blank"
-                                    >🔗 GitLab PAT Token Docs</a
-                                >
-                                <a
-                                    href="https://gitlab.com/-/user_settings/personal_access_tokens?scopes=api&name=gn-cli"
-                                    target="_blank"
-                                    >🔑 Direct Token Generation Link</a
-                                >
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="step-item">
-                        <span class="step-num">C</span>
-                        <span class="step-title">Codeberg Configuration</span>
-                        <div class="step-content">
-                            <p>
-                                Create a private repository named
-                                <code>gn</code>. Go to Settings &rarr;
-                                Applications to generate a token with repository
-                                access permissions.
-                            </p>
-                            <div class="external-links">
-                                <a
-                                    href="https://docs.codeberg.org/api/authentication/"
-                                    target="_blank"
-                                    >🔗 Codeberg Token Auth Docs</a
-                                >
-                                <a
-                                    href="https://codeberg.org/user/settings/applications"
-                                    target="_blank"
-                                    >🔑 Direct Token Generation Link</a
-                                >
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="get-started">
-                <h2>Download gn</h2>
-                <p>
-                    Run the one-liner below, or manually configure
-                    <code>gn</code> using the directions further down.
+            <section id="manual-setup">
+                <h2>Manual Setup</h2>
+                <p
+                    style="
+                        font-size: 0.95rem;
+                        color: var(--text-muted);
+                        margin-bottom: 1rem;
+                    "
+                >
+                    Prefer to wire things up yourself instead of running the
+                    installer? Here's the whole process by hand.
                 </p>
 
                 <div class="installer-panel">
-                    <h3>Option A: One-liner (Recommended)</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-muted)">
-                        Paste this into your terminal. It downloads
-                        <code>install.sh</code>, makes it executable, and runs
-                        it. You will be prompted to select your platform and
-                        credentials.
+                    <h3>1. Install the script</h3>
+                    <p style="margin-bottom: 0.75rem">
+                        Download <code>gn.sh</code> into <code>~/gn</code>, make
+                        it executable, and link it onto your <code>$PATH</code>.
                     </p>
-                    <div class="run-instructions">
-                        <p>Paste Into Terminal</p>
-                        <code
-                            >curl -fsSL https://gn-notes.pages.dev/install.sh -o
-                            install.sh && chmod +x install.sh &&
-                            ./install.sh</code
-                        >
-                    </div>
-                    <button
-                        class="btn btn-secondary copy-btn"
-                        style="
-                            margin-top: 0.75rem;
-                            font-size: 0.85rem;
-                            padding: 0.5rem 1rem;
-                        "
-                        onclick="
-                            copyText(
-                                'curl -fsSL https://gn-notes.pages.dev/install.sh -o install.sh && chmod +x install.sh && ./install.sh',
-                                this,
-                            )
-                        "
-                    >
-                        <svg
-                            width="14"
-                            height="14"
-                            viewBox="0 0 16 16"
-                            fill="currentColor"
-                        >
-                            <path
-                                d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"
-                            />
-                            <path
-                                d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"
-                            />
-                        </svg>
-                        Copy
-                    </button>
-                    <p
-                        style="
-                            font-size: 0.8rem;
-                            color: var(--text-muted);
-                            margin: 0.75rem 0 0;
-                        "
-                    >
-                        Prefer to inspect before running?
-                        <a href="install.sh" download="install.sh"
-                            >Download install.sh</a
-                        >
-                        first.
-                    </p>
+                    <pre><code>mkdir -p ~/gn
+curl -fsSL https://gn-notes.pages.dev/gn.sh -o ~/gn/gn.sh
+chmod +x ~/gn/gn.sh
+sudo cp ~/gn/gn.sh /usr/local/bin/gn</code></pre>
                 </div>
 
-                <div
-                    class="installer-panel"
-                    style="background: transparent; padding: 0; border: none"
-                >
-                    <h3>Option B: Manual Set Up</h3>
-                    <div class="btn-container">
-                        <a class="btn" href="gn.sh" download="gn.sh">
-                            <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 16 16"
-                                fill="currentColor"
-                            >
-                                <path
-                                    d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14H2.75Z"
-                                ></path>
-                                <path
-                                    d="M7.25 1.75a.75.75 0 0 1 1.5 0v7.793l2.146-2.147a.75.75 0 1 1 1.06 1.06l-3.427 3.427a.75.75 0 0 1-1.06 0L4.043 8.457a.75.75 0 1 1 1.06-1.06l2.147 2.147V1.75Z"
-                                ></path>
-                            </svg>
-                            Download gn.sh
-                        </a>
+                <div class="installer-panel">
+                    <h3>2a. Configure gn.conf for GitHub</h3>
+                    <p style="margin-bottom: 0.75rem">
+                        Generate a Personal Access Token with the
+                        <code>repo</code> scope from your
                         <a
-                            class="btn btn-secondary"
-                            href="gn.conf"
-                            download="gn.conf"
-                        >
-                            <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 16 16"
-                                fill="currentColor"
-                            >
-                                <path
-                                    d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"
-                                ></path>
-                            </svg>
-                            Download gn.conf
-                        </a>
-                    </div>
+                            href="https://github.com/settings/tokens/new?scopes=repo&description=gn-cli"
+                            target="_blank"
+                            style="
+                                color: var(--accent-color);
+                                text-decoration: none;
+                            "
+                            >GitHub token settings</a
+                        >, then create the repository you want to sync notes to
+                        (or let it 404 and create it manually). Write the
+                        following to <code>~/gn/gn.conf</code>:
+                    </p>
+                    <pre><code># gn configuration (GitHub backend)
+GIT_TOKEN=ghp_your_personal_access_token
+GIT_OWNER=your-github-username
+GIT_REPO=gn</code></pre>
+                    <p style="margin-top: 0.75rem">
+                        Then lock the file down:
+                        <code>chmod 600 ~/gn/gn.conf</code>
+                    </p>
                 </div>
 
-                <pre
-                    class="scrollable-code"
-                ><code id="script-content"># Script content dynamic loading zone...</code></pre>
-                <button
-                    class="btn btn-secondary copy-btn"
-                    style="
-                        margin-top: 0.75rem;
-                        font-size: 0.85rem;
-                        padding: 0.5rem 1rem;
-                    "
-                    onclick="copyScriptContent(this)"
-                >
-                    <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 16 16"
-                        fill="currentColor"
+                <div class="installer-panel">
+                    <h3>2b. Configure gn.conf for Dropbox</h3>
+                    <p style="margin-bottom: 0.75rem">
+                        Create a scoped, app-folder Dropbox app at the
+                        <a
+                            href="https://www.dropbox.com/developers/apps"
+                            target="_blank"
+                            style="
+                                color: var(--accent-color);
+                                text-decoration: none;
+                            "
+                            >Dropbox Developer Console</a
+                        >, enable the <code>files.content.write</code> and
+                        <code>files.content.read</code> permissions, and note
+                        its <strong>App key</strong> and
+                        <strong>App secret</strong>.
+                    </p>
+                    <p style="margin-bottom: 0.75rem">
+                        Visit this URL (replace
+                        <code>YOUR_APP_KEY</code>) to authorize the app and get
+                        a one-time code:
+                    </p>
+                    <pre><code>https://www.dropbox.com/oauth2/authorize?client_id=YOUR_APP_KEY&response_type=code&token_access_type=offline</code></pre>
+                    <p style="margin-bottom: 0.75rem">
+                        Exchange that code for a long-lived refresh token:
+                    </p>
+                    <pre><code>curl -s -X POST https://api.dropbox.com/oauth2/token \
+  -d code=YOUR_AUTH_CODE \
+  -d grant_type=authorization_code \
+  -d client_id=YOUR_APP_KEY \
+  -d client_secret=YOUR_APP_SECRET</code></pre>
+                    <p style="margin-bottom: 0.75rem">
+                        Copy the <code>refresh_token</code> from the response
+                        and write the following to <code>~/gn/gn.conf</code>:
+                    </p>
+                    <pre><code># gn configuration (Dropbox backend)
+DROPBOX_APP_KEY=your_app_key
+DROPBOX_APP_SECRET=your_app_secret
+DROPBOX_REFRESH_TOKEN=your_refresh_token
+DROPBOX_PATH=/notes</code></pre>
+                    <p style="margin-top: 0.75rem">
+                        Then lock the file down:
+                        <code>chmod 600 ~/gn/gn.conf</code>
+                    </p>
+                </div>
+
+                <div class="installer-panel">
+                    <h3>3. Start taking notes</h3>
+                    <p>
+                        Run <code>gn</code> to open today's default note, or
+                        <code>gn myfile</code> to open or create
+                        <code>myfile.md</code>. gn automatically pulls the
+                        latest version before editing and pushes your changes
+                        back on save. Run <code>gn -h</code> for the full list
+                        of options.
+                    </p>
+                </div>
+            </section>
+
+            <section id="downloads">
+                <h2>Manual Download</h2>
+                <div class="btn-container">
+                    <a class="btn" href="gn.sh" download="gn.sh"
+                        >Download gn.sh</a
                     >
-                        <path
-                            d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"
-                        />
-                        <path
-                            d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"
-                        />
-                    </svg>
-                    Copy Script
-                </button>
-            </section>
-
-            <section id="setup">
-                <h2>Manual Installation</h2>
-                <p>
-                    If you prefer not to use the automated
-                    <code>install.sh</code> script, follow these steps to
-                    configure <code>gn</code> manually:
-                </p>
-
-                <div class="step-list">
-                    <div class="step-item">
-                        <span class="step-num">1</span>
-                        <span class="step-title">Create the Config File</span>
-                        <div class="step-content">
-                            <p>
-                                Create the configuration folder hierarchy, then
-                                build the target configuration file:
-                            </p>
-                            <pre><code>mkdir -p ~/gn && nano ~/gn/gn.conf && chmod 600 ~/gn/gn.conf</code></pre>
-                            <button
-                                class="btn btn-secondary copy-btn"
-                                style="
-                                    margin-bottom: 0.75rem;
-                                    font-size: 0.85rem;
-                                    padding: 0.5rem 1rem;
-                                "
-                                onclick="
-                                    copyText(
-                                        'mkdir -p ~/gn && nano ~/gn/gn.conf && chmod 600 ~/gn/gn.conf',
-                                        this,
-                                    )
-                                "
-                            >
-                                <svg
-                                    width="14"
-                                    height="14"
-                                    viewBox="0 0 16 16"
-                                    fill="currentColor"
-                                >
-                                    <path
-                                        d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"
-                                    />
-                                    <path
-                                        d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"
-                                    />
-                                </svg>
-                                Copy
-                            </button>
-                            <p>
-                                Add these four values, adjusting for your chosen
-                                Git platform:
-                            </p>
-                            <pre><code>GIT_PROVIDER=git_cloud_provider
-GIT_TOKEN=your_personal_access_token_here
-GIT_OWNER=your_username
-GIT_REPO=gn</code></pre>
-                            <ul
-                                style="
-                                    margin: 0.75rem 0;
-                                    padding-left: 1.5rem;
-                                    color: var(--text-main);
-                                    line-height: 2;
-                                "
-                            >
-                                <li>
-                                    <strong>GIT_PROVIDER</strong> - Your target
-                                    hosting provider platform
-                                    (<code>github</code>, <code>gitlab</code>,
-                                    or <code>codeberg</code>).
-                                </li>
-                                <li>
-                                    <strong>GIT_TOKEN</strong> - Your personal
-                                    access token with repository write
-                                    permissions.
-                                </li>
-                                <li>
-                                    <strong>GIT_OWNER</strong> - Your user
-                                    account name.
-                                </li>
-                                <li>
-                                    <strong>GIT_REPO</strong> - The name of the
-                                    private repository (defaults to
-                                    <code>gn</code>).
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="step-item">
-                        <span class="step-num">2</span>
-                        <span class="step-title"
-                            >Make the Script Available Globally</span
-                        >
-                        <div class="step-content">
-                            <p>
-                                Make the downloaded <code>gn.sh</code> script
-                                executable and copy it into your system's
-                                binaries directory:
-                            </p>
-                            <pre><code>chmod +x gn.sh && sudo cp gn.sh /usr/local/bin/gn</code></pre>
-                            <button
-                                class="btn btn-secondary copy-btn"
-                                style="
-                                    margin-top: 0.5rem;
-                                    font-size: 0.85rem;
-                                    padding: 0.5rem 1rem;
-                                "
-                                onclick="
-                                    copyText(
-                                        'chmod +x gn.sh && sudo cp gn.sh /usr/local/bin/gn',
-                                        this,
-                                    )
-                                "
-                            >
-                                <svg
-                                    width="14"
-                                    height="14"
-                                    viewBox="0 0 16 16"
-                                    fill="currentColor"
-                                >
-                                    <path
-                                        d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"
-                                    />
-                                    <path
-                                        d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"
-                                    />
-                                </svg>
-                                Copy
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="step-item">
-                        <span class="step-num">3</span>
-                        <span class="step-title">Using gn</span>
-                        <p>
-                            Run gn from your Terminal. Use flags for advanced
-                            features.
-                        </p>
-                        <div class="step-content">
-                            <pre><code>gn                  # Opens your main note.md
-gn daily-log        # Creates/Opens daily-log.md
-gn work/reminders   # Creates work/ directory and opens reminders.md
-gn -h               # Displays help page
-gn -l               # Lists all your notes
-gn -g "todo"        # Finds text matching "todo" inside any note
-gn -t               # Opens today's automated scratchpad entry
-gn -d daily-log     # Deletes daily-log.md locally and from cloud remote
-gn -r old new       # Renames old.md to new.md locally and on cloud remote</code></pre>
-                        </div>
-                    </div>
+                    <a
+                        class="btn btn-secondary"
+                        href="gn.conf"
+                        download="gn.conf"
+                        >Download gn.conf</a
+                    >
                 </div>
+                <pre><code id="script-content"># Source text preview area...</code></pre>
             </section>
 
-            <section id="second-machine">
-                <h2>Setting Up a Second Computer</h2>
-                <p>
-                    Your notes live in the cloud and sync via the API, so
-                    there's nothing to clone. Just create the directory, drop in
-                    your config file, and install the script.
-                </p>
-
-                <div class="step-list">
-                    <div class="step-item">
-                        <span class="step-num">1</span>
-                        <span class="step-title"
-                            >Create the notes directory and config file</span
-                        >
-                        <div class="step-content">
-                            <pre><code>mkdir -p ~/gn
-nano ~/gn/gn.conf
-chmod 600 ~/gn/gn.conf
-</code></pre>
-                            <pre><code>GIT_PROVIDER=github
-GIT_TOKEN=your_personal_access_token_here
-GIT_OWNER=your_username
-GIT_REPO=gn</code></pre>
-                        </div>
-                    </div>
-
-                    <div class="step-item">
-                        <span class="step-num">2</span>
-                        <span class="step-title">Install gn</span>
-                        <div class="step-content">
-                            <p>
-                                Download <code>gn.sh</code> and configure
-                                permissions globally:
-                            </p>
-                            <pre><code>chmod +x gn.sh && sudo cp gn.sh /usr/local/bin/gn</code></pre>
-                            <button
-                                class="btn btn-secondary copy-btn"
-                                style="
-                                    margin-top: 0.5rem;
-                                    font-size: 0.85rem;
-                                    padding: 0.5rem 1rem;
-                                "
-                                onclick="
-                                    copyText(
-                                        'chmod +x gn.sh && sudo cp gn.sh /usr/local/bin/gn',
-                                        this,
-                                    )
-                                "
-                            >
-                                <svg
-                                    width="14"
-                                    height="14"
-                                    viewBox="0 0 16 16"
-                                    fill="currentColor"
-                                >
-                                    <path
-                                        d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"
-                                    />
-                                    <path
-                                        d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"
-                                    />
-                                </svg>
-                                Copy
-                            </button>
-                            <p>
-                                That's it - run <code>gn</code> and it will pull
-                                your notes before opening the editor.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <footer>
-                &copy; 2026 Barney Matthews. Released under the
-                <a
-                    href="https://opensource.org/licenses/MIT"
-                    target="_blank"
-                    style="color: var(--text-muted); text-decoration: underline"
-                    >MIT License</a
-                >.
-            </footer>
+            <footer>&copy; 2026 Barney Matthews. MIT License.</footer>
         </div>
 
         <script>
@@ -1185,8 +748,8 @@ GIT_REPO=gn</code></pre>
                     })
                     .catch(() => {});
 
-                const cmd1 = "gn hello";
-                const nanoText = "hello world";
+                const cmd1 = "gn quicknote";
+                const nanoText = "unified engine modifications verified.";
                 const cmd2 = "gn -h";
 
                 const container1 = document.getElementById("text-cmd-1");
@@ -1237,7 +800,6 @@ GIT_REPO=gn</code></pre>
                     helpOutput.style.display = "none";
                     document.getElementById("cursor-2").style.display =
                         "inline-block";
-
                     s1.classList.add("active");
                     sNano.classList.remove("active");
                     sSync.classList.remove("active");
@@ -1247,77 +809,59 @@ GIT_REPO=gn</code></pre>
                         typeString(container1, cmd1, 100, () => {
                             s1.classList.remove("active");
                             sNano.classList.add("active");
-
                             setTimeout(() => {
                                 typeString(containerNano, nanoText, 120, () => {
                                     setTimeout(() => {
                                         sNano.classList.remove("active");
                                         sSync.classList.add("active");
-
                                         appendLog(
-                                            "Fetching latest cloud updates...",
+                                            "Fetching... [via GITHUB]",
                                             "t-out",
                                             300,
                                         );
                                         appendLog(
-                                            "Syncing changes to cloud remote...",
+                                            "Pushing... [via GITHUB]",
                                             "t-out",
                                             1100,
                                         );
-                                        appendLog(
-                                            "Sync complete!",
-                                            "t-ok",
-                                            1900,
-                                            () => {
-                                                setTimeout(() => {
-                                                    sSync.classList.remove(
-                                                        "active",
-                                                    );
-                                                    sHelp.classList.add(
-                                                        "active",
-                                                    );
-
-                                                    typeString(
-                                                        container2,
-                                                        cmd2,
-                                                        100,
-                                                        () => {
-                                                            document.getElementById(
-                                                                "cursor-2",
-                                                            ).style.display =
-                                                                "none";
-                                                            helpOutput.style.display =
-                                                                "block";
-                                                        },
-                                                    );
-                                                }, 1000);
-                                            },
-                                        );
+                                        appendLog("Done.", "t-ok", 1900, () => {
+                                            setTimeout(() => {
+                                                sSync.classList.remove(
+                                                    "active",
+                                                );
+                                                sHelp.classList.add("active");
+                                                typeString(
+                                                    container2,
+                                                    cmd2,
+                                                    100,
+                                                    () => {
+                                                        document.getElementById(
+                                                            "cursor-2",
+                                                        ).style.display =
+                                                            "none";
+                                                        helpOutput.style.display =
+                                                            "block";
+                                                    },
+                                                );
+                                            }, 1000);
+                                        });
                                     }, 1000);
                                 });
                             }, 500);
                         });
                     }, 800);
                 }
-
                 runTerminalSequence();
             });
 
             function copyText(text, btn) {
                 navigator.clipboard.writeText(text).then(() => {
                     const orig = btn.innerHTML;
-                    btn.innerHTML =
-                        '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/></svg> Copied!';
+                    btn.innerHTML = "Copied!";
                     setTimeout(() => {
                         btn.innerHTML = orig;
                     }, 2000);
                 });
-            }
-
-            function copyScriptContent(btn) {
-                const content =
-                    document.getElementById("script-content").textContent;
-                copyText(content, btn);
             }
         </script>
     </body>
