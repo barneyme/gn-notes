@@ -517,7 +517,7 @@ curl -s -X POST https://api.dropbox.com/oauth2/token \
                     </p>
                     <div class="ext-links">
                         <a
-                            href="https://developers.dropbox.com/oauth-guide"
+                            href="https://open.dropbox.com/oauth-guide"
                             target="_blank"
                             rel="noopener"
                             >&#128279; Dropbox OAuth Guide</a
@@ -605,14 +605,6 @@ Save this config for future runs? [Y/n] Y</code></pre>
                             </td>
                         </tr>
                         <tr>
-                            <td><code>gn -l</code></td>
-                            <td>List local notes</td>
-                        </tr>
-                        <tr>
-                            <td><code>gn -g pattern</code></td>
-                            <td>Grep across local notes</td>
-                        </tr>
-                        <tr>
                             <td><code>gn -d ideas</code></td>
                             <td>
                                 Delete a note, local and remote (with
@@ -631,13 +623,6 @@ Save this config for future runs? [Y/n] Y</code></pre>
                             <td>
                                 Sync (pull) all remote notes down to local
                                 directory
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>gn -b</code></td>
-                            <td>
-                                Backup all local notes to
-                                <code>~/gn-YYYY-MM-DD.tar</code>
                             </td>
                         </tr>
                         <tr>
@@ -693,14 +678,14 @@ Save this config for future runs? [Y/n] Y</code></pre>
                     <pre><code id="full-script">#!/usr/bin/env bash
 # gn - get Notes
 # A zero-dependency CLI tool to sync markdown notes via WebDAV, GitHub, or Dropbox.
-# Web: gnnotes.pages.dev. Author: Barney Matthews. License: MIT
+# Web: gn-notes.pages.dev. Author: Barney Matthews. License: MIT
 
 NOTES_DIR=&quot;$HOME/gn&quot;
 CONFIG_FILE=&quot;$NOTES_DIR/gn.conf&quot;
 
 mkdir -p &quot;$NOTES_DIR&quot;
 
-for cmd in curl grep sed awk find tar base64 tr; do
+for cmd in curl grep sed awk base64 tr; do
     command -v &quot;$cmd&quot; &gt;/dev/null 2&gt;&amp;1 || { echo &quot;Error: &#x27;$cmd&#x27; is required but not installed.&quot; &gt;&amp;2; exit 1; }
 done
 
@@ -796,8 +781,12 @@ if [ -z &quot;$gn_USER&quot; ] &amp;&amp; [ -z &quot;$GIT_TOKEN&quot; ] &amp;&am
                 if [ -n &quot;$GIT_TOKEN&quot; ]; then
                     printf &#x27;GIT_TOKEN=%s\nGIT_OWNER=%s\nGIT_REPO=%s\n&#x27; &quot;$GIT_TOKEN&quot; &quot;$GIT_OWNER&quot; &quot;$GIT_REPO&quot;
                 elif [ -n &quot;$DROPBOX_APP_KEY&quot; ]; then
-                    printf &#x27;DROPBOX_APP_KEY=%s\nDROPBOX_APP_SECRET=%s\nDROPBOX_REFRESH_TOKEN=%s\nDROPBOX_PATH=%s\n&#x27; \
-                        &quot;$DROPBOX_APP_KEY&quot; &quot;$DROPBOX_APP_SECRET&quot; &quot;$DROPBOX_REFRESH_TOKEN&quot; &quot;$DROPBOX_PATH&quot;
+                    cat &lt;&lt;EOF
+DROPBOX_APP_KEY=$DROPBOX_APP_KEY
+DROPBOX_APP_SECRET=$DROPBOX_APP_SECRET
+DROPBOX_REFRESH_TOKEN=$DROPBOX_REFRESH_TOKEN
+DROPBOX_PATH=$DROPBOX_PATH
+EOF
                 else
                     printf &#x27;gn_URL=%s\ngn_USER=%s\ngn_PASS=%s\ngn_PATH=%s\n&#x27; &quot;$gn_URL&quot; &quot;$gn_USER&quot; &quot;$gn_PASS&quot; &quot;$gn_PATH&quot;
                 fi
@@ -836,8 +825,9 @@ if [ &quot;$SYNC_ENGINE&quot; = &quot;DROPBOX&quot; ]; then
     dropbox_refresh() {
         local resp pfile
         pfile=$(mktemp); chmod 600 &quot;$pfile&quot;
-        printf &#x27;grant_type=refresh_token&amp;refresh_token=%s&amp;client_id=%s&amp;client_secret=%s&#x27; \
-            &quot;$DROPBOX_REFRESH_TOKEN&quot; &quot;$DROPBOX_APP_KEY&quot; &quot;$DROPBOX_APP_SECRET&quot; &gt; &quot;$pfile&quot;
+        cat &lt;&lt;EOF &gt; &quot;$pfile&quot;
+grant_type=refresh_token&amp;refresh_token=${DROPBOX_REFRESH_TOKEN}&amp;client_id=${DROPBOX_APP_KEY}&amp;client_secret=${DROPBOX_APP_SECRET}
+EOF
         resp=$(curl -s -X POST &quot;https://api.dropbox.com/oauth2/token&quot; --data-binary &quot;@$pfile&quot;)
         rm -f &quot;$pfile&quot;
         DROPBOX_ACCESS_TOKEN=$(echo &quot;$resp&quot; | awk -F&#x27;&quot;&#x27; &#x27;{for(i=1;i&lt;=NF;i++) if($i==&quot;access_token&quot;) {print $(i+2); exit}}&#x27;)
@@ -860,13 +850,10 @@ show_help() {
 Usage: gn [options] [note]
 
   -h          Show this help
-  -l          List local notes
-  -g PATTERN  Search notes (grep)
   -t          Open today&#x27;s note (YYYY-MM-DD)
   -d NOTE     Delete a note (local + remote)
   -r OLD NEW  Rename a note (local + remote)
   -s          Sync (pull) all remote notes down to local directory
-  -b          Backup all local notes to ~/gn-YYYY-MM-DD.tar
   -c          Clear saved credentials and reconfigure
 
 Engine: $SYNC_ENGINE
@@ -879,7 +866,7 @@ api_curl() {
     local hdr rc
     if [ &quot;$SYNC_ENGINE&quot; = &quot;WEBDAV&quot; ]; then
         local nf host
-        host=$(echo &quot;$gn_URL&quot; | awk -F/ &#x27;{print $3}&#x27;)
+        host=$(echo &quot;$gn_URL&quot; | awk -F/ Kishor &#x27;{print $3}&#x27;)
         nf=$(mktemp); chmod 600 &quot;$nf&quot;
         printf &#x27;machine %s\nlogin %s\npassword %s\n&#x27; &quot;$host&quot; &quot;$gn_USER&quot; &quot;$gn_PASS&quot; &gt; &quot;$nf&quot;
         curl -s --netrc-file &quot;$nf&quot; &quot;$@&quot;; rc=$?
@@ -928,10 +915,10 @@ urldec() {
 }
 
 get_file_hash() {
-    if command -v md5sum &gt;/dev/null 2&gt;&amp;1; then md5sum &quot;$1&quot; 2&gt;/dev/null | awk &#x27;{print $1}&#x27;
-    elif command -v shasum &gt;/dev/null 2&gt;&amp;1; then shasum &quot;$1&quot; 2&gt;/dev/null | awk &#x27;{print $1}&#x27;
-    elif command -v md5 &gt;/dev/null 2&gt;&amp;1; then md5 -q &quot;$1&quot; 2&gt;/dev/null || md5 &quot;$1&quot; 2&gt;/dev/null | awk &#x27;{print $1}&#x27;
-    else ls -ln &quot;$1&quot; 2&gt;/dev/null | awk &#x27;{print $5,$6,$7,$8}&#x27;
+    if command -v md5sum &gt;/dev/null 2>&1; then md5sum &quot;$1&quot; 2>/dev/null | awk '{print $1}'
+    elif command -v shasum &gt;/dev/null 2>&1; then shasum &quot;$1&quot; 2>/dev/null | awk '{print $1}'
+    elif command -v md5 &gt;/dev/null 2>&1; then md5 -q &quot;$1&quot; 2>/dev/null || md5 &quot;$1&quot; 2>/dev/null | awk '{print $1}'
+    else ls -ln &quot;$1&quot; 2>/dev/null | awk '{print $5,$6,$7,$8}'
     fi
 }
 
@@ -939,12 +926,12 @@ remote_url() { echo &quot;${gn_URL}$(urlenc &quot;${gn_PATH}/$1&quot;)&quot;; }
 
 remote_mkdir() {
     local dir=&quot;$1&quot; path=&quot;&quot; part parts target
-    if [ -z &quot;$dir&quot; ] || [ &quot;$dir&quot; = &quot;.&quot; ]; then target=&quot;$gn_PATH&quot;; else target=&quot;$gn_PATH/$dir&quot;; fi
-    IFS=&#x27;/&#x27; read -ra parts &lt;&lt;&lt; &quot;$target&quot;
-    for part in &quot;${parts[@]}&quot;; do
-        [ -z &quot;$part&quot; ] &amp;&amp; continue
-        path=&quot;$path/$part&quot;
-        api_curl -X MKCOL &quot;${gn_URL}$(urlenc &quot;$path&quot;)&quot; -o /dev/null
+    if [ -z &quot;$dir&quot; ] || [ &quot;$dir" = "." ]; then target="$gn_PATH"; else target="$gn_PATH/$dir"; fi
+    IFS='/' read -ra parts <<< "$target"
+    for part in "${parts[@]}"; do
+        [ -z "$part" ] && continue
+        path="$path/$part"
+        api_curl -X MKCOL "${gn_URL}$(urlenc "$path")" -o /dev/null
     done
 }
 
@@ -1032,10 +1019,10 @@ push_note() {
         dir=$(dirname &quot;$file&quot;)
         remote_mkdir &quot;$dir&quot;
         url=$(remote_url &quot;$file&quot;)
-        http_code=$(api_curl -w &quot;%{http_code}&quot; -o /dev/null -X PUT --data-binary &quot;@$file&quot; &quot;$url&quot;)
-        case &quot;$http_code&quot; in
+        http_code=$(api_curl -w &quot;%{http_code}&quot; -o /dev/null -X PUT --data-binary "@$file" "$url")
+        case "$http_code" in
             200|201|204) ;;
-            *) echo &quot;Error: Push failed (HTTP $http_code).&quot; &gt;&amp;2; exit 1 ;;
+            *) echo "Error: Push failed (HTTP $http_code)." >&2; exit 1 ;;
         esac
     fi
 }
@@ -1050,7 +1037,7 @@ remote_delete() {
         sha_resp=$(api_curl -s &quot;$url&quot;)
         sha=$(echo &quot;$sha_resp&quot; | awk -F&#x27;&quot;&#x27; &#x27;{for(i=1;i&lt;=NF;i++) if($i==&quot;sha&quot;) {print $(i+2); exit}}&#x27;)
         if [ -z &quot;$sha&quot; ]; then rm -f &quot;$pfile&quot;; return 0; fi
-        printf &#x27;{&quot;message&quot;:&quot;%s&quot;,&quot;sha&quot;:&quot;%s&quot;,&quot;branch&quot;:&quot;main&quot;}&#x27; &quot;$msg&quot; &quot;$sha&quot; &gt; &quot;$pfile&quot;
+        printf &#x27;{&quot;message&quot;:&quot;%s&quot;,&quot;sha&quot;:&quot;%s&quot;,&quot;branch&quot;:&quot;main&quot;}\x27; &quot;$msg&quot; &quot;$sha&quot; &gt; &quot;$pfile&quot;
         resp=$(api_curl -w &quot;\n%{http_code}&quot; -X DELETE -H &quot;Content-Type: application/json&quot; --data-binary &quot;@$pfile&quot; &quot;$url&quot;)
         rm -f &quot;$pfile&quot;
         http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
@@ -1061,16 +1048,16 @@ remote_delete() {
         path=$(printf &#x27;%s/%s&#x27; &quot;$DROPBOX_PATH&quot; &quot;$file&quot; | sed &#x27;s#//*#/#g&#x27;)
         arg=$(printf &#x27;{&quot;path&quot;:&quot;%s&quot;}&#x27; &quot;$path&quot;)
         resp=$(api_curl -w &quot;\n%{http_code}&quot; -X POST \
-            -H &quot;Content-Type: application/json&quot; --data-binary &quot;$arg&quot; \
-            &quot;https://api.dropboxapi.com/2/files/delete_v2&quot;)
-        http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
-        [[ &quot;$http_code&quot; =~ ^(200|409)$ ]] || echo &quot;Warning: Dropbox delete failed (HTTP $http_code).&quot; &gt;&amp;2
+            -H "Content-Type: application/json" --data-binary "$arg" \
+            "https://api.dropboxapi.com/2/files/delete_v2")
+        http_code="${resp##*$'\n'}"
+        [[ "$http_code" =~ ^(200|409)$ ]] || echo "Warning: Dropbox delete failed (HTTP $http_code)." >&2
 
     else
         local url http_code
-        url=$(remote_url &quot;$file&quot;)
-        http_code=$(api_curl -w &quot;%{http_code}&quot; -o /dev/null -X DELETE &quot;$url&quot;)
-        case &quot;$http_code&quot; in 200|204|404) ;; *) echo &quot;Warning: Remote delete failed (HTTP $http_code).&quot; &gt;&amp;2 ;; esac
+        url=$(remote_url "$file")
+        http_code=$(api_curl -w "%{http_code}" -o /dev/null -X DELETE "$url")
+        case "$http_code" in 200|204|404) ;; *) echo "Warning: Remote delete failed (HTTP $http_code)." >&2 ;; esac
     fi
 }
 
@@ -1078,11 +1065,10 @@ remote_rename() {
     local old=&quot;$1&quot; new=&quot;$2&quot;
 
     if [ &quot;$SYNC_ENGINE&quot; = &quot;GITHUB&quot; ] || [ &quot;$SYNC_ENGINE&quot; = &quot;DROPBOX&quot; ]; then
-        # No native rename: push new, delete old (caller handles local mv)
         cp &quot;$NOTES_DIR/$old&quot; &quot;$NOTES_DIR/$new&quot;
         push_note &quot;$new&quot;
         remote_delete &quot;$old&quot; &quot;gn: rename $old to $new&quot;
-        rm -f &quot;$NOTES_DIR/$new&quot; # caller will mv old→new
+        rm -f &quot;$NOTES_DIR/$new&quot;
     else
         local src dst http_code dir
         dir=$(dirname &quot;$new&quot;)
@@ -1092,20 +1078,6 @@ remote_rename() {
         http_code=$(api_curl -w &quot;%{http_code}&quot; -o /dev/null -X MOVE -H &quot;Destination: $dst&quot; -H &quot;Overwrite: F&quot; &quot;$src&quot;)
         case &quot;$http_code&quot; in 201|204|412|404) ;; *) echo &quot;Warning: Remote rename failed (HTTP $http_code).&quot; &gt;&amp;2 ;; esac
     fi
-}
-
-list_notes() {
-    echo &quot;=== $NOTES_DIR ===&quot;
-    if [ -d &quot;$NOTES_DIR&quot; ]; then
-        (cd &quot;$NOTES_DIR&quot; &amp;&amp; find . -type f ! -name &quot;gn.conf&quot; ! -name &quot;gn.sh&quot; ! -path &#x27;*/.*&#x27; | sed &quot;s|^\./||&quot; | sort)
-    fi
-    exit 0
-}
-
-search_notes() {
-    echo &quot;=== Searching for: &#x27;$1&#x27; ===&quot;
-    grep -Rin &quot;$1&quot; &quot;$NOTES_DIR&quot; --exclude-dir=&quot;.git&quot; --exclude=&quot;gn.conf&quot; --exclude=&quot;gn.sh&quot;
-    exit 0
 }
 
 delete_note() {
@@ -1124,150 +1096,130 @@ delete_note() {
 rename_note() {
     local old=&quot;$1&quot; new=&quot;$2&quot;
     case &quot;$old&quot; in *.md) ;; *) old=&quot;${old}.md&quot; ;; esac
-    case &quot;$new&quot; in *.md) ;; *) new=&quot;${new}.md&quot; ;; esac
-    [ -f &quot;$NOTES_DIR/$old&quot; ] || { echo &quot;Error: &#x27;$old&#x27; not found.&quot;; exit 1; }
-    [ -f &quot;$NOTES_DIR/$new&quot; ] &amp;&amp; { echo &quot;Error: &#x27;$new&#x27; already exists.&quot;; exit 1; }
-    remote_rename &quot;$old&quot; &quot;$new&quot;
-    [ &quot;$(dirname &quot;$new&quot;)&quot; != &quot;.&quot; ] &amp;&amp; mkdir -p &quot;$NOTES_DIR/$(dirname &quot;$new&quot;)&quot;
-    mv &quot;$NOTES_DIR/$old&quot; &quot;$NOTES_DIR/$new&quot;
-    echo &quot;Renamed &#x27;$old&#x27; to &#x27;$new&#x27;.&quot;
+    case &quot;$new" in *.md) ;; *) new="${new}.md" ;; esac
+    [ -f "$NOTES_DIR/$old" ] || { echo "Error: '$old' not found."; exit 1; }
+    [ -f "$NOTES_DIR/$new" ] && { echo "Error: '$new' already exists."; exit 1; }
+    remote_rename "$old" "$new"
+    [ "$(dirname "$new")" != "." ] && mkdir -p "$NOTES_DIR/$(dirname "$new")"
+    mv "$NOTES_DIR/$old" "$NOTES_DIR/$new"
+    echo "Renamed '$old' to '$new'."
     exit 0
 }
 
 sync_all_remote() {
-    echo &quot;Fetching remote file list... [$SYNC_ENGINE]&quot;
+    echo "Fetching remote file list... [$SYNC_ENGINE]"
 
-    if [ &quot;$SYNC_ENGINE&quot; = &quot;GITHUB&quot; ]; then
+    if [ "$SYNC_ENGINE" = "GITHUB" ]; then
         local resp http_code REPLY paths path
-        resp=$(api_curl -w &quot;\n%{http_code}&quot; &quot;${GIT_API}&quot;)
-        http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
-        REPLY=&quot;${resp%$&#x27;\n&#x27;*}&quot;
-        [ &quot;$http_code&quot; != &quot;200&quot; ] &amp;&amp; { echo &quot;Error: Could not list remote files (HTTP $http_code).&quot; &gt;&amp;2; exit 1; }
-        # Extract .md filenames from JSON array
-        paths=$(echo &quot;$REPLY&quot; | awk -F&#x27;&quot;&#x27; &#x27;{for(i=1;i&lt;=NF;i++) if($i==&quot;name&quot;) print $(i+2)}&#x27; | grep &#x27;\.md$&#x27;)
-        echo &quot;$paths&quot; | while IFS= read -r path; do
-            [ -z &quot;$path&quot; ] &amp;&amp; continue
-            echo &quot;Syncing: $path&quot;
-            (cd &quot;$NOTES_DIR&quot; &amp;&amp; pull_note &quot;$path&quot;)
+        resp=$(api_curl -w "\n%{http_code}" "${GIT_API}")
+        http_code="${resp##*$'\n'}"
+        REPLY="${resp%$'\n'*}"
+        [ "$http_code" != "200" ] && { echo "Error: Could not list remote files (HTTP $http_code)." >&2; exit 1; }
+        paths=$(echo "$REPLY" | awk -F'"' '{for(i=1;i<=NF;i++) if($i=="name") print $(i+2)}' | grep '\.md$')
+        echo "$paths" | while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            echo "Syncing: $path"
+            (cd "$NOTES_DIR" && pull_note "$path")
         done
 
-    elif [ &quot;$SYNC_ENGINE&quot; = &quot;DROPBOX&quot; ]; then
+    elif [ "$SYNC_ENGINE" = "DROPBOX" ]; then
         local resp http_code REPLY arg paths path
-        arg=$(printf &#x27;{&quot;path&quot;:&quot;%s&quot;,&quot;recursive&quot;:true}&#x27; &quot;$DROPBOX_PATH&quot;)
-        resp=$(api_curl -w &quot;\n%{http_code}&quot; -X POST \
-            -H &quot;Content-Type: application/json&quot; --data-binary &quot;$arg&quot; \
-            &quot;https://api.dropboxapi.com/2/files/list_folder&quot;)
-        http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
-        REPLY=&quot;${resp%$&#x27;\n&#x27;*}&quot;
-        [ &quot;$http_code&quot; != &quot;200&quot; ] &amp;&amp; { echo &quot;Error: Could not list remote files (HTTP $http_code).&quot; &gt;&amp;2; exit 1; }
-        # Extract .md paths relative to DROPBOX_PATH
-        paths=$(echo &quot;$REPLY&quot; | awk -F&#x27;&quot;&#x27; &#x27;{for(i=1;i&lt;=NF;i++) if($i==&quot;path_display&quot;) print $(i+2)}&#x27; | grep &#x27;\.md$&#x27;)
-        echo &quot;$paths&quot; | while IFS= read -r path; do
-            [ -z &quot;$path&quot; ] &amp;&amp; continue
-            rel_path=$(echo &quot;$path&quot; | sed &quot;s|^$DROPBOX_PATH/||&quot; | sed &#x27;s|^/||&#x27;)
-            echo &quot;Syncing: $rel_path&quot;
-            dir=$(dirname &quot;$rel_path&quot;)
-            [ &quot;$dir&quot; != &quot;.&quot; ] &amp;&amp; mkdir -p &quot;$NOTES_DIR/$dir&quot;
-            (cd &quot;$NOTES_DIR&quot; &amp;&amp; pull_note &quot;$rel_path&quot;)
+        arg=$(printf '{"path":"%s","recursive":true}' "$DROPBOX_PATH")
+        resp=$(api_curl -w "\n%{http_code}" -X POST \
+            -H "Content-Type: application/json" --data-binary "$arg" \
+            "https://api.dropboxapi.com/2/files/list_folder")
+        http_code="${resp##*$'\n'}"
+        REPLY="${resp%$'\n'*}"
+        [ "$http_code" != "200" ] && { echo "Error: Could not list remote files (HTTP $http_code)." >&2; exit 1; }
+        paths=$(echo "$REPLY" | awk -F'"' '{for(i=1;i<=NF;i++) if($i=="path_display") print $(i+2)}' | grep '\.md$')
+        echo "$paths" | while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            rel_path=$(echo "$path" | sed "s|^$DROPBOX_PATH/||" | sed 's|^/||')
+            echo "Syncing: $rel_path"
+            dir=$(dirname "$rel_path")
+            [ "$dir" != "." ] && mkdir -p "$NOTES_DIR/$dir"
+            (cd "$NOTES_DIR" && pull_note "$rel_path")
         done
 
     else
         local base_encoded_path xml_response raw_paths path dec_path rel_path dir
-        base_encoded_path=$(urlenc &quot;$gn_PATH&quot;)
-        xml_response=$(api_curl -X PROPFIND -H &quot;Depth: 1&quot; -H &quot;Content-Type: text/xml&quot; &quot;${gn_URL}${base_encoded_path}&quot;)
-        if [ -z &quot;$xml_response&quot; ]; then
-            echo &quot;Error: Could not retrieve remote file list.&quot; &gt;&amp;2; exit 1
+        base_encoded_path=$(urlenc "$gn_PATH")
+        xml_response=$(api_curl -X PROPFIND -H "Depth: 1" -H "Content-Type: text/xml" "${gn_URL}${base_encoded_path}")
+        if [ -z "$xml_response" ]; then
+            echo "Error: Could not retrieve remote file list." >&2; exit 1
         fi
-        # Namespace-agnostic regex to split XML href tags smoothly on varying WebDAV backends
-        raw_paths=$(echo &quot;$xml_response&quot; | tr -d &#x27;\n\r&#x27; | sed -E &#x27;s/&lt;\/[^&gt;]*href&gt;//g&#x27; | sed -E &#x27;s/&lt;[^&gt;]*href&gt;/\n/g&#x27; | grep -v &#x27;^[[:space:]]*$&#x27;)
-        echo &quot;$raw_paths&quot; | while IFS= read -r path; do
-            [ -z &quot;$path&quot; ] &amp;&amp; continue
-            dec_path=$(urldec &quot;$path&quot;)
-            case &quot;$dec_path&quot; in
-                *&quot;$gn_PATH&quot;*.*.md)
-                    rel_path=$(echo &quot;$dec_path&quot; | sed &quot;s|.*$gn_PATH||&quot; | sed &#x27;s|^/||&#x27;)
-                    echo &quot;Syncing: $rel_path&quot;
-                    dir=$(dirname &quot;$rel_path&quot;)
-                    [ &quot;$dir&quot; != &quot;.&quot; ] &amp;&amp; mkdir -p &quot;$NOTES_DIR/$dir&quot;
-                    (cd &quot;$NOTES_DIR&quot; &amp;&amp; pull_note &quot;$rel_path&quot;)
+        raw_paths=$(echo "$xml_response" | tr -d '\n\r' | sed -E 's/<\/[^>]*href>//g' | sed -E 's/<[^>]*href>/\n/g' | grep -v '^[[:space:]]*$')
+        echo "$raw_paths" | while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            dec_path=$(urldec "$path")
+            case "$dec_path" in
+                *"$gn_PATH"*.*.md)
+                    rel_path=$(echo "$dec_path" | sed "s|.*$gn_PATH||" | sed 's|^/||')
+                    echo "Syncing: $rel_path"
+                    dir=$(dirname "$rel_path")
+                    [ "$dir" != "." ] && mkdir -p "$NOTES_DIR/$dir"
+                    (cd "$NOTES_DIR" && pull_note "$rel_path")
                     ;;
             esac
         done
     fi
 
-    echo &quot;Sync complete.&quot;
-    exit 0
-}
-
-backup_local_notes() {
-    local backup_file
-    backup_file=&quot;$HOME/gn-$(date &#x27;+%Y-%m-%d&#x27;).tar&quot;
-    echo &quot;Creating backup at $backup_file...&quot;
-
-    if (cd &quot;$NOTES_DIR&quot; &amp;&amp; find . -type f ! -name &quot;gn.conf&quot; ! -name &quot;gn.sh&quot; ! -path &#x27;*/.*&#x27; | tar -cf &quot;$backup_file&quot; -T -); then
-        echo &quot;Backup created successfully.&quot;
-    else
-        echo &quot;Error: Backup failed.&quot; &gt;&amp;2
-        exit 1
-    fi
+    echo "Sync complete."
     exit 0
 }
 
 reconfigure() {
-    rm -f &quot;$CONFIG_FILE&quot;
-    echo &quot;Saved config cleared. Run gn again to set up new credentials.&quot;
+    rm -f "$CONFIG_FILE"
+    echo "Saved config cleared. Run gn again to set up new credentials."
     exit 0
 }
 
 # --- Entry Point ---
-if [ &quot;$1&quot; = &quot;-r&quot; ]; then
-    [ -z &quot;$2&quot; ] || [ -z &quot;$3&quot; ] &amp;&amp; { echo &quot;Usage: gn -r OLD NEW&quot;; exit 1; }
-    rename_note &quot;$2&quot; &quot;$3&quot;
+if [ "$1" = "-r" ]; then
+    [ -z "$2" ] || [ -z "$3" ] && { echo "Usage: gn -r OLD NEW"; exit 1; }
+    rename_note "$2" "$3"
 fi
 
 ACTION_RUN=0
-while getopts &quot;hlg:tcd:sb&quot; opt; do
+while getopts "htcd:s" opt; do
     case $opt in
         h) show_help ;;
-        l) ACTION_RUN=1; list_notes ;;
-        g) ACTION_RUN=1; search_notes &quot;$OPTARG&quot; ;;
-        t) NOTE_NAME=$(date &#x27;+%Y-%m-%d&#x27;) ;;
+        t) NOTE_NAME=$(date '+%Y-%m-%d') ;;
         c) ACTION_RUN=1; reconfigure ;;
-        d) ACTION_RUN=1; delete_note &quot;$OPTARG&quot; ;;
+        d) ACTION_RUN=1; delete_note "$OPTARG" ;;
         s) ACTION_RUN=1; sync_all_remote ;;
-        b) ACTION_RUN=1; backup_local_notes ;;
         *) show_help ;;
     esac
 done
-[ &quot;$ACTION_RUN&quot; -eq 1 ] &amp;&amp; exit 0
+[ "$ACTION_RUN" -eq 1 ] && exit 0
 shift $((OPTIND - 1))
 
-[ -z &quot;$NOTE_NAME&quot; ] &amp;&amp; NOTE_NAME=&quot;${1:-note}&quot;
-if [ &quot;$NOTE_NAME&quot; = &quot;gn.conf&quot; ] || [ &quot;$NOTE_NAME&quot; = &quot;gn.sh&quot; ]; then
-    echo &quot;Error: Cannot open runtime files via gn.&quot;
+[ -z "$NOTE_NAME" ] && NOTE_NAME="${1:-note}\x27
+if [ "$NOTE_NAME" = "gn.conf" ] || [ "$NOTE_NAME" = "gn.sh" ]; then
+    echo "Error: Cannot open runtime files via gn."
     exit 1
 fi
 
-case &quot;$NOTE_NAME&quot; in *.md) ;; *) NOTE_NAME=&quot;${NOTE_NAME}.md&quot; ;; esac
+case "$NOTE_NAME" in *.md) ;; *) NOTE_NAME="${NOTE_NAME}.md" ;; esac
 
-cd &quot;$NOTES_DIR&quot; || { echo &quot;Error: Cannot access $NOTES_DIR&quot;; exit 1; }
-[ &quot;$(dirname &quot;$NOTE_NAME&quot;)&quot; != &quot;.&quot; ] &amp;&amp; mkdir -p &quot;$(dirname &quot;$NOTE_NAME&quot;)&quot;
+cd "$NOTES_DIR" || { echo "Error: Cannot access $NOTES_DIR"; exit 1; }
+[ "$(dirname "$NOTE_NAME")" != "." ] && mkdir -p "$(dirname "$NOTE_NAME")"
 
-echo &quot;Fetching... [$SYNC_ENGINE]&quot;
-pull_note &quot;$NOTE_NAME&quot;
+echo "Fetching... [$SYNC_ENGINE]"
+pull_note "$NOTE_NAME"
 
-PRE_SHA=$(get_file_hash &quot;$NOTE_NAME&quot;)
-$EDITOR &quot;$NOTE_NAME&quot;
+PRE_SHA=$(get_file_hash "$NOTE_NAME")
+$EDITOR "$NOTE_NAME"
 
-[ -f &quot;$NOTE_NAME&quot; ] || { echo &quot;Note not saved. Cancelled.&quot;; exit 0; }
+[ -f "$NOTE_NAME" ] || { echo "Note not saved. Cancelled."; exit 0; }
 
-POST_SHA=$(get_file_hash &quot;$NOTE_NAME&quot;)
-if [ &quot;$PRE_SHA&quot; = &quot;$POST_SHA&quot; ]; then
-    echo &quot;No changes. Sync skipped.&quot;
+POST_SHA=$(get_file_hash "$NOTE_NAME")
+if [ "$PRE_SHA" = "$POST_SHA" ]; then
+    echo "No changes. Sync skipped."
 else
-    echo &quot;Pushing... [$SYNC_ENGINE]&quot;
-    push_note &quot;$NOTE_NAME&quot;
-    echo &quot;Done.&quot;
+    echo "Pushing... [$SYNC_ENGINE]"
+    push_note "$NOTE_NAME"
+    echo "Done."
 fi
 </code></pre>
                 </div>

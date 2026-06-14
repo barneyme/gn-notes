@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# gn - Get Notes
+# gn - get Notes
 # A zero-dependency CLI tool to sync markdown notes via WebDAV, GitHub, or Dropbox.
-# Web: gnnotes.pages.dev. Author: Barney Matthews. License: MIT
+# Web: gn-notes.pages.dev. Author: Barney Matthews. License: MIT
 
 NOTES_DIR="$HOME/gn"
 CONFIG_FILE="$NOTES_DIR/gn.conf"
 
 mkdir -p "$NOTES_DIR"
 
-for cmd in curl grep sed awk find tar base64 tr; do
+for cmd in curl grep sed awk base64 tr; do
     command -v "$cmd" >/dev/null 2>&1 || { echo "Error: '$cmd' is required but not installed." >&2; exit 1; }
 done
 
@@ -104,8 +104,12 @@ if [ -z "$gn_USER" ] && [ -z "$GIT_TOKEN" ] && [ -z "$DROPBOX_APP_KEY" ]; then
                 if [ -n "$GIT_TOKEN" ]; then
                     printf 'GIT_TOKEN=%s\nGIT_OWNER=%s\nGIT_REPO=%s\n' "$GIT_TOKEN" "$GIT_OWNER" "$GIT_REPO"
                 elif [ -n "$DROPBOX_APP_KEY" ]; then
-                    printf 'DROPBOX_APP_KEY=%s\nDROPBOX_APP_SECRET=%s\nDROPBOX_REFRESH_TOKEN=%s\nDROPBOX_PATH=%s\n' \
-                        "$DROPBOX_APP_KEY" "$DROPBOX_APP_SECRET" "$DROPBOX_REFRESH_TOKEN" "$DROPBOX_PATH"
+                    cat <<EOF
+DROPBOX_APP_KEY=$DROPBOX_APP_KEY
+DROPBOX_APP_SECRET=$DROPBOX_APP_SECRET
+DROPBOX_REFRESH_TOKEN=$DROPBOX_REFRESH_TOKEN
+DROPBOX_PATH=$DROPBOX_PATH
+EOF
                 else
                     printf 'gn_URL=%s\ngn_USER=%s\ngn_PASS=%s\ngn_PATH=%s\n' "$gn_URL" "$gn_USER" "$gn_PASS" "$gn_PATH"
                 fi
@@ -144,8 +148,9 @@ if [ "$SYNC_ENGINE" = "DROPBOX" ]; then
     dropbox_refresh() {
         local resp pfile
         pfile=$(mktemp); chmod 600 "$pfile"
-        printf 'grant_type=refresh_token&refresh_token=%s&client_id=%s&client_secret=%s' \
-            "$DROPBOX_REFRESH_TOKEN" "$DROPBOX_APP_KEY" "$DROPBOX_APP_SECRET" > "$pfile"
+        cat <<EOF > "$pfile"
+grant_type=refresh_token&refresh_token=${DROPBOX_REFRESH_TOKEN}&client_id=${DROPBOX_APP_KEY}&client_secret=${DROPBOX_APP_SECRET}
+EOF
         resp=$(curl -s -X POST "https://api.dropbox.com/oauth2/token" --data-binary "@$pfile")
         rm -f "$pfile"
         DROPBOX_ACCESS_TOKEN=$(echo "$resp" | awk -F'"' '{for(i=1;i<=NF;i++) if($i=="access_token") {print $(i+2); exit}}')
@@ -168,13 +173,10 @@ show_help() {
 Usage: gn [options] [note]
 
   -h          Show this help
-  -l          List local notes
-  -g PATTERN  Search notes (grep)
   -t          Open today's note (YYYY-MM-DD)
   -d NOTE     Delete a note (local + remote)
   -r OLD NEW  Rename a note (local + remote)
   -s          Sync (pull) all remote notes down to local directory
-  -b          Backup all local notes to ~/gn-YYYY-MM-DD.tar
   -c          Clear saved credentials and reconfigure
 
 Engine: $SYNC_ENGINE
@@ -386,11 +388,10 @@ remote_rename() {
     local old="$1" new="$2"
 
     if [ "$SYNC_ENGINE" = "GITHUB" ] || [ "$SYNC_ENGINE" = "DROPBOX" ]; then
-        # No native rename: push new, delete old (caller handles local mv)
         cp "$NOTES_DIR/$old" "$NOTES_DIR/$new"
         push_note "$new"
         remote_delete "$old" "gn: rename $old to $new"
-        rm -f "$NOTES_DIR/$new" # caller will mv old→new
+        rm -f "$NOTES_DIR/$new"
     else
         local src dst http_code dir
         dir=$(dirname "$new")
@@ -400,20 +401,6 @@ remote_rename() {
         http_code=$(api_curl -w "%{http_code}" -o /dev/null -X MOVE -H "Destination: $dst" -H "Overwrite: F" "$src")
         case "$http_code" in 201|204|412|404) ;; *) echo "Warning: Remote rename failed (HTTP $http_code)." >&2 ;; esac
     fi
-}
-
-list_notes() {
-    echo "=== $NOTES_DIR ==="
-    if [ -d "$NOTES_DIR" ]; then
-        (cd "$NOTES_DIR" && find . -type f ! -name "gn.conf" ! -name "gn.sh" ! -path '*/.*' | sed "s|^\./||" | sort)
-    fi
-    exit 0
-}
-
-search_notes() {
-    echo "=== Searching for: '$1' ==="
-    grep -Rin "$1" "$NOTES_DIR" --exclude-dir=".git" --exclude="gn.conf" --exclude="gn.sh"
-    exit 0
 }
 
 delete_note() {
@@ -451,7 +438,6 @@ sync_all_remote() {
         http_code="${resp##*$'\n'}"
         REPLY="${resp%$'\n'*}"
         [ "$http_code" != "200" ] && { echo "Error: Could not list remote files (HTTP $http_code)." >&2; exit 1; }
-        # Extract .md filenames from JSON array
         paths=$(echo "$REPLY" | awk -F'"' '{for(i=1;i<=NF;i++) if($i=="name") print $(i+2)}' | grep '\.md$')
         echo "$paths" | while IFS= read -r path; do
             [ -z "$path" ] && continue
@@ -468,7 +454,6 @@ sync_all_remote() {
         http_code="${resp##*$'\n'}"
         REPLY="${resp%$'\n'*}"
         [ "$http_code" != "200" ] && { echo "Error: Could not list remote files (HTTP $http_code)." >&2; exit 1; }
-        # Extract .md paths relative to DROPBOX_PATH
         paths=$(echo "$REPLY" | awk -F'"' '{for(i=1;i<=NF;i++) if($i=="path_display") print $(i+2)}' | grep '\.md$')
         echo "$paths" | while IFS= read -r path; do
             [ -z "$path" ] && continue
@@ -486,7 +471,6 @@ sync_all_remote() {
         if [ -z "$xml_response" ]; then
             echo "Error: Could not retrieve remote file list." >&2; exit 1
         fi
-        # Namespace-agnostic regex to split XML href tags smoothly on varying WebDAV backends
         raw_paths=$(echo "$xml_response" | tr -d '\n\r' | sed -E 's/<\/[^>]*href>//g' | sed -E 's/<[^>]*href>/\n/g' | grep -v '^[[:space:]]*$')
         echo "$raw_paths" | while IFS= read -r path; do
             [ -z "$path" ] && continue
@@ -507,20 +491,6 @@ sync_all_remote() {
     exit 0
 }
 
-backup_local_notes() {
-    local backup_file
-    backup_file="$HOME/gn-$(date '+%Y-%m-%d').tar"
-    echo "Creating backup at $backup_file..."
-
-    if (cd "$NOTES_DIR" && find . -type f ! -name "gn.conf" ! -name "gn.sh" ! -path '*/.*' | tar -cf "$backup_file" -T -); then
-        echo "Backup created successfully."
-    else
-        echo "Error: Backup failed." >&2
-        exit 1
-    fi
-    exit 0
-}
-
 reconfigure() {
     rm -f "$CONFIG_FILE"
     echo "Saved config cleared. Run gn again to set up new credentials."
@@ -534,16 +504,13 @@ if [ "$1" = "-r" ]; then
 fi
 
 ACTION_RUN=0
-while getopts "hlg:tcd:sb" opt; do
+while getopts "htcd:s" opt; do
     case $opt in
         h) show_help ;;
-        l) ACTION_RUN=1; list_notes ;;
-        g) ACTION_RUN=1; search_notes "$OPTARG" ;;
         t) NOTE_NAME=$(date '+%Y-%m-%d') ;;
         c) ACTION_RUN=1; reconfigure ;;
         d) ACTION_RUN=1; delete_note "$OPTARG" ;;
         s) ACTION_RUN=1; sync_all_remote ;;
-        b) ACTION_RUN=1; backup_local_notes ;;
         *) show_help ;;
     esac
 done
