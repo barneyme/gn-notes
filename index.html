@@ -3,956 +3,1300 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>gn</title>
+        <title>gn - get Notes</title>
         <link
             rel="icon"
-            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='black'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-family='Georgia,serif' font-size='22' fill='white'>g</text></svg>"
+            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='black'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-family='Georgia,serif' font-size='22' fill='white'>k</text></svg>"
         />
         <style>
             :root {
-                --bg-color: #0d1117;
-                --panel-bg: #161b22;
-                --accent-color: #2f81f7;
-                --success-color: #238636;
-                --success-hover: #2ea043;
-                --text-main: #c9d1d9;
-                --text-muted: #8b949e;
-                --border-color: #30363d;
-                --terminal-green: #7ee787;
-                --warning-yellow: #d4a72c;
+                --bg: #0b0d0f;
+                --panel: #11141a;
+                --border: #232830;
+                --text: #c9d1d9;
+                --dim: #6b7280;
+                --accent: #7ad7a4;
+                --accent-dim: #4f8a6b;
+                --amber: #e6b673;
             }
 
             * {
                 box-sizing: border-box;
+            }
+
+            html,
+            body {
                 margin: 0;
                 padding: 0;
-            }
-            body {
-                font-family:
-                    -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
-                    Arial, sans-serif;
-                background-color: var(--bg-color);
-                color: var(--text-main);
-                line-height: 1.6;
-                padding: 2rem 1rem;
-            }
-            .container {
-                max-width: 800px;
-                margin: 0 auto;
-            }
-            @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap");
-
-            header {
-                text-align: left;
-                margin-bottom: 3rem;
-                border-bottom: 1px solid var(--border-color);
-                padding-bottom: 0;
-            }
-            .hero {
-                padding: 3.5rem 0 2.5rem;
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .hero-wordmark {
-                font-family: "IBM Plex Mono", monospace;
-                font-size: 5rem;
-                font-weight: 700;
-                color: #ffffff;
-                letter-spacing: -0.04em;
-                line-height: 1;
-                position: relative;
-                display: inline-block;
-            }
-            .hero-brand {
-                width: 100%;
-                text-align: center;
-            }
-            .hero-wordmark::after {
-                content: "_";
-                color: var(--terminal-green);
-                animation: blink 1.1s step-end infinite;
-            }
-            @keyframes blink {
-                50% {
-                    opacity: 0;
-                }
+                background: var(--bg);
+                color: var(--text);
+                font-family: "IBM Plex Mono", "Courier New", monospace;
+                font-size: 15px;
+                line-height: 1.65;
             }
 
-            .hero-tagline {
-                font-family: "IBM Plex Mono", monospace;
-                font-size: 0.95rem;
-                color: var(--text-muted);
-                margin-top: 0.6rem;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-            }
-            .hero-tagline span {
-                color: var(--terminal-green);
-            }
-            .intro-block p {
-                text-align: left;
-                font-size: 1.05rem;
-                margin-bottom: 1.25rem;
-                line-height: 1.7;
-            }
-
-            .terminal-window {
-                width: 100%;
-                background: #010409;
-                border: 1px solid var(--border-color);
-                border-radius: 10px;
-                overflow: hidden;
-                margin: 2rem 0 0;
-                box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
-            }
-            .terminal-titlebar {
-                background: #1c2128;
-                padding: 0.5rem 0.85rem;
-                display: flex;
-                align-items: center;
-                gap: 0.4rem;
-                border-bottom: 1px solid var(--border-color);
-            }
-            .terminal-dot {
-                width: 11px;
-                height: 11px;
-                border-radius: 50%;
-            }
-            .terminal-dot.red {
-                background: #ff5f57;
-            }
-            .terminal-dot.yellow {
-                background: #febc2e;
-            }
-            .terminal-dot.green {
-                background: #28c840;
-            }
-            .terminal-titlebar-label {
-                font-family: "IBM Plex Mono", monospace;
-                font-size: 0.72rem;
-                color: var(--text-muted);
-                margin: 0 auto;
-                padding-right: 24px;
-            }
-            .terminal-body {
-                padding: 1rem 1.25rem 1.25rem;
-                font-family: "IBM Plex Mono", monospace;
-                font-size: 0.85rem;
-                min-height: 440px;
-                color: #e6edf3;
-            }
-
-            .t-prompt {
-                color: var(--terminal-green);
-            }
-            .t-cmd {
-                color: #e6edf3;
-            }
-            .t-out {
-                color: var(--text-muted);
-            }
-            .t-ok {
-                color: var(--terminal-green);
-            }
-            .cursor {
-                display: inline-block;
-                width: 8px;
-                height: 15px;
-                background-color: var(--terminal-green);
-                vertical-align: middle;
-                animation: blink 1s step-end infinite;
-            }
-            .cursor.white {
-                background-color: #ffffff;
-            }
-
-            .terminal-screen {
-                display: none;
-            }
-            .terminal-screen.active {
-                display: block;
-            }
-            .nano-buffer {
-                background: #000000;
-                color: #ffffff;
-                margin: -1rem -1.25rem -1.25rem;
-                padding: 0.5rem 1rem;
-                min-height: 440px;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-            }
-            .nano-header {
-                background: #ffffff;
-                color: #000000;
-                text-align: center;
-                font-size: 0.8rem;
-                font-weight: bold;
-            }
-            .nano-content {
-                flex-grow: 1;
-                padding: 1rem 0;
-            }
-            .nano-footer {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 0.25rem;
-                font-size: 0.75rem;
-            }
-            .nano-key {
-                color: #00ff00;
-                font-weight: bold;
-                margin-right: 0.25rem;
-            }
-
-            section {
-                margin-bottom: 3rem;
-            }
-            h2 {
-                font-size: 1.5rem;
-                color: #ffffff;
-                margin-bottom: 1rem;
-                border-bottom: 1px solid var(--border-color);
-                padding-bottom: 0.5rem;
-            }
-            .installer-panel {
-                background-color: var(--panel-bg);
-                border: 1px solid var(--border-color);
-                border-radius: 8px;
-                padding: 1.5rem;
-                margin: 1.5rem 0;
-            }
-            .installer-panel h3 {
-                color: #ffffff;
-                margin-bottom: 1rem;
-            }
-
-            .setup-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 1.5rem;
-                margin: 1.5rem 0;
-            }
-            @media (max-width: 768px) {
-                .setup-grid {
-                    grid-template-columns: 1fr;
-                }
-            }
-            .setup-card {
-                background-color: var(--panel-bg);
-                border: 1px solid var(--border-color);
-                border-radius: 8px;
-                padding: 1.5rem;
-            }
-            .setup-card h3 {
-                font-size: 1.2rem;
-                color: #ffffff;
-                margin-bottom: 0.75rem;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-            .setup-card ul {
-                list-style-type: none;
-                padding-left: 0;
-            }
-            .setup-card li {
-                margin-bottom: 0.75rem;
-                font-size: 0.9rem;
-                position: relative;
-                padding-left: 1.25rem;
-            }
-            .setup-card li::before {
-                content: "→";
-                position: absolute;
-                left: 0;
-                color: var(--accent-color);
-            }
-            .setup-card li strong {
-                color: #ffffff;
-            }
-            .external-links {
-                display: flex;
-                gap: 1.5rem;
-                flex-wrap: wrap;
-                margin-top: 0.75rem;
-                padding: 0.75rem 1rem;
-                background-color: #010409;
-                border: 1px dashed var(--border-color);
-                border-radius: 6px;
-            }
-            .external-links a {
-                font-size: 0.85rem;
-                display: inline-flex;
-                align-items: center;
-                gap: 0.3rem;
-                color: var(--accent-color);
+            a {
+                color: var(--accent);
                 text-decoration: none;
             }
-            .external-links a:hover {
+            a:hover {
                 text-decoration: underline;
             }
-            .note-box {
-                margin-top: 1rem;
-                padding: 0.75rem;
-                background-color: rgba(212, 167, 44, 0.1);
-                border-left: 3px solid var(--warning-yellow);
-                border-radius: 4px;
-                font-size: 0.85rem;
-                color: #e3b341;
+
+            .wrap {
+                max-width: 760px;
+                margin: 0 auto;
+                padding: 48px 24px 96px;
             }
 
-            .btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.5rem;
-                background-color: var(--accent-color);
-                color: #ffffff;
-                border: none;
-                padding: 0.75rem 1.5rem;
-                font-size: 1rem;
+            header {
+                margin-bottom: 40px;
+            }
+
+            .prompt {
+                color: var(--dim);
+                font-size: 13px;
+                margin-bottom: 6px;
+            }
+
+            .prompt::before {
+                content: "$ ";
+                color: var(--accent-dim);
+            }
+
+            h1 {
+                font-size: 28px;
                 font-weight: 600;
-                border-radius: 6px;
-                cursor: pointer;
-                text-decoration: none;
-            }
-            .btn:hover {
-                background-color: #216cd4;
-            }
-            .btn-secondary {
-                background-color: var(--panel-bg);
-                border: 1px solid var(--border-color);
-                color: var(--text-main);
-            }
-            .btn-secondary:hover {
-                background-color: #30363d;
-            }
-            .btn-container {
-                margin: 1.5rem 0;
-                display: flex;
-                gap: 1rem;
-                flex-wrap: wrap;
+                margin: 0 0 6px;
+                letter-spacing: -0.02em;
             }
 
-            .run-instructions {
-                padding: 1rem;
-                background-color: #010409;
-                border: 1px solid var(--border-color);
-                border-left: 4px solid var(--terminal-green);
-                border-radius: 6px;
+            h1 .engine {
+                color: var(--accent);
             }
-            .run-instructions p {
-                font-size: 0.85rem;
-                color: var(--text-muted);
-                margin-bottom: 0.5rem;
+
+            .tagline {
+                color: var(--dim);
+                margin: 0;
+            }
+
+            h2 {
+                font-size: 16px;
                 font-weight: 600;
                 text-transform: uppercase;
+                letter-spacing: 0.08em;
+                color: var(--accent);
+                margin: 48px 0 16px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid var(--border);
             }
-            .run-instructions code {
-                display: block;
-                color: var(--terminal-green);
-                font-size: 0.95rem;
+
+            h3 {
+                font-size: 14px;
+                font-weight: 600;
+                color: var(--amber);
+                margin: 24px 0 12px;
+            }
+
+            p {
+                color: var(--text);
+            }
+
+            .dim {
+                color: var(--dim);
+            }
+
+            .code-block {
+                position: relative;
+                margin: 12px 0;
             }
 
             pre {
-                background-color: #010409;
-                border: 1px solid var(--border-color);
+                background: var(--panel);
+                border: 1px solid var(--border);
                 border-radius: 6px;
-                padding: 1rem;
+                padding: 16px 18px;
                 overflow-x: auto;
-                font-size: 0.9rem;
-                margin: 0.75rem 0;
-                color: #e6edf3;
+                font-size: 13.5px;
+                line-height: 1.7;
+                margin: 0;
             }
+
             code {
-                font-family: ui-monospace, SFMono-Regular, monospace;
-                background-color: rgba(110, 118, 129, 0.4);
-                padding: 0.2rem 0.4rem;
-                border-radius: 6px;
-                font-size: 0.85em;
+                font-family: inherit;
+                background: var(--panel);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                padding: 1px 6px;
+                font-size: 0.92em;
             }
+
             pre code {
-                background-color: transparent;
+                background: none;
+                border: none;
                 padding: 0;
-                font-size: inherit;
+                display: block;
             }
+
+            .comment {
+                color: var(--dim);
+            }
+            .str {
+                color: var(--amber);
+            }
+            .flag {
+                color: var(--accent);
+            }
+
+            .copy-btn {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                background: var(--bg);
+                color: var(--dim);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                font-family: inherit;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                padding: 5px 10px;
+                cursor: pointer;
+                transition:
+                    color 0.15s ease,
+                    border-color 0.15s ease;
+            }
+
+            .copy-btn:hover {
+                color: var(--accent);
+                border-color: var(--accent-dim);
+            }
+
+            .copy-btn.copied {
+                color: var(--accent);
+                border-color: var(--accent-dim);
+            }
+
+            .script-block pre {
+                max-height: 480px;
+                overflow-y: auto;
+            }
+
+            .script-block .copy-btn {
+                top: 12px;
+                right: 12px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 14px;
+            }
+
+            th,
+            td {
+                text-align: left;
+                padding: 8px 12px;
+                border-bottom: 1px solid var(--border);
+                vertical-align: top;
+            }
+
+            th {
+                color: var(--dim);
+                font-weight: 500;
+                text-transform: uppercase;
+                font-size: 11px;
+                letter-spacing: 0.08em;
+            }
+
+            td code {
+                white-space: nowrap;
+            }
+
+            .download {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                margin-top: 12px;
+                padding: 12px 20px;
+                background: var(--panel);
+                border: 1px solid var(--accent-dim);
+                border-radius: 6px;
+                color: var(--accent);
+                font-weight: 600;
+                transition:
+                    border-color 0.15s ease,
+                    transform 0.1s ease;
+            }
+
+            .download:hover {
+                border-color: var(--accent);
+                text-decoration: none;
+                transform: translateY(-1px);
+            }
+
+            .download .arrow {
+                color: var(--dim);
+            }
+
+            .note {
+                border-left: 2px solid var(--amber);
+                padding: 4px 0 4px 16px;
+                color: var(--text);
+                margin: 16px 0;
+            }
+
+            .note .label {
+                color: var(--amber);
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 11px;
+                letter-spacing: 0.08em;
+                display: block;
+                margin-bottom: 4px;
+            }
+
+            ol,
+            ul {
+                padding-left: 22px;
+            }
+
+            ol li,
+            ul li {
+                margin-bottom: 8px;
+            }
+
             footer {
-                text-align: center;
-                margin-top: 4rem;
-                padding-top: 1.5rem;
-                border-top: 1px solid var(--border-color);
-                color: var(--text-muted);
-                font-size: 0.85rem;
+                margin-top: 64px;
+                padding-top: 24px;
+                border-top: 1px solid var(--border);
+                color: var(--dim);
+                font-size: 13px;
+                display: flex;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            footer a {
+                color: var(--dim);
+            }
+            footer a:hover {
+                color: var(--accent);
+            }
+
+            .ext-links {
+                display: flex;
+                gap: 20px;
+                flex-wrap: wrap;
+                margin-top: 10px;
+                padding: 10px 14px;
+                background: var(--panel);
+                border: 1px dashed var(--border);
+                border-radius: 4px;
+                font-size: 13px;
+            }
+
+            .ext-links a {
+                color: var(--accent);
+                text-decoration: none;
+            }
+
+            .ext-links a:hover {
+                text-decoration: underline;
+            }
+
+            .privacy-note {
+                border-left: 2px solid var(--accent-dim);
+                padding: 4px 0 4px 16px;
+                color: var(--dim);
+                margin: 20px 0 0;
+                font-size: 13px;
+            }
+
+            .privacy-note strong {
+                color: var(--accent);
+            }
+
+            @media (max-width: 600px) {
+                .wrap {
+                    padding: 32px 16px 64px;
+                }
+                h1 {
+                    font-size: 24px;
+                }
+                footer {
+                    flex-direction: column;
+                }
             }
         </style>
     </head>
     <body>
-        <div class="container">
+        <div class="wrap">
             <header>
-                <div class="hero">
-                    <div class="hero-brand">
-                        <div class="hero-wordmark">gn</div>
-                        <div class="hero-tagline">
-                            <span>get_notes.md</span>
-                        </div>
-                    </div>
-                    <div class="intro-block">
-                        <p>
-                            <code>gn</code> (Get Notes) is a zero-dependency CLI
-                            note utility that saves your markdown files directly
-                            to a private GitHub repository or Dropbox folder. It
-                            acts as a lightweight sync layer using nothing but
-                            native Bash and curl - no local Git installation or
-                            setup required. When you run gn [note], it pulls the
-                            latest file version from your storage host via HTTP
-                            API, opens it in your default $EDITOR, and
-                            automatically pushes your changes back immediately
-                            as soon as you save and exit. <code>gn</code> runs
-                            anywhere Bash does - including Linux, MacOS, WSL and
-                            BSD. It runs completely in the foreground with zero
-                            background daemons, no local databases, and no
-                            tracking. It is built to give you seamless cloud
-                            backups while keeping your notes as raw, standalone
-                            text files under your own control.
-                        </p>
-                    </div>
-
-                    <div class="terminal-window">
-                        <div class="terminal-titlebar">
-                            <div class="terminal-dot red"></div>
-                            <div class="terminal-dot yellow"></div>
-                            <div class="terminal-dot green"></div>
-                            <span class="terminal-titlebar-label"
-                                >bash – 80&times;24</span
-                            >
-                        </div>
-                        <div class="terminal-body">
-                            <div id="scr-type-1" class="terminal-screen active">
-                                <span class="t-prompt">user@terminal:~$</span>
-                                <span class="t-cmd" id="text-cmd-1"></span
-                                ><span class="cursor" id="cursor-1"></span>
-                            </div>
-                            <div id="scr-nano" class="terminal-screen">
-                                <div class="nano-buffer">
-                                    <div class="nano-header">
-                                        GNU nano 7.2 - binary.md
-                                    </div>
-                                    <div class="nano-content">
-                                        <span id="text-nano-body"></span
-                                        ><span
-                                            class="cursor white"
-                                            id="cursor-nano"
-                                        ></span>
-                                    </div>
-                                    <div class="nano-footer">
-                                        <div>
-                                            <span class="nano-key">^G</span> Get
-                                            Help
-                                        </div>
-                                        <div>
-                                            <span class="nano-key">^O</span>
-                                            Write Out
-                                        </div>
-                                        <div>
-                                            <span class="nano-key">^W</span>
-                                            Where Is
-                                        </div>
-                                        <div>
-                                            <span class="nano-key">^X</span>
-                                            Exit
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="scr-sync" class="terminal-screen">
-                                <span class="t-prompt">user@terminal:~$</span>
-                                <span class="t-cmd">gn quicknote</span><br />
-                                <div id="sync-logs"></div>
-                            </div>
-                            <div id="scr-help" class="terminal-screen">
-                                <span class="t-prompt">user@terminal:~$</span>
-                                <span class="t-cmd">gn binary</span><br />
-                                <span class="t-out"
-                                    >Fetching... [via GITHUB]</span
-                                ><br />
-                                <span class="t-out"
-                                    >Pushing... [via GITHUB]</span
-                                ><br />
-                                <span class="t-ok">Done.</span><br />
-                                <span
-                                    class="t-prompt"
-                                    style="
-                                        display: inline-block;
-                                        margin-top: 0.75rem;
-                                    "
-                                    >user@terminal:~$</span
-                                >
-                                <span class="t-cmd" id="text-cmd-2"></span
-                                ><span class="cursor" id="cursor-2"></span>
-                                <div
-                                    id="help-output"
-                                    style="
-                                        display: none;
-                                        margin-top: 0.25rem;
-                                        color: var(--text-muted);
-                                    "
-                                >
-                                    Usage: gn [options] [note]<br /><br />
-                                    &nbsp;&nbsp;-h&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Show
-                                    this help<br />
-                                    &nbsp;&nbsp;-l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;List
-                                    notes<br />
-                                    &nbsp;&nbsp;-g PATTERN&nbsp;&nbsp;Search
-                                    notes (grep)<br />
-                                    &nbsp;&nbsp;-t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Open
-                                    today's note (YYYY-MM-DD)<br />
-                                    &nbsp;&nbsp;-d NOTE&nbsp;&nbsp;&nbsp;Delete
-                                    a note<br />
-                                    &nbsp;&nbsp;-r OLD NEW&nbsp;Rename a note<br /><br />
-                                    Defaults to 'note' if no note is given.<br /><br />
-                                    Engine: GITHUB
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="prompt">whoami</div>
+                <h1>gn <span class="engine">// get notes</span></h1>
+                <p class="tagline">
+                    Zero-dependency markdown notes, synced to WebDAV, GitHub, or
+                    Dropbox.
+                </p>
             </header>
 
-            <section id="prerequisites">
-                <h2>Cloud Storage Setup Guide</h2>
-                <p
-                    style="
-                        font-size: 0.95rem;
-                        color: var(--text-muted);
-                        margin-bottom: 1rem;
-                    "
-                >
-                    Before you run the install script below, prepare your
-                    storage account using one of the two options:
+            <section>
+                <p>
+                    <code>gn</code> is a simple bash script that pulls a
+                    markdown note from cloud storage, opens it in
+                    <code>$EDITOR</code>, and pushes it back if you changed
+                    anything. Supports WebDAV (Koofr, Nextcloud, etc.), GitHub,
+                    and Dropbox. No git, no daemons, no heavy apps to install -
+                    just <code>curl</code> and a local folder.
                 </p>
-                <div class="setup-grid">
-                    <div class="setup-card">
-                        <h3>Option 1: GitHub</h3>
-                        <ul>
-                            <li>
-                                <strong>Github Account:</strong> If you do not
-                                already have one, create an
-                                <a
-                                    href="https://github.com/signup"
-                                    target="_blank"
-                                    style="
-                                        color: var(--accent-color);
-                                        text-decoration: none;
-                                    "
-                                    >account</a
-                                >.
-                            </li>
-                            <li>
-                                <strong>Private Repository:</strong> Create a
-                                private repository (named <code>gn</code>, or
-                                anything you like) to hold your notes. (The
-                                setup script will offer to create this for you
-                                automatically if it doesn't already exist.)
-                            </li>
-                            <li>
-                                <strong>Personal Access Token:</strong>
-                                Generate a new Personal Access Token with full
-                                <code>repo</code> scope - this is what lets
-                                <code>gn</code> read and write files in your
-                                repository over the GitHub API.
-                            </li>
-                            <li>
-                                <strong>Keep it handy:</strong> The setup script
-                                will ask you to paste in your token, username,
-                                and repository name once; these are saved to
-                                your local config file.
-                            </li>
-                        </ul>
-                        <div class="external-links">
-                            <a
-                                href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens"
-                                target="_blank"
-                                >🔗 GitHub PAT Token Docs</a
-                            >
-                            <a
-                                href="https://github.com/settings/tokens/new?scopes=repo&description=gn-cli"
-                                target="_blank"
-                                >🔑 Direct Token Generation Link</a
-                            >
-                        </div>
-                    </div>
-
-                    <div class="setup-card">
-                        <h3>Option 2: Dropbox API App</h3>
-                        <ul>
-                            <li>
-                                <strong>Dropbox Account:</strong> If you do not
-                                already have one, create an
-                                <a
-                                    href="https://www.dropbox.com/register"
-                                    target="_blank"
-                                    style="
-                                        color: var(--accent-color);
-                                        text-decoration: none;
-                                    "
-                                    >account</a
-                                >.
-                            </li>
-                            <li>
-                                <strong>Create an App:</strong> Go to the
-                                <a
-                                    href="https://www.dropbox.com/developers/apps"
-                                    target="_blank"
-                                    style="
-                                        color: var(--accent-color);
-                                        text-decoration: none;
-                                    "
-                                    >Dropbox Developer Console</a
-                                >
-                                and click *Create App*. Select *Scoped access*
-                                and choose the *App folder* option.
-                            </li>
-                            <li>
-                                <strong>Set Permissions:</strong> Before
-                                finishing, click on the *Permissions* tab of
-                                your new app. Check the boxes for
-                                <code>files.content.write</code> and
-                                <code>files.content.read</code>, then click
-                                *Submit* at the bottom.
-                            </li>
-                            <li>
-                                <strong>Keys:</strong> Keep your app's *App key*
-                                and *App secret* open from your settings tab.
-                                The setup script will ask for them to connect
-                                securely.
-                            </li>
-                        </ul>
-                        <div class="external-links">
-                            <a
-                                href="https://developers.dropbox.com/oauth-guide"
-                                target="_blank"
-                                >🔗 Dropbox OAuth Guide</a
-                            >
-                            <a
-                                href="https://www.dropbox.com/developers/apps"
-                                target="_blank"
-                                >🔑 Dropbox App Console</a
-                            >
-                        </div>
-                    </div>
-                </div>
-                <div class="note-box">
-                    <strong>🔒 Privacy Note:</strong> Your credentials are kept
-                    private. The installer saves your choices into a
-                    configuration file and locks it down so that only your local
-                    computer user account can read it.
-                </div>
+                <a class="download" href="./gn.sh" download>
+                    <span>↓</span>
+                    <span>gn.sh</span>
+                    <span class="arrow dim">- save to ~/bin/gn, chmod +x</span>
+                </a>
             </section>
 
-            <section id="quick-install">
-                <h2>Quick Installation</h2>
-                <div class="run-instructions" style="margin-top: 1rem">
-                    <p>Run Installer Setup Command:</p>
-                    <code
-                        >curl -fsSL https://gn-notes.pages.dev/install.sh -o
-                        install.sh && chmod +x install.sh && ./install.sh</code
-                    >
-                </div>
-                <button
-                    class="btn btn-secondary"
-                    style="margin-top: 0.75rem"
-                    onclick="
-                        copyText(
-                            'curl -fsSL https://gn-notes.pages.dev/install.sh -o install.sh && chmod +x install.sh && ./install.sh',
-                            this,
-                        )
-                    "
-                >
-                    Copy Command
-                </button>
-            </section>
-
-            <section id="manual-setup">
-                <h2>Manual Setup</h2>
-                <p
-                    style="
-                        font-size: 0.95rem;
-                        color: var(--text-muted);
-                        margin-bottom: 1rem;
-                    "
-                >
-                    Prefer to do things yourself instead of running the
-                    installer? Here's the whole process by hand.
-                </p>
-
-                <div class="installer-panel">
-                    <h3>1. Install the script</h3>
-                    <p style="margin-bottom: 0.75rem">
-                        Download <code>gn.sh</code> into <code>~/gn</code>, make
-                        it executable, and link it onto your <code>$PATH</code>.
-                    </p>
-                    <pre><code>mkdir -p ~/gn
-curl -fsSL https://gn-notes.pages.dev/gn.sh -o ~/gn/gn.sh
-chmod +x ~/gn/gn.sh
-sudo cp ~/gn/gn.sh /usr/local/bin/gn</code></pre>
+            <section>
+                <h2>Setup</h2>
+                <ol>
+                    <li>
+                        Download <code>gn.sh</code> above and make it
+                        executable:
+                    </li>
+                </ol>
+                <div class="code-block">
+                    <button class="copy-btn" data-copy-target="cmd-install">
+                        Copy
+                    </button>
+                    <pre><code id="cmd-install"><span class="comment"># move it somewhere on your PATH</span>
+mv gn.sh ~/bin/gn
+chmod +x ~/bin/gn</code></pre>
                 </div>
 
-                <div class="installer-panel">
-                    <h3>2a. Configure gn.conf for GitHub</h3>
-                    <p style="margin-bottom: 0.75rem">
-                        Generate a Personal Access Token with the
-                        <code>repo</code> scope from your
-                        <a
-                            href="https://github.com/settings/tokens/new?scopes=repo&description=gn-cli"
-                            target="_blank"
-                            style="
-                                color: var(--accent-color);
-                                text-decoration: none;
-                            "
-                            >GitHub token settings</a
-                        >, then create the repository you want to sync notes to
-                        (or let it 404 and create it manually). Write the
-                        following to <code>~/gn/gn.conf</code>:
-                    </p>
-                    <pre><code># gn configuration (GitHub backend)
-GIT_TOKEN=ghp_your_personal_access_token
-GIT_OWNER=your-github-username
-GIT_REPO=gn</code></pre>
-                    <p style="margin-top: 0.75rem">
-                        Then protect the file:
-                        <code>chmod 600 ~/gn/gn.conf</code>
-                    </p>
-                    <div class="external-links">
+                <ol start="2">
+                    <li>Prepare your storage provider credentials:</li>
+                </ol>
+
+                <div style="padding-left: 22px">
+                    <h3>Option A: Koofr Cloud Storage</h3>
+                    <ul>
+                        <li>
+                            Sign up free or log in at
+                            <a
+                                href="https://app.koofr.net"
+                                target="_blank"
+                                rel="noopener"
+                                >app.koofr.net</a
+                            >.
+                        </li>
+                        <li>
+                            Go to
+                            <strong>Account settings &rarr; Password</strong>
+                            and generate an <strong>App Password</strong>. The
+                            script needs this specific app-token, not your main
+                            web portal login password.
+                        </li>
+                    </ul>
+
+                    <h3>
+                        Option B: General WebDAV (Nextcloud, ownCloud, etc.)
+                    </h3>
+                    <ul>
+                        <li>
+                            Locate your service's primary WebDAV connection URL.
+                            <span class="dim"
+                                >(e.g., Nextcloud users can find this via Files
+                                &rarr; Files settings in the lower-left sidebar
+                                corner).</span
+                            >
+                        </li>
+                        <li>
+                            Ensure you have a dedicated App Password generated
+                            through your server's security settings panel for gn
+                            to use.
+                        </li>
+                    </ul>
+
+                    <h3>Option C: GitHub</h3>
+                    <ul>
+                        <li>
+                            <strong>GitHub Account:</strong> If you don't
+                            already have one, create an
+                            <a
+                                href="https://github.com/signup"
+                                target="_blank"
+                                rel="noopener"
+                                >account</a
+                            >.
+                        </li>
+                        <li>
+                            <strong>Private Repository:</strong> Create a
+                            private repository (named <code>gn</code>, or
+                            anything you like) to hold your notes.
+                        </li>
+                        <li>
+                            <strong>Personal Access Token:</strong> Generate a
+                            new Personal Access Token with the
+                            <code>repo</code> scope &mdash; this lets gn read
+                            and write files in your repository over the GitHub
+                            API. The setup menu will ask you to paste in your
+                            token, username, and repository name once; these are
+                            saved to your local config file.
+                        </li>
+                    </ul>
+                    <div class="ext-links">
                         <a
                             href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens"
                             target="_blank"
-                            >🔗 GitHub PAT Token Docs</a
+                            rel="noopener"
+                            >&#128279; GitHub PAT Token Docs</a
                         >
                         <a
                             href="https://github.com/settings/tokens/new?scopes=repo&description=gn-cli"
                             target="_blank"
-                            >🔑 Direct Token Generation Link</a
+                            rel="noopener"
+                            >&#128273; Direct Token Generation Link</a
                         >
                     </div>
-                </div>
 
-                <div class="installer-panel">
-                    <h3>2b. Configure gn.conf for Dropbox</h3>
-                    <p style="margin-bottom: 0.75rem">
-                        Create a scoped, app-folder Dropbox app at the
-                        <a
-                            href="https://www.dropbox.com/developers/apps"
-                            target="_blank"
-                            style="
-                                color: var(--accent-color);
-                                text-decoration: none;
-                            "
-                            >Dropbox Developer Console</a
-                        >, enable the <code>files.content.write</code> and
-                        <code>files.content.read</code> permissions, and note
-                        its <strong>App key</strong> and
-                        <strong>App secret</strong>.
-                    </p>
-                    <p style="margin-bottom: 0.75rem">
-                        Visit this URL (replace
-                        <code>YOUR_APP_KEY</code>) to authorize the app and get
-                        a one-time code:
-                    </p>
-                    <pre><code>https://www.dropbox.com/oauth2/authorize?client_id=YOUR_APP_KEY&response_type=code&token_access_type=offline</code></pre>
-                    <p style="margin-bottom: 0.75rem">
-                        Exchange that code for a long-lived refresh token:
-                    </p>
-                    <pre><code>curl -s -X POST https://api.dropbox.com/oauth2/token \
+                    <h3>Option D: Dropbox</h3>
+                    <ul>
+                        <li>
+                            <strong>Dropbox Account:</strong> If you don't
+                            already have one, create an
+                            <a
+                                href="https://www.dropbox.com/register"
+                                target="_blank"
+                                rel="noopener"
+                                >account</a
+                            >.
+                        </li>
+                        <li>
+                            <strong>Create an App:</strong> Go to the
+                            <a
+                                href="https://www.dropbox.com/developers/apps"
+                                target="_blank"
+                                rel="noopener"
+                                >Dropbox Developer Console</a
+                            >
+                            and click <strong>Create App</strong>. Select
+                            <strong>Scoped access</strong> and choose the
+                            <strong>App folder</strong> option.
+                        </li>
+                        <li>
+                            <strong>Set Permissions:</strong> Before finishing,
+                            click the <strong>Permissions</strong> tab of your
+                            new app. Check <code>files.content.write</code> and
+                            <code>files.content.read</code>, then click
+                            <strong>Submit</strong>.
+                        </li>
+                        <li>
+                            <strong>Keys:</strong> Keep your app's
+                            <strong>App key</strong> and
+                            <strong>App secret</strong> handy from the settings
+                            tab. You'll also need to generate a long-lived
+                            refresh token via the OAuth flow below:
+                        </li>
+                    </ul>
+                    <div class="code-block" style="margin-top: 8px">
+                        <pre><code><span class="comment"># 1. Open this URL (replace YOUR_APP_KEY) to authorise and get a one-time code:</span>
+https://www.dropbox.com/oauth2/authorize?client_id=YOUR_APP_KEY&response_type=code&token_access_type=offline
+
+<span class="comment"># 2. Exchange the code for a long-lived refresh token:</span>
+curl -s -X POST https://api.dropbox.com/oauth2/token \
   -d code=YOUR_AUTH_CODE \
   -d grant_type=authorization_code \
   -d client_id=YOUR_APP_KEY \
   -d client_secret=YOUR_APP_SECRET</code></pre>
-                    <p style="margin-bottom: 0.75rem">
+                    </div>
+                    <p class="dim" style="font-size: 13px; margin-top: 8px">
                         Copy the <code>refresh_token</code> from the response
-                        and write the following to <code>~/gn/gn.conf</code>:
+                        &mdash; the setup menu will ask for it.
                     </p>
-                    <pre><code># gn configuration (Dropbox backend)
-DROPBOX_APP_KEY=your_app_key
-DROPBOX_APP_SECRET=your_app_secret
-DROPBOX_REFRESH_TOKEN=your_refresh_token
-DROPBOX_PATH=/notes</code></pre>
-                    <p style="margin-top: 0.75rem">
-                        Then lock the file down:
-                        <code>chmod 600 ~/gn/gn.conf</code>
-                    </p>
-                    <div class="external-links">
+                    <div class="ext-links">
                         <a
                             href="https://developers.dropbox.com/oauth-guide"
                             target="_blank"
-                            >🔗 Dropbox OAuth Guide</a
+                            rel="noopener"
+                            >&#128279; Dropbox OAuth Guide</a
                         >
                         <a
                             href="https://www.dropbox.com/developers/apps"
                             target="_blank"
-                            >🔑 Dropbox App Console</a
+                            rel="noopener"
+                            >&#128273; Dropbox App Console</a
                         >
                     </div>
                 </div>
 
-                <div class="installer-panel">
-                    <h3>3. Start taking notes</h3>
-                    <p>
-                        Run <code>gn</code> to open the default note, or
-                        <code>gn myfile</code> to open or create
-                        <code>myfile.md</code>. gn automatically pulls the
-                        latest version before editing and pushes your changes
-                        back on save. Run <code>gn -h</code> for the full list
-                        of options.
-                    </p>
+                <div class="privacy-note">
+                    <strong>&#128274; Privacy:</strong> Credentials are saved
+                    into <code>~/gn/gn.conf</code> with
+                    <code>chmod 600</code> permissions — only your local user
+                    can read the file.
                 </div>
+
+                <ol start="3" style="margin-top: 24px">
+                    <li>
+                        Run the script. If no configuration file is found, it
+                        will run an interactive setup menu to choose your
+                        backend and configure credentials:
+                    </li>
+                </ol>
+                <div class="code-block">
+                    <button class="copy-btn" data-copy-target="cmd-firstrun">
+                        Copy
+                    </button>
+                    <pre><code id="cmd-firstrun">$ gn
+No config found at ~/gn/gn.conf - let's set one up.
+Select your provider:
+1) Koofr (WebDAV)
+2) Custom WebDAV Server
+3) GitHub
+4) Dropbox
+Choice [1-4]: 3
+GitHub Personal Access Token (input hidden):
+GitHub username (repo owner): your-username
+Repository name: gn
+Save this config for future runs? [Y/n] Y</code></pre>
+                </div>
+                <p class="dim">
+                    To clear or alter your configuration later, run
+                    <code>gn -c</code> to wipe <code>gn.conf</code> and re-run
+                    setup.
+                </p>
             </section>
 
-            <section id="downloads">
-                <h2>Manual Download</h2>
-                <div class="btn-container">
-                    <a class="btn" href="gn.sh" download="gn.sh"
-                        >Download gn.sh</a
-                    >
+            <section>
+                <h2>Usage</h2>
+                <div class="code-block">
+                    <button class="copy-btn" data-copy-target="cmd-usage">
+                        Copy
+                    </button>
+                    <pre><code id="cmd-usage">gn <span class="flag">[options]</span> <span class="str">[note]</span></code></pre>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Command</th>
+                            <th>What it does</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>gn</code></td>
+                            <td>
+                                Open (or create) default <code>note.md</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>gn ideas</code></td>
+                            <td>
+                                Open <code>ideas.md</code> - pulls, edits,
+                                pushes if changed
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>gn -t</code></td>
+                            <td>
+                                Open today's note, <code>YYYY-MM-DD.md</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>gn -l</code></td>
+                            <td>List local notes</td>
+                        </tr>
+                        <tr>
+                            <td><code>gn -g pattern</code></td>
+                            <td>Grep across local notes</td>
+                        </tr>
+                        <tr>
+                            <td><code>gn -d ideas</code></td>
+                            <td>
+                                Delete a note, local and remote (with
+                                confirmation)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>gn -r old new</code></td>
+                            <td>
+                                Rename a note, local and remote (WebDAV
+                                <code>MOVE</code>)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>gn -s</code></td>
+                            <td>
+                                Sync (pull) all remote notes down to local
+                                directory
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>gn -b</code></td>
+                            <td>
+                                Backup all local notes to
+                                <code>~/gn-YYYY-MM-DD.tar</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>gn -c</code></td>
+                            <td>Clear saved credentials and reconfigure</td>
+                        </tr>
+                        <tr>
+                            <td><code>gn -h</code></td>
+                            <td>Show help</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>Notes</h2>
+                <div class="note">
+                    <span class="label">Heads up</span>
+                    Sync is last-write-wins. There's no merge or conflict
+                    detection - if you edit the same note from two machines
+                    without syncing in between, the second push overwrites the
+                    first.
+                </div>
+                <div class="note">
+                    <span class="label">Tip</span>
+                    Notes are raw markdown files in your chosen storage backend,
+                    so you can read and edit them directly via a web browser or
+                    mobile app &mdash; e.g.
+                    <a href="https://app.koofr.net/app/">Koofr</a>,
+                    <a href="https://github.com" target="_blank" rel="noopener"
+                        >GitHub</a
+                    >, or the
                     <a
-                        class="btn btn-secondary"
-                        href="gn.conf"
-                        download="gn.conf"
-                        >Download gn.conf</a
+                        href="https://www.dropbox.com"
+                        target="_blank"
+                        rel="noopener"
+                        >Dropbox</a
                     >
+                    mobile app.
                 </div>
-                <pre><code id="script-content"># Source text preview area...</code></pre>
             </section>
 
-            <footer>&copy; 2026 Barney Matthews. MIT License.</footer>
+            <section>
+                <h2>Source</h2>
+                <p class="dim">
+                    The full script - copy it directly if you'd rather not
+                    download the file.
+                </p>
+                <div class="code-block script-block">
+                    <button class="copy-btn" data-copy-target="full-script">
+                        Copy
+                    </button>
+                    <pre><code id="full-script">#!/usr/bin/env bash
+# gn - get Notes
+# A zero-dependency CLI tool to sync markdown notes via WebDAV, GitHub, or Dropbox.
+# Web: gnnotes.pages.dev. Author: Barney Matthews. License: MIT
+
+NOTES_DIR=&quot;$HOME/gn&quot;
+CONFIG_FILE=&quot;$NOTES_DIR/gn.conf&quot;
+
+mkdir -p &quot;$NOTES_DIR&quot;
+
+for cmd in curl grep sed awk find tar base64 tr; do
+    command -v &quot;$cmd&quot; &gt;/dev/null 2&gt;&amp;1 || { echo &quot;Error: &#x27;$cmd&#x27; is required but not installed.&quot; &gt;&amp;2; exit 1; }
+done
+
+# --- Config ---
+if [ -f &quot;$CONFIG_FILE&quot; ]; then
+    chmod 600 &quot;$CONFIG_FILE&quot;
+    while IFS=&#x27;=&#x27; read -r key value; do
+        key=$(echo &quot;$key&quot; | tr -d &#x27; &#x27;)
+        [ -z &quot;$key&quot; ] &amp;&amp; continue
+        case &quot;$key&quot; in \#*) continue ;; esac
+
+        value=$(echo &quot;$value&quot; | sed -e &#x27;s/^[[:space:]]*//&#x27; -e &#x27;s/[[:space:]]*$//&#x27; -e &#x27;s/[[:space:]]*#.*//&#x27;)
+        case &quot;$value&quot; in \&#x27;*\&#x27;|\&quot;*\&quot; ) value=$(echo &quot;$value&quot; | sed &#x27;s/^.\(.*\).$/\1/&#x27;) ;; esac
+
+        case &quot;$key&quot; in
+            gn_USER)               gn_USER=&quot;$value&quot; ;;
+            gn_PASS)               gn_PASS=&quot;$value&quot; ;;
+            gn_PATH)               gn_PATH=&quot;$value&quot; ;;
+            gn_URL)                gn_URL=&quot;$value&quot; ;;
+            GIT_TOKEN)             GIT_TOKEN=&quot;$value&quot; ;;
+            GIT_OWNER)             GIT_OWNER=&quot;$value&quot; ;;
+            GIT_REPO)              GIT_REPO=&quot;$value&quot; ;;
+            GIT_API)               GIT_API=&quot;$value&quot; ;;
+            DROPBOX_APP_KEY)       DROPBOX_APP_KEY=&quot;$value&quot; ;;
+            DROPBOX_APP_SECRET)    DROPBOX_APP_SECRET=&quot;$value&quot; ;;
+            DROPBOX_REFRESH_TOKEN) DROPBOX_REFRESH_TOKEN=&quot;$value&quot; ;;
+            DROPBOX_PATH)          DROPBOX_PATH=&quot;$value&quot; ;;
+        esac
+    done &lt; &quot;$CONFIG_FILE&quot;
+fi
+
+# --- First-run / reconfigure setup ---
+if [ -z &quot;$gn_USER&quot; ] &amp;&amp; [ -z &quot;$GIT_TOKEN&quot; ] &amp;&amp; [ -z &quot;$DROPBOX_APP_KEY&quot; ]; then
+    echo &quot;No config found at $CONFIG_FILE - let&#x27;s set one up.&quot;
+    echo &quot;Select your provider:&quot;
+    echo &quot;1) Koofr (WebDAV)&quot;
+    echo &quot;2) Custom WebDAV Server&quot;
+    echo &quot;3) GitHub&quot;
+    echo &quot;4) Dropbox&quot;
+    printf &quot;Choice [1-4]: &quot;
+    read -r provider_choice
+
+    case &quot;$provider_choice&quot; in
+        2)
+            printf &quot;WebDAV Server URL (e.g., https://example.com/remote.php/dav/files/user/): &quot;
+            read -r gn_URL
+            printf &quot;Username: &quot;
+            read -r gn_USER
+            printf &quot;App Password (input hidden): &quot;
+            stty -echo; read -r gn_PASS; stty echo; echo
+            printf &quot;Remote notes folder inside WebDAV [/notes]: &quot;
+            read -r gn_PATH
+            gn_PATH=&quot;${gn_PATH:-/notes}&quot;
+            ;;
+        3)
+            printf &quot;GitHub Personal Access Token (input hidden): &quot;
+            stty -echo; read -r GIT_TOKEN; stty echo; echo
+            printf &quot;GitHub username (repo owner): &quot;
+            read -r GIT_OWNER
+            printf &quot;Repository name: &quot;
+            read -r GIT_REPO
+            ;;
+        4)
+            printf &quot;Dropbox App Key: &quot;
+            read -r DROPBOX_APP_KEY
+            printf &quot;Dropbox App Secret (input hidden): &quot;
+            stty -echo; read -r DROPBOX_APP_SECRET; stty echo; echo
+            printf &quot;Dropbox Refresh Token (input hidden): &quot;
+            stty -echo; read -r DROPBOX_REFRESH_TOKEN; stty echo; echo
+            printf &quot;Remote notes folder in Dropbox [/notes]: &quot;
+            read -r DROPBOX_PATH
+            DROPBOX_PATH=&quot;${DROPBOX_PATH:-/notes}&quot;
+            ;;
+        *)
+            gn_URL=&quot;https://app.koofr.net/dav/Koofr&quot;
+            printf &quot;Koofr email/username: &quot;
+            read -r gn_USER
+            printf &quot;Koofr app password (input hidden): &quot;
+            stty -echo; read -r gn_PASS; stty echo; echo
+            printf &quot;Remote notes folder [/notes]: &quot;
+            read -r gn_PATH
+            gn_PATH=&quot;${gn_PATH:-/notes}&quot;
+            ;;
+    esac
+
+    printf &quot;Save this config for future runs? [Y/n] &quot;
+    read -r save
+    case &quot;$save&quot; in
+        [Nn]|[Nn][Oo]) echo &quot;Using credentials for this session only.&quot; ;;
+        *)
+            umask 077
+            {
+                if [ -n &quot;$GIT_TOKEN&quot; ]; then
+                    printf &#x27;GIT_TOKEN=%s\nGIT_OWNER=%s\nGIT_REPO=%s\n&#x27; &quot;$GIT_TOKEN&quot; &quot;$GIT_OWNER&quot; &quot;$GIT_REPO&quot;
+                elif [ -n &quot;$DROPBOX_APP_KEY&quot; ]; then
+                    printf &#x27;DROPBOX_APP_KEY=%s\nDROPBOX_APP_SECRET=%s\nDROPBOX_REFRESH_TOKEN=%s\nDROPBOX_PATH=%s\n&#x27; \
+                        &quot;$DROPBOX_APP_KEY&quot; &quot;$DROPBOX_APP_SECRET&quot; &quot;$DROPBOX_REFRESH_TOKEN&quot; &quot;$DROPBOX_PATH&quot;
+                else
+                    printf &#x27;gn_URL=%s\ngn_USER=%s\ngn_PASS=%s\ngn_PATH=%s\n&#x27; &quot;$gn_URL&quot; &quot;$gn_USER&quot; &quot;$gn_PASS&quot; &quot;$gn_PATH&quot;
+                fi
+            } &gt; &quot;$CONFIG_FILE&quot;
+            chmod 600 &quot;$CONFIG_FILE&quot;
+            echo &quot;Saved to $CONFIG_FILE&quot;
+            ;;
+    esac
+fi
+
+# --- Detect Sync Engine ---
+SYNC_ENGINE=&quot;&quot;
+if [ -n &quot;$GIT_TOKEN&quot; ] &amp;&amp; [ -n &quot;$GIT_OWNER&quot; ] &amp;&amp; [ -n &quot;$GIT_REPO&quot; ]; then
+    SYNC_ENGINE=&quot;GITHUB&quot;
+    GIT_API=&quot;${GIT_API:-https://api.github.com/repos/${GIT_OWNER}/${GIT_REPO}/contents}&quot;
+elif [ -n &quot;$DROPBOX_APP_KEY&quot; ] &amp;&amp; [ -n &quot;$DROPBOX_APP_SECRET&quot; ] &amp;&amp; [ -n &quot;$DROPBOX_REFRESH_TOKEN&quot; ]; then
+    SYNC_ENGINE=&quot;DROPBOX&quot;
+    DROPBOX_PATH=&quot;${DROPBOX_PATH:-/notes}&quot;
+    DROPBOX_PATH=&quot;/${DROPBOX_PATH#/}&quot;
+    [ &quot;$DROPBOX_PATH&quot; = &quot;//&quot; ] &amp;&amp; DROPBOX_PATH=&quot;/&quot;
+elif [ -n &quot;$gn_USER&quot; ] &amp;&amp; [ -n &quot;$gn_PASS&quot; ] &amp;&amp; [ -n &quot;$gn_URL&quot; ]; then
+    SYNC_ENGINE=&quot;WEBDAV&quot;
+    gn_URL=&quot;${gn_URL%/}&quot;
+    gn_PATH=&quot;${gn_PATH:-/notes}&quot;
+    case &quot;$gn_PATH&quot; in /*) ;; *) gn_PATH=&quot;/$gn_PATH&quot; ;; esac
+    [ &quot;$gn_PATH&quot; = &quot;//&quot; ] &amp;&amp; gn_PATH=&quot;/&quot;
+else
+    echo &quot;Error: gn.conf is incomplete. Provide WebDAV (gn_URL, gn_USER, gn_PASS),&quot; &gt;&amp;2
+    echo &quot;GitHub (GIT_TOKEN, GIT_OWNER, GIT_REPO), or Dropbox (DROPBOX_APP_KEY,&quot; &gt;&amp;2
+    echo &quot;DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN) credentials.&quot; &gt;&amp;2
+    exit 1
+fi
+
+# --- Dropbox Auth Init ---
+if [ &quot;$SYNC_ENGINE&quot; = &quot;DROPBOX&quot; ]; then
+    dropbox_refresh() {
+        local resp pfile
+        pfile=$(mktemp); chmod 600 &quot;$pfile&quot;
+        printf &#x27;grant_type=refresh_token&amp;refresh_token=%s&amp;client_id=%s&amp;client_secret=%s&#x27; \
+            &quot;$DROPBOX_REFRESH_TOKEN&quot; &quot;$DROPBOX_APP_KEY&quot; &quot;$DROPBOX_APP_SECRET&quot; &gt; &quot;$pfile&quot;
+        resp=$(curl -s -X POST &quot;https://api.dropbox.com/oauth2/token&quot; --data-binary &quot;@$pfile&quot;)
+        rm -f &quot;$pfile&quot;
+        DROPBOX_ACCESS_TOKEN=$(echo &quot;$resp&quot; | awk -F&#x27;&quot;&#x27; &#x27;{for(i=1;i&lt;=NF;i++) if($i==&quot;access_token&quot;) {print $(i+2); exit}}&#x27;)
+        [ -z &quot;$DROPBOX_ACCESS_TOKEN&quot; ] &amp;&amp; { echo &quot;Error: Dropbox token refresh failed: $resp&quot; &gt;&amp;2; exit 1; }
+    }
+    dropbox_refresh
+fi
+
+EDITOR=&quot;${EDITOR:-nano}&quot;
+
+# --- Helpers ---
+show_help() {
+    local remote_info
+    case &quot;$SYNC_ENGINE&quot; in
+        GITHUB)  remote_info=&quot;GitHub: ${GIT_OWNER}/${GIT_REPO}&quot; ;;
+        DROPBOX) remote_info=&quot;Dropbox: ${DROPBOX_PATH}&quot; ;;
+        *)       remote_info=&quot;WebDAV: ${gn_URL}${gn_PATH}&quot; ;;
+    esac
+    cat &lt;&lt;EOF
+Usage: gn [options] [note]
+
+  -h          Show this help
+  -l          List local notes
+  -g PATTERN  Search notes (grep)
+  -t          Open today&#x27;s note (YYYY-MM-DD)
+  -d NOTE     Delete a note (local + remote)
+  -r OLD NEW  Rename a note (local + remote)
+  -s          Sync (pull) all remote notes down to local directory
+  -b          Backup all local notes to ~/gn-YYYY-MM-DD.tar
+  -c          Clear saved credentials and reconfigure
+
+Engine: $SYNC_ENGINE
+Remote: $remote_info
+EOF
+    exit 0
+}
+
+api_curl() {
+    local hdr rc
+    if [ &quot;$SYNC_ENGINE&quot; = &quot;WEBDAV&quot; ]; then
+        local nf host
+        host=$(echo &quot;$gn_URL&quot; | awk -F/ &#x27;{print $3}&#x27;)
+        nf=$(mktemp); chmod 600 &quot;$nf&quot;
+        printf &#x27;machine %s\nlogin %s\npassword %s\n&#x27; &quot;$host&quot; &quot;$gn_USER&quot; &quot;$gn_PASS&quot; &gt; &quot;$nf&quot;
+        curl -s --netrc-file &quot;$nf&quot; &quot;$@&quot;; rc=$?
+        rm -f &quot;$nf&quot;; return $rc
+    else
+        hdr=$(mktemp); chmod 600 &quot;$hdr&quot;
+        if [ &quot;$SYNC_ENGINE&quot; = &quot;GITHUB&quot; ]; then
+            echo &quot;Authorization: token $GIT_TOKEN&quot; &gt; &quot;$hdr&quot;
+        else
+            echo &quot;Authorization: Bearer $DROPBOX_ACCESS_TOKEN&quot; &gt; &quot;$hdr&quot;
+        fi
+        curl -s -H &quot;@$hdr&quot; &quot;$@&quot;; rc=$?
+        rm -f &quot;$hdr&quot;; return $rc
+    fi
+}
+
+urlenc() {
+    local s=&quot;$1&quot; out=&quot;&quot; c i
+    for (( i=0; i&lt;${#s}; i++ )); do
+        c=&quot;${s:$i:1}&quot;
+        case &quot;$c&quot; in
+            [a-zA-Z0-9./_-]) out+=&quot;$c&quot; ;;
+            *) out+=$(printf &#x27;%%%02X&#x27; &quot;&#x27;$c&quot;) ;;
+        esac
+    done
+    echo &quot;$out&quot;
+}
+
+urldec() {
+    echo &quot;$1&quot; | awk &#x27;{
+        gsub(/\+/, &quot; &quot;);
+        while (match($0, /%[0-9a-fA-F]{2}/)) {
+            hex = substr($0, RSTART+1, 2);
+            dec = 0;
+            for (i=1; i&lt;=2; i++) {
+                c = substr(hex, i, 1);
+                if (c ~ /[A-F]/) { dec = dec * 16 + (index(&quot;ABCDEF&quot;, c) + 9) }
+                else if (c ~ /[a-f]/) { dec = dec * 16 + (index(&quot;abcdef&quot;, c) + 9) }
+                else { dec = dec * 16 + c }
+            }
+            printf &quot;%s%c&quot;, substr($0, 1, RSTART-1), dec;
+            $0 = substr($0, RSTART+RLENGTH);
+        }
+        print $0;
+    }&#x27;
+}
+
+get_file_hash() {
+    if command -v md5sum &gt;/dev/null 2&gt;&amp;1; then md5sum &quot;$1&quot; 2&gt;/dev/null | awk &#x27;{print $1}&#x27;
+    elif command -v shasum &gt;/dev/null 2&gt;&amp;1; then shasum &quot;$1&quot; 2&gt;/dev/null | awk &#x27;{print $1}&#x27;
+    elif command -v md5 &gt;/dev/null 2&gt;&amp;1; then md5 -q &quot;$1&quot; 2&gt;/dev/null || md5 &quot;$1&quot; 2&gt;/dev/null | awk &#x27;{print $1}&#x27;
+    else ls -ln &quot;$1&quot; 2&gt;/dev/null | awk &#x27;{print $5,$6,$7,$8}&#x27;
+    fi
+}
+
+remote_url() { echo &quot;${gn_URL}$(urlenc &quot;${gn_PATH}/$1&quot;)&quot;; }
+
+remote_mkdir() {
+    local dir=&quot;$1&quot; path=&quot;&quot; part parts target
+    if [ -z &quot;$dir&quot; ] || [ &quot;$dir&quot; = &quot;.&quot; ]; then target=&quot;$gn_PATH&quot;; else target=&quot;$gn_PATH/$dir&quot;; fi
+    IFS=&#x27;/&#x27; read -ra parts &lt;&lt;&lt; &quot;$target&quot;
+    for part in &quot;${parts[@]}&quot;; do
+        [ -z &quot;$part&quot; ] &amp;&amp; continue
+        path=&quot;$path/$part&quot;
+        api_curl -X MKCOL &quot;${gn_URL}$(urlenc &quot;$path&quot;)&quot; -o /dev/null
+    done
+}
+
+pull_note() {
+    local file=&quot;$1&quot;
+
+    if [ &quot;$SYNC_ENGINE&quot; = &quot;GITHUB&quot; ]; then
+        local url resp http_code content REPLY
+        url=&quot;${GIT_API}/$file&quot;
+        resp=$(api_curl -w &quot;\n%{http_code}&quot; &quot;$url&quot;)
+        http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
+        REPLY=&quot;${resp%$&#x27;\n&#x27;*}&quot;
+        [ &quot;$http_code&quot; = &quot;404&quot; ] &amp;&amp; return 0
+        [ &quot;$http_code&quot; != &quot;200&quot; ] &amp;&amp; { echo &quot;Error: Pull failed (HTTP $http_code): $REPLY&quot; &gt;&amp;2; exit 1; }
+        content=$(echo &quot;$REPLY&quot; | awk -F&#x27;&quot;&#x27; &#x27;{for(i=1;i&lt;=NF;i++) if($i==&quot;content&quot;) {print $(i+2); exit}}&#x27; | tr -d &#x27;\\ n[:space:]&quot;&#x27;)
+        [ -n &quot;$content&quot; ] &amp;&amp; [ &quot;$content&quot; != &quot;null&quot; ] &amp;&amp; {
+            echo &quot;$content&quot; | base64 -d &gt; &quot;$file&quot; 2&gt;/dev/null \
+                || echo &quot;$content&quot; | base64 -D &gt; &quot;$file&quot; 2&gt;/dev/null
+        }
+
+    elif [ &quot;$SYNC_ENGINE&quot; = &quot;DROPBOX&quot; ]; then
+        local path arg http_code
+        path=$(printf &#x27;%s/%s&#x27; &quot;$DROPBOX_PATH&quot; &quot;$file&quot; | sed &#x27;s#//*#/#g&#x27;)
+        arg=$(printf &#x27;{&quot;path&quot;:&quot;%s&quot;}&#x27; &quot;$path&quot;)
+        http_code=$(api_curl -o &quot;$file.tmp&quot; -w &quot;%{http_code}&quot; -X POST \
+            &quot;https://content.dropboxapi.com/2/files/download&quot; \
+            -H &quot;Dropbox-API-Arg: $arg&quot;)
+        case &quot;$http_code&quot; in
+            200) mv &quot;$file.tmp&quot; &quot;$file&quot; ;;
+            409) rm -f &quot;$file.tmp&quot; ;;
+            *)   rm -f &quot;$file.tmp&quot;; echo &quot;Error: Dropbox pull failed (HTTP $http_code).&quot; &gt;&amp;2; exit 1 ;;
+        esac
+
+    else
+        local url http_code
+        url=$(remote_url &quot;$file&quot;)
+        http_code=$(api_curl -w &quot;%{http_code}&quot; -o &quot;$file&quot; &quot;$url&quot;)
+        case &quot;$http_code&quot; in
+            200) ;;
+            404) rm -f &quot;$file&quot; ;;
+            *) echo &quot;Error: Pull failed (HTTP $http_code).&quot; &gt;&amp;2; exit 1 ;;
+        esac
+    fi
+}
+
+push_note() {
+    local file=&quot;$1&quot;
+
+    if [ &quot;$SYNC_ENGINE&quot; = &quot;GITHUB&quot; ]; then
+        local url sha sha_resp http_code content msg pfile REPLY
+        msg=&quot;gn: update $file $(date &#x27;+%Y-%m-%d %H:%M:%S&#x27;)&quot;
+        url=&quot;${GIT_API}/$file&quot;
+        content=$(base64 -w0 &lt; &quot;$file&quot; 2&gt;/dev/null || base64 &lt; &quot;$file&quot; | tr -d &#x27;\n&#x27;)
+        pfile=$(mktemp); chmod 600 &quot;$pfile&quot;
+        sha_resp=$(api_curl -s &quot;$url&quot;)
+        sha=$(echo &quot;$sha_resp&quot; | awk -F&#x27;&quot;&#x27; &#x27;{for(i=1;i&lt;=NF;i++) if($i==&quot;sha&quot;) {print $(i+2); exit}}&#x27;)
+        if [ -n &quot;$sha&quot; ]; then
+            printf &#x27;{&quot;message&quot;:&quot;%s&quot;,&quot;content&quot;:&quot;%s&quot;,&quot;sha&quot;:&quot;%s&quot;,&quot;branch&quot;:&quot;main&quot;}&#x27; \
+                &quot;$msg&quot; &quot;$content&quot; &quot;$sha&quot; &gt; &quot;$pfile&quot;
+        else
+            printf &#x27;{&quot;message&quot;:&quot;%s&quot;,&quot;content&quot;:&quot;%s&quot;,&quot;branch&quot;:&quot;main&quot;}&#x27; \
+                &quot;$msg&quot; &quot;$content&quot; &gt; &quot;$pfile&quot;
+        fi
+        resp=$(api_curl -w &quot;\n%{http_code}&quot; -X PUT -H &quot;Content-Type: application/json&quot; --data-binary &quot;@$pfile&quot; &quot;$url&quot;)
+        rm -f &quot;$pfile&quot;
+        http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
+        REPLY=&quot;${resp%$&#x27;\n&#x27;*}&quot;
+        [[ &quot;$http_code&quot; =~ ^(200|201)$ ]] || { echo &quot;Error: Push failed (HTTP $http_code): $REPLY&quot; &gt;&amp;2; exit 1; }
+
+    elif [ &quot;$SYNC_ENGINE&quot; = &quot;DROPBOX&quot; ]; then
+        local path arg resp http_code REPLY
+        path=$(printf &#x27;%s/%s&#x27; &quot;$DROPBOX_PATH&quot; &quot;$file&quot; | sed &#x27;s#//*#/#g&#x27;)
+        arg=$(printf &#x27;{&quot;path&quot;:&quot;%s&quot;,&quot;mode&quot;:&quot;overwrite&quot;,&quot;autorename&quot;:false,&quot;mute&quot;:true}&#x27; &quot;$path&quot;)
+        resp=$(api_curl -w &quot;\n%{http_code}&quot; -X POST \
+            &quot;https://content.dropboxapi.com/2/files/upload&quot; \
+            -H &quot;Dropbox-API-Arg: $arg&quot; \
+            -H &quot;Content-Type: application/octet-stream&quot; \
+            --data-binary &quot;@$file&quot;)
+        http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
+        REPLY=&quot;${resp%$&#x27;\n&#x27;*}&quot;
+        [ &quot;$http_code&quot; = &quot;200&quot; ] || { echo &quot;Error: Dropbox push failed (HTTP $http_code): $REPLY&quot; &gt;&amp;2; exit 1; }
+
+    else
+        local url http_code dir
+        dir=$(dirname &quot;$file&quot;)
+        remote_mkdir &quot;$dir&quot;
+        url=$(remote_url &quot;$file&quot;)
+        http_code=$(api_curl -w &quot;%{http_code}&quot; -o /dev/null -X PUT --data-binary &quot;@$file&quot; &quot;$url&quot;)
+        case &quot;$http_code&quot; in
+            200|201|204) ;;
+            *) echo &quot;Error: Push failed (HTTP $http_code).&quot; &gt;&amp;2; exit 1 ;;
+        esac
+    fi
+}
+
+remote_delete() {
+    local file=&quot;$1&quot; msg=&quot;${2:-gn: delete $1}&quot;
+
+    if [ &quot;$SYNC_ENGINE&quot; = &quot;GITHUB&quot; ]; then
+        local url sha sha_resp http_code resp pfile REPLY
+        url=&quot;${GIT_API}/$file&quot;
+        pfile=$(mktemp); chmod 600 &quot;$pfile&quot;
+        sha_resp=$(api_curl -s &quot;$url&quot;)
+        sha=$(echo &quot;$sha_resp&quot; | awk -F&#x27;&quot;&#x27; &#x27;{for(i=1;i&lt;=NF;i++) if($i==&quot;sha&quot;) {print $(i+2); exit}}&#x27;)
+        if [ -z &quot;$sha&quot; ]; then rm -f &quot;$pfile&quot;; return 0; fi
+        printf &#x27;{&quot;message&quot;:&quot;%s&quot;,&quot;sha&quot;:&quot;%s&quot;,&quot;branch&quot;:&quot;main&quot;}&#x27; &quot;$msg&quot; &quot;$sha&quot; &gt; &quot;$pfile&quot;
+        resp=$(api_curl -w &quot;\n%{http_code}&quot; -X DELETE -H &quot;Content-Type: application/json&quot; --data-binary &quot;@$pfile&quot; &quot;$url&quot;)
+        rm -f &quot;$pfile&quot;
+        http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
+        [[ &quot;$http_code&quot; =~ ^(200|204)$ ]] || echo &quot;Warning: Remote delete failed (HTTP $http_code).&quot; &gt;&amp;2
+
+    elif [ &quot;$SYNC_ENGINE&quot; = &quot;DROPBOX&quot; ]; then
+        local path arg resp http_code
+        path=$(printf &#x27;%s/%s&#x27; &quot;$DROPBOX_PATH&quot; &quot;$file&quot; | sed &#x27;s#//*#/#g&#x27;)
+        arg=$(printf &#x27;{&quot;path&quot;:&quot;%s&quot;}&#x27; &quot;$path&quot;)
+        resp=$(api_curl -w &quot;\n%{http_code}&quot; -X POST \
+            -H &quot;Content-Type: application/json&quot; --data-binary &quot;$arg&quot; \
+            &quot;https://api.dropboxapi.com/2/files/delete_v2&quot;)
+        http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
+        [[ &quot;$http_code&quot; =~ ^(200|409)$ ]] || echo &quot;Warning: Dropbox delete failed (HTTP $http_code).&quot; &gt;&amp;2
+
+    else
+        local url http_code
+        url=$(remote_url &quot;$file&quot;)
+        http_code=$(api_curl -w &quot;%{http_code}&quot; -o /dev/null -X DELETE &quot;$url&quot;)
+        case &quot;$http_code&quot; in 200|204|404) ;; *) echo &quot;Warning: Remote delete failed (HTTP $http_code).&quot; &gt;&amp;2 ;; esac
+    fi
+}
+
+remote_rename() {
+    local old=&quot;$1&quot; new=&quot;$2&quot;
+
+    if [ &quot;$SYNC_ENGINE&quot; = &quot;GITHUB&quot; ] || [ &quot;$SYNC_ENGINE&quot; = &quot;DROPBOX&quot; ]; then
+        # No native rename: push new, delete old (caller handles local mv)
+        cp &quot;$NOTES_DIR/$old&quot; &quot;$NOTES_DIR/$new&quot;
+        push_note &quot;$new&quot;
+        remote_delete &quot;$old&quot; &quot;gn: rename $old to $new&quot;
+        rm -f &quot;$NOTES_DIR/$new&quot; # caller will mv old→new
+    else
+        local src dst http_code dir
+        dir=$(dirname &quot;$new&quot;)
+        remote_mkdir &quot;$dir&quot;
+        src=$(remote_url &quot;$old&quot;)
+        dst=$(remote_url &quot;$new&quot;)
+        http_code=$(api_curl -w &quot;%{http_code}&quot; -o /dev/null -X MOVE -H &quot;Destination: $dst&quot; -H &quot;Overwrite: F&quot; &quot;$src&quot;)
+        case &quot;$http_code&quot; in 201|204|412|404) ;; *) echo &quot;Warning: Remote rename failed (HTTP $http_code).&quot; &gt;&amp;2 ;; esac
+    fi
+}
+
+list_notes() {
+    echo &quot;=== $NOTES_DIR ===&quot;
+    if [ -d &quot;$NOTES_DIR&quot; ]; then
+        (cd &quot;$NOTES_DIR&quot; &amp;&amp; find . -type f ! -name &quot;gn.conf&quot; ! -name &quot;gn.sh&quot; ! -path &#x27;*/.*&#x27; | sed &quot;s|^\./||&quot; | sort)
+    fi
+    exit 0
+}
+
+search_notes() {
+    echo &quot;=== Searching for: &#x27;$1&#x27; ===&quot;
+    grep -Rin &quot;$1&quot; &quot;$NOTES_DIR&quot; --exclude-dir=&quot;.git&quot; --exclude=&quot;gn.conf&quot; --exclude=&quot;gn.sh&quot;
+    exit 0
+}
+
+delete_note() {
+    local file=&quot;$1&quot;
+    case &quot;$file&quot; in *.md) ;; *) file=&quot;${file}.md&quot; ;; esac
+    [ -f &quot;$NOTES_DIR/$file&quot; ] || { echo &quot;Error: &#x27;$file&#x27; not found.&quot;; exit 1; }
+    printf &quot;Delete &#x27;%s&#x27;? This cannot be undone. [y/N] &quot; &quot;$file&quot;
+    read -r confirm
+    case &quot;$confirm&quot; in [Yy]|[Yy][Ee][Ss]) ;; *) echo &quot;Aborted.&quot;; exit 0 ;; esac
+    remote_delete &quot;$file&quot; &quot;gn: delete $file&quot;
+    rm &quot;$NOTES_DIR/$file&quot;
+    echo &quot;Deleted &#x27;$file&#x27;.&quot;
+    exit 0
+}
+
+rename_note() {
+    local old=&quot;$1&quot; new=&quot;$2&quot;
+    case &quot;$old&quot; in *.md) ;; *) old=&quot;${old}.md&quot; ;; esac
+    case &quot;$new&quot; in *.md) ;; *) new=&quot;${new}.md&quot; ;; esac
+    [ -f &quot;$NOTES_DIR/$old&quot; ] || { echo &quot;Error: &#x27;$old&#x27; not found.&quot;; exit 1; }
+    [ -f &quot;$NOTES_DIR/$new&quot; ] &amp;&amp; { echo &quot;Error: &#x27;$new&#x27; already exists.&quot;; exit 1; }
+    remote_rename &quot;$old&quot; &quot;$new&quot;
+    [ &quot;$(dirname &quot;$new&quot;)&quot; != &quot;.&quot; ] &amp;&amp; mkdir -p &quot;$NOTES_DIR/$(dirname &quot;$new&quot;)&quot;
+    mv &quot;$NOTES_DIR/$old&quot; &quot;$NOTES_DIR/$new&quot;
+    echo &quot;Renamed &#x27;$old&#x27; to &#x27;$new&#x27;.&quot;
+    exit 0
+}
+
+sync_all_remote() {
+    echo &quot;Fetching remote file list... [$SYNC_ENGINE]&quot;
+
+    if [ &quot;$SYNC_ENGINE&quot; = &quot;GITHUB&quot; ]; then
+        local resp http_code REPLY paths path
+        resp=$(api_curl -w &quot;\n%{http_code}&quot; &quot;${GIT_API}&quot;)
+        http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
+        REPLY=&quot;${resp%$&#x27;\n&#x27;*}&quot;
+        [ &quot;$http_code&quot; != &quot;200&quot; ] &amp;&amp; { echo &quot;Error: Could not list remote files (HTTP $http_code).&quot; &gt;&amp;2; exit 1; }
+        # Extract .md filenames from JSON array
+        paths=$(echo &quot;$REPLY&quot; | awk -F&#x27;&quot;&#x27; &#x27;{for(i=1;i&lt;=NF;i++) if($i==&quot;name&quot;) print $(i+2)}&#x27; | grep &#x27;\.md$&#x27;)
+        echo &quot;$paths&quot; | while IFS= read -r path; do
+            [ -z &quot;$path&quot; ] &amp;&amp; continue
+            echo &quot;Syncing: $path&quot;
+            (cd &quot;$NOTES_DIR&quot; &amp;&amp; pull_note &quot;$path&quot;)
+        done
+
+    elif [ &quot;$SYNC_ENGINE&quot; = &quot;DROPBOX&quot; ]; then
+        local resp http_code REPLY arg paths path
+        arg=$(printf &#x27;{&quot;path&quot;:&quot;%s&quot;,&quot;recursive&quot;:true}&#x27; &quot;$DROPBOX_PATH&quot;)
+        resp=$(api_curl -w &quot;\n%{http_code}&quot; -X POST \
+            -H &quot;Content-Type: application/json&quot; --data-binary &quot;$arg&quot; \
+            &quot;https://api.dropboxapi.com/2/files/list_folder&quot;)
+        http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
+        REPLY=&quot;${resp%$&#x27;\n&#x27;*}&quot;
+        [ &quot;$http_code&quot; != &quot;200&quot; ] &amp;&amp; { echo &quot;Error: Could not list remote files (HTTP $http_code).&quot; &gt;&amp;2; exit 1; }
+        # Extract .md paths relative to DROPBOX_PATH
+        paths=$(echo &quot;$REPLY&quot; | awk -F&#x27;&quot;&#x27; &#x27;{for(i=1;i&lt;=NF;i++) if($i==&quot;path_display&quot;) print $(i+2)}&#x27; | grep &#x27;\.md$&#x27;)
+        echo &quot;$paths&quot; | while IFS= read -r path; do
+            [ -z &quot;$path&quot; ] &amp;&amp; continue
+            rel_path=$(echo &quot;$path&quot; | sed &quot;s|^$DROPBOX_PATH/||&quot; | sed &#x27;s|^/||&#x27;)
+            echo &quot;Syncing: $rel_path&quot;
+            dir=$(dirname &quot;$rel_path&quot;)
+            [ &quot;$dir&quot; != &quot;.&quot; ] &amp;&amp; mkdir -p &quot;$NOTES_DIR/$dir&quot;
+            (cd &quot;$NOTES_DIR&quot; &amp;&amp; pull_note &quot;$rel_path&quot;)
+        done
+
+    else
+        local base_encoded_path xml_response raw_paths path dec_path rel_path dir
+        base_encoded_path=$(urlenc &quot;$gn_PATH&quot;)
+        xml_response=$(api_curl -X PROPFIND -H &quot;Depth: 1&quot; -H &quot;Content-Type: text/xml&quot; &quot;${gn_URL}${base_encoded_path}&quot;)
+        if [ -z &quot;$xml_response&quot; ]; then
+            echo &quot;Error: Could not retrieve remote file list.&quot; &gt;&amp;2; exit 1
+        fi
+        # Namespace-agnostic regex to split XML href tags smoothly on varying WebDAV backends
+        raw_paths=$(echo &quot;$xml_response&quot; | tr -d &#x27;\n\r&#x27; | sed -E &#x27;s/&lt;\/[^&gt;]*href&gt;//g&#x27; | sed -E &#x27;s/&lt;[^&gt;]*href&gt;/\n/g&#x27; | grep -v &#x27;^[[:space:]]*$&#x27;)
+        echo &quot;$raw_paths&quot; | while IFS= read -r path; do
+            [ -z &quot;$path&quot; ] &amp;&amp; continue
+            dec_path=$(urldec &quot;$path&quot;)
+            case &quot;$dec_path&quot; in
+                *&quot;$gn_PATH&quot;*.*.md)
+                    rel_path=$(echo &quot;$dec_path&quot; | sed &quot;s|.*$gn_PATH||&quot; | sed &#x27;s|^/||&#x27;)
+                    echo &quot;Syncing: $rel_path&quot;
+                    dir=$(dirname &quot;$rel_path&quot;)
+                    [ &quot;$dir&quot; != &quot;.&quot; ] &amp;&amp; mkdir -p &quot;$NOTES_DIR/$dir&quot;
+                    (cd &quot;$NOTES_DIR&quot; &amp;&amp; pull_note &quot;$rel_path&quot;)
+                    ;;
+            esac
+        done
+    fi
+
+    echo &quot;Sync complete.&quot;
+    exit 0
+}
+
+backup_local_notes() {
+    local backup_file
+    backup_file=&quot;$HOME/gn-$(date &#x27;+%Y-%m-%d&#x27;).tar&quot;
+    echo &quot;Creating backup at $backup_file...&quot;
+
+    if (cd &quot;$NOTES_DIR&quot; &amp;&amp; find . -type f ! -name &quot;gn.conf&quot; ! -name &quot;gn.sh&quot; ! -path &#x27;*/.*&#x27; | tar -cf &quot;$backup_file&quot; -T -); then
+        echo &quot;Backup created successfully.&quot;
+    else
+        echo &quot;Error: Backup failed.&quot; &gt;&amp;2
+        exit 1
+    fi
+    exit 0
+}
+
+reconfigure() {
+    rm -f &quot;$CONFIG_FILE&quot;
+    echo &quot;Saved config cleared. Run gn again to set up new credentials.&quot;
+    exit 0
+}
+
+# --- Entry Point ---
+if [ &quot;$1&quot; = &quot;-r&quot; ]; then
+    [ -z &quot;$2&quot; ] || [ -z &quot;$3&quot; ] &amp;&amp; { echo &quot;Usage: gn -r OLD NEW&quot;; exit 1; }
+    rename_note &quot;$2&quot; &quot;$3&quot;
+fi
+
+ACTION_RUN=0
+while getopts &quot;hlg:tcd:sb&quot; opt; do
+    case $opt in
+        h) show_help ;;
+        l) ACTION_RUN=1; list_notes ;;
+        g) ACTION_RUN=1; search_notes &quot;$OPTARG&quot; ;;
+        t) NOTE_NAME=$(date &#x27;+%Y-%m-%d&#x27;) ;;
+        c) ACTION_RUN=1; reconfigure ;;
+        d) ACTION_RUN=1; delete_note &quot;$OPTARG&quot; ;;
+        s) ACTION_RUN=1; sync_all_remote ;;
+        b) ACTION_RUN=1; backup_local_notes ;;
+        *) show_help ;;
+    esac
+done
+[ &quot;$ACTION_RUN&quot; -eq 1 ] &amp;&amp; exit 0
+shift $((OPTIND - 1))
+
+[ -z &quot;$NOTE_NAME&quot; ] &amp;&amp; NOTE_NAME=&quot;${1:-note}&quot;
+if [ &quot;$NOTE_NAME&quot; = &quot;gn.conf&quot; ] || [ &quot;$NOTE_NAME&quot; = &quot;gn.sh&quot; ]; then
+    echo &quot;Error: Cannot open runtime files via gn.&quot;
+    exit 1
+fi
+
+case &quot;$NOTE_NAME&quot; in *.md) ;; *) NOTE_NAME=&quot;${NOTE_NAME}.md&quot; ;; esac
+
+cd &quot;$NOTES_DIR&quot; || { echo &quot;Error: Cannot access $NOTES_DIR&quot;; exit 1; }
+[ &quot;$(dirname &quot;$NOTE_NAME&quot;)&quot; != &quot;.&quot; ] &amp;&amp; mkdir -p &quot;$(dirname &quot;$NOTE_NAME&quot;)&quot;
+
+echo &quot;Fetching... [$SYNC_ENGINE]&quot;
+pull_note &quot;$NOTE_NAME&quot;
+
+PRE_SHA=$(get_file_hash &quot;$NOTE_NAME&quot;)
+$EDITOR &quot;$NOTE_NAME&quot;
+
+[ -f &quot;$NOTE_NAME&quot; ] || { echo &quot;Note not saved. Cancelled.&quot;; exit 0; }
+
+POST_SHA=$(get_file_hash &quot;$NOTE_NAME&quot;)
+if [ &quot;$PRE_SHA&quot; = &quot;$POST_SHA&quot; ]; then
+    echo &quot;No changes. Sync skipped.&quot;
+else
+    echo &quot;Pushing... [$SYNC_ENGINE]&quot;
+    push_note &quot;$NOTE_NAME&quot;
+    echo &quot;Done.&quot;
+fi
+</code></pre>
+                </div>
+            </section>
+
+            <footer>
+                <span>gn // get notes</span>
+                <span><a href="https://barney.me">barney.me</a></span>
+            </footer>
         </div>
 
         <script>
-            document.addEventListener("DOMContentLoaded", () => {
-                fetch("gn.sh")
-                    .then((r) => r.text())
-                    .then((text) => {
-                        const el = document.getElementById("script-content");
-                        if (el) el.textContent = text;
-                    })
-                    .catch(() => {});
-
-                const cmd1 = "gn binary";
-                const nanoText =
-                    "There are 10 types of people - those who understand binary and those who do not.";
-                const cmd2 = "gn -h";
-
-                const container1 = document.getElementById("text-cmd-1");
-                const containerNano = document.getElementById("text-nano-body");
-                const container2 = document.getElementById("text-cmd-2");
-
-                const s1 = document.getElementById("scr-type-1");
-                const sNano = document.getElementById("scr-nano");
-                const sSync = document.getElementById("scr-sync");
-                const sHelp = document.getElementById("scr-help");
-                const logs = document.getElementById("sync-logs");
-                const helpOutput = document.getElementById("help-output");
-
-                function typeString(
-                    targetElement,
-                    fullString,
-                    speed,
-                    callback,
-                ) {
-                    let index = 0;
-                    targetElement.textContent = "";
-                    const interval = setInterval(() => {
-                        if (index < fullString.length) {
-                            targetElement.textContent += fullString[index];
-                            index++;
-                        } else {
-                            clearInterval(interval);
-                            setTimeout(callback, 600);
-                        }
-                    }, speed);
-                }
-
-                function appendLog(text, className, delay, callback) {
-                    setTimeout(() => {
-                        const line = document.createElement("span");
-                        line.className = className;
-                        line.innerHTML = text + "<br />";
-                        logs.appendChild(line);
-                        if (callback) callback();
-                    }, delay);
-                }
-
-                function runTerminalSequence() {
-                    container1.textContent = "";
-                    containerNano.textContent = "";
-                    container2.textContent = "";
-                    logs.innerHTML = "";
-                    helpOutput.style.display = "none";
-                    document.getElementById("cursor-2").style.display =
-                        "inline-block";
-                    s1.classList.add("active");
-                    sNano.classList.remove("active");
-                    sSync.classList.remove("active");
-                    sHelp.classList.remove("active");
-
-                    setTimeout(() => {
-                        typeString(container1, cmd1, 100, () => {
-                            s1.classList.remove("active");
-                            sNano.classList.add("active");
-                            setTimeout(() => {
-                                typeString(containerNano, nanoText, 120, () => {
-                                    setTimeout(() => {
-                                        sNano.classList.remove("active");
-                                        sSync.classList.add("active");
-                                        appendLog(
-                                            "Fetching... [via GITHUB]",
-                                            "t-out",
-                                            300,
-                                        );
-                                        appendLog(
-                                            "Pushing... [via GITHUB]",
-                                            "t-out",
-                                            1100,
-                                        );
-                                        appendLog("Done.", "t-ok", 1900, () => {
-                                            setTimeout(() => {
-                                                sSync.classList.remove(
-                                                    "active",
-                                                );
-                                                sHelp.classList.add("active");
-                                                typeString(
-                                                    container2,
-                                                    cmd2,
-                                                    100,
-                                                    () => {
-                                                        document.getElementById(
-                                                            "cursor-2",
-                                                        ).style.display =
-                                                            "none";
-                                                        helpOutput.style.display =
-                                                            "block";
-                                                    },
-                                                );
-                                            }, 1000);
-                                        });
-                                    }, 1000);
-                                });
-                            }, 500);
-                        });
-                    }, 800);
-                }
-                runTerminalSequence();
-            });
-
-            function copyText(text, btn) {
-                navigator.clipboard.writeText(text).then(() => {
-                    const orig = btn.innerHTML;
-                    btn.innerHTML = "Copied!";
-                    setTimeout(() => {
-                        btn.innerHTML = orig;
-                    }, 2000);
+            document.querySelectorAll(".copy-btn").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    var target = document.getElementById(
+                        btn.getAttribute("data-copy-target"),
+                    );
+                    var text = target.textContent;
+                    navigator.clipboard.writeText(text).then(function () {
+                        var original = btn.textContent;
+                        btn.textContent = "Copied";
+                        btn.classList.add("copied");
+                        setTimeout(function () {
+                            btn.textContent = original;
+                            btn.classList.remove("copied");
+                        }, 1500);
+                    });
                 });
-            }
+            });
         </script>
     </body>
 </html>
