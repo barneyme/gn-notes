@@ -179,6 +179,11 @@ Usage: gn [options] [note]
   -s          Sync (pull) all remote notes down to local directory
   -c          Clear saved credentials and reconfigure
 
+  Browse local notes:
+    ls ~/gn                       List notes
+    grep -r "keyword" ~/gn        Search note contents
+    find ~/gn -name "*.md"        Find notes by filename
+
 Engine: $SYNC_ENGINE
 Remote: $remote_info
 EOF
