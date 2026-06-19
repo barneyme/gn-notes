@@ -1,6 +1,6 @@
 # gn // get notes
 
-Zero-dependency markdown notes synced to WebDAV, GitHub, or Dropbox.
+Zero-dependency markdown notes synced to Koofr or GitHub.
 
 `gn` is a simple Bash script that pulls a markdown note from cloud storage, opens it in your preferred editor, and pushes it back if anything changed.
 
@@ -21,11 +21,11 @@ Just:
 - Zero dependencies beyond common Unix tools
 - Works with any editor through `$EDITOR`
 - Syncs notes through:
-  - WebDAV (Koofr, Nextcloud, ownCloud, etc.)
+  - Koofr (WebDAV)
   - GitHub repositories
-  - Dropbox
 - Automatic pull → edit → push workflow
-- Daily notes support
+- Search notes with grep
+- List notes
 - Rename notes
 - Delete notes
 - Sync all remote notes locally
@@ -41,8 +41,6 @@ curl
 grep
 sed
 awk
-find
-tar
 base64
 tr
 ```
@@ -96,32 +94,7 @@ https://app.koofr.net/dav/Koofr
 
 ---
 
-## Option B: Generic WebDAV
-
-Works with:
-
-- Nextcloud
-- ownCloud
-- Synology
-- Seafile
-- Any WebDAV-compatible server
-
-You'll need:
-
-- WebDAV URL
-- Username
-- App password or access password
-- Remote notes folder
-
-Example:
-
-```text
-https://example.com/remote.php/dav/files/user/
-```
-
----
-
-## Option C: GitHub
+## Option B: GitHub
 
 ### Create a Repository
 
@@ -153,70 +126,6 @@ Repository name
 Personal Access Token
 ```
 
-Example:
-
-```bash
-gn
-```
-
-```text
-GitHub Personal Access Token:
-GitHub username: yourname
-Repository name: gn
-```
-
----
-
-## Option D: Dropbox
-
-### Create an App
-
-Open the Dropbox Developer Console.
-
-Create:
-
-```text
-Scoped Access
-App Folder
-```
-
-application.
-
-### Permissions
-
-Enable:
-
-```text
-files.content.read
-files.content.write
-```
-
-### Generate Refresh Token
-
-Authorize:
-
-```text
-https://www.dropbox.com/oauth2/authorize?client_id=YOUR_APP_KEY&response_type=code&token_access_type=offline
-```
-
-Exchange the authorization code:
-
-```bash
-curl -s -X POST https://api.dropbox.com/oauth2/token \
-  -d code=YOUR_AUTH_CODE \
-  -d grant_type=authorization_code \
-  -d client_id=YOUR_APP_KEY \
-  -d client_secret=YOUR_APP_SECRET
-```
-
-Copy the returned:
-
-```text
-refresh_token
-```
-
-You'll enter it during setup.
-
 ---
 
 ## Configuration Storage
@@ -247,17 +156,15 @@ $ gn
 No config found at ~/gn/gn.conf - let's set one up.
 
 Select your provider:
-
-1) Koofr (WebDAV)
-2) Custom WebDAV Server
-3) GitHub
-4) Dropbox
+1) GitHub
+2) Koofr
+Choice [1-2]:
 ```
 
 Example GitHub setup:
 
 ```text
-Choice [1-4]: 3
+Choice [1-2]: 1
 
 GitHub Personal Access Token:
 GitHub username (repo owner): your-username
@@ -318,46 +225,6 @@ Push back to remote
 
 ---
 
-## Open Today's Note
-
-```bash
-gn -t
-```
-
-Creates or opens:
-
-```text
-YYYY-MM-DD.md
-```
-
-Example:
-
-```text
-2026-06-14.md
-```
-
----
-
-## List Notes
-
-```bash
-gn -l
-```
-
-Lists all local notes.
-
----
-
-## Search Notes
-
-```bash
-gn -g meeting
-```
-
-Searches all local notes using grep.
-
----
-
 ## Delete a Note
 
 ```bash
@@ -370,9 +237,7 @@ Deletes:
 ideas.md
 ```
 
-Locally and remotely.
-
-Confirmation is required.
+Locally and remotely. Confirmation is required.
 
 ---
 
@@ -385,13 +250,7 @@ gn -r ideas projects
 Renames:
 
 ```text
-ideas.md
-```
-
-to:
-
-```text
-projects.md
+ideas.md → projects.md
 ```
 
 Locally and remotely.
@@ -407,22 +266,6 @@ gn -s
 Downloads all remote notes into your local notes directory.
 
 Useful when setting up a new machine.
-
----
-
-## Create a Backup
-
-```bash
-gn -b
-```
-
-Creates:
-
-```text
-~/gn-YYYY-MM-DD.tar
-```
-
-containing all notes.
 
 ---
 
@@ -448,7 +291,22 @@ and starts setup again next time you run `gn`.
 gn -h
 ```
 
-Displays command help.
+Displays command help and local file commands.
+
+---
+
+# Local File Commands
+
+Because notes are plain files in `~/gn/`, standard shell tools work on them directly:
+
+```bash
+ls -lt ~/gn/*.md                      # list notes, newest first
+grep -ril "term" ~/gn/                # search notes (filenames only)
+grep -rn "term" ~/gn/                 # search notes (with line numbers)
+find ~/gn -name "*.md" -mtime -7      # notes modified in last 7 days
+wc -l ~/gn/*.md | sort -rn            # largest notes by line count
+cp -a ~/gn ~/gn-backup-$(date +%F)   # snapshot backup
+```
 
 ---
 
@@ -466,8 +324,7 @@ Example:
 ~/gn/
 ├── note.md
 ├── ideas.md
-├── projects.md
-└── 2026-06-14.md
+└── projects.md
 ```
 
 ---
@@ -479,7 +336,7 @@ When you open a note:
 ```text
 1. Pull remote copy
 2. Open editor
-3. Detect changes
+3. Detect changes via file hash
 4. Push updated file
 ```
 
@@ -505,7 +362,7 @@ There is:
 - No conflict detection
 - No version resolution
 
-If the same note is edited on two machines without syncing between them, the most recent upload replaces the older version.
+If the same note is edited on two machines without syncing between them, the most recent upload replaces the older version. Run `gn -s` before starting a session on a new device.
 
 ---
 
@@ -521,22 +378,10 @@ Examples:
 
 ```bash
 export EDITOR=nano
-```
-
-```bash
 export EDITOR=vim
-```
-
-```bash
 export EDITOR=micro
-```
-
-```bash
-export EDITOR=helix
-```
-
-```bash
-export EDITOR=emacs
+export EDITOR=nvim
+export EDITOR=hx
 ```
 
 Default:
@@ -560,13 +405,7 @@ Your notes remain:
 - Searchable
 - Future-proof
 
-No proprietary database.
-
-No lock-in.
-
-No background sync service.
-
-Just files.
+No proprietary database. No lock-in. No background sync service. Just files.
 
 ---
 
@@ -579,8 +418,6 @@ MIT
 # Author
 
 Barney Matthews
-
-Website:
 
 ```text
 https://barney.me
