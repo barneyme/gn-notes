@@ -337,8 +337,8 @@
                 <div class="prompt">whoami</div>
                 <h1>gn <span class="engine">// get notes</span></h1>
                 <p class="tagline">
-                    Zero-dependency markdown notes, synced to WebDAV, GitHub, or
-                    Dropbox.
+                    Zero-dependency markdown notes, synced to Koofr WebDAV or
+                    GitHub.
                 </p>
             </header>
 
@@ -347,10 +347,11 @@
                     <code>gn</code> is a simple bash script that pulls a
                     markdown note from cloud storage, opens it in
                     <code>$EDITOR</code>, and pushes it back if you changed
-                    anything. Supports WebDAV (Koofr, Nextcloud, etc.), GitHub,
-                    and Dropbox. No git, no daemons, no heavy apps to install -
-                    just <code>curl</code> and a local folder.
+                    anything. Supports Koofr (WebDAV) and GitHub. No git, no
+                    daemons, no heavy apps to install - just
+                    <code>curl</code> and a local folder.
                 </p>
+                <h2>Download</h2>
                 <a class="download" href="./gn.sh" download>
                     <span>↓</span>
                     <span>gn.sh</span>
@@ -362,17 +363,16 @@
                 <h2>Setup</h2>
                 <ol>
                     <li>
-                        Download <code>gn.sh</code> above and make it
-                        executable:
+                        Download <code>gn.sh</code> above and make it run this
+                        to make it executable:
                     </li>
                 </ol>
+
                 <div class="code-block">
                     <button class="copy-btn" data-copy-target="cmd-install">
                         Copy
                     </button>
-                    <pre><code id="cmd-install"><span class="comment"># move it somewhere on your PATH</span>
-mv gn.sh ~/bin/gn
-chmod +x ~/bin/gn</code></pre>
+                    <pre><code id="cmd-install">mv gn.sh ~/bin/gn && chmod +x ~/bin/gn</code></pre>
                 </div>
 
                 <ol start="2">
@@ -400,26 +400,7 @@ chmod +x ~/bin/gn</code></pre>
                         </li>
                     </ul>
 
-                    <h3>
-                        Option B: General WebDAV (Nextcloud, ownCloud, etc.)
-                    </h3>
-                    <ul>
-                        <li>
-                            Locate your service's primary WebDAV connection URL.
-                            <span class="dim"
-                                >(e.g., Nextcloud users can find this via Files
-                                &rarr; Files settings in the lower-left sidebar
-                                corner).</span
-                            >
-                        </li>
-                        <li>
-                            Ensure you have a dedicated App Password generated
-                            through your server's security settings panel for gn
-                            to use.
-                        </li>
-                    </ul>
-
-                    <h3>Option C: GitHub</h3>
+                    <h3>Option B: GitHub</h3>
                     <ul>
                         <li>
                             <strong>GitHub Account:</strong> If you don't
@@ -460,81 +441,12 @@ chmod +x ~/bin/gn</code></pre>
                             >&#128273; Direct Token Generation Link</a
                         >
                     </div>
-
-                    <h3>Option D: Dropbox</h3>
-                    <ul>
-                        <li>
-                            <strong>Dropbox Account:</strong> If you don't
-                            already have one, create an
-                            <a
-                                href="https://www.dropbox.com/register"
-                                target="_blank"
-                                rel="noopener"
-                                >account</a
-                            >.
-                        </li>
-                        <li>
-                            <strong>Create an App:</strong> Go to the
-                            <a
-                                href="https://www.dropbox.com/developers/apps"
-                                target="_blank"
-                                rel="noopener"
-                                >Dropbox Developer Console</a
-                            >
-                            and click <strong>Create App</strong>. Select
-                            <strong>Scoped access</strong> and choose the
-                            <strong>App folder</strong> option.
-                        </li>
-                        <li>
-                            <strong>Set Permissions:</strong> Before finishing,
-                            click the <strong>Permissions</strong> tab of your
-                            new app. Check <code>files.content.write</code> and
-                            <code>files.content.read</code>, then click
-                            <strong>Submit</strong>.
-                        </li>
-                        <li>
-                            <strong>Keys:</strong> Keep your app's
-                            <strong>App key</strong> and
-                            <strong>App secret</strong> handy from the settings
-                            tab. You'll also need to generate a long-lived
-                            refresh token via the OAuth flow below:
-                        </li>
-                    </ul>
-                    <div class="code-block" style="margin-top: 8px">
-                        <pre><code><span class="comment"># 1. Open this URL (replace YOUR_APP_KEY) to authorise and get a one-time code:</span>
-https://www.dropbox.com/oauth2/authorize?client_id=YOUR_APP_KEY&response_type=code&token_access_type=offline
-
-<span class="comment"># 2. Exchange the code for a long-lived refresh token:</span>
-curl -s -X POST https://api.dropbox.com/oauth2/token \
-  -d code=YOUR_AUTH_CODE \
-  -d grant_type=authorization_code \
-  -d client_id=YOUR_APP_KEY \
-  -d client_secret=YOUR_APP_SECRET</code></pre>
-                    </div>
-                    <p class="dim" style="font-size: 13px; margin-top: 8px">
-                        Copy the <code>refresh_token</code> from the response
-                        &mdash; the setup menu will ask for it.
-                    </p>
-                    <div class="ext-links">
-                        <a
-                            href="https://open.dropbox.com/oauth-guide"
-                            target="_blank"
-                            rel="noopener"
-                            >&#128279; Dropbox OAuth Guide</a
-                        >
-                        <a
-                            href="https://www.dropbox.com/developers/apps"
-                            target="_blank"
-                            rel="noopener"
-                            >&#128273; Dropbox App Console</a
-                        >
-                    </div>
                 </div>
 
                 <div class="privacy-note">
                     <strong>&#128274; Privacy:</strong> Credentials are saved
                     into <code>~/gn/gn.conf</code> with
-                    <code>chmod 600</code> permissions — only your local user
+                    <code>chmod 600</code> permissions - only your local user
                     can read the file.
                 </div>
 
@@ -553,10 +465,8 @@ curl -s -X POST https://api.dropbox.com/oauth2/token \
 No config found at ~/gn/gn.conf - let's set one up.
 Select your provider:
 1) Koofr (WebDAV)
-2) Custom WebDAV Server
-3) GitHub
-4) Dropbox
-Choice [1-4]: 3
+2) GitHub
+Choice [1-2]: 2
 GitHub Personal Access Token (input hidden):
 GitHub username (repo owner): your-username
 Repository name: gn
@@ -598,11 +508,6 @@ Save this config for future runs? [Y/n] Y</code></pre>
                                 pushes if changed
                             </td>
                         </tr>
-                        <tr>
-                            <td><code>gn -t</code></td>
-                            <td>
-                                Open today's note, <code>YYYY-MM-DD.md</code>
-                            </td>
                         </tr>
                         <tr>
                             <td><code>gn -d ideas</code></td>
@@ -654,14 +559,7 @@ Save this config for future runs? [Y/n] Y</code></pre>
                     <a href="https://app.koofr.net/app/">Koofr</a>,
                     <a href="https://github.com" target="_blank" rel="noopener"
                         >GitHub</a
-                    >, or the
-                    <a
-                        href="https://www.dropbox.com"
-                        target="_blank"
-                        rel="noopener"
-                        >Dropbox</a
                     >
-                    mobile app.
                 </div>
             </section>
 
@@ -672,556 +570,10 @@ Save this config for future runs? [Y/n] Y</code></pre>
                     download the file.
                 </p>
                 <div class="code-block script-block">
-                    <button class="copy-btn" data-copy-target="full-script">
+                    <button class="copy-btn" id="script-copy-btn" disabled>
                         Copy
                     </button>
-                    <pre><code id="full-script">#!/usr/bin/env bash
-# gn - get Notes
-# A zero-dependency CLI tool to sync markdown notes via WebDAV, GitHub, or Dropbox.
-# Web: gn-notes.pages.dev. Author: Barney Matthews. License: MIT
-
-NOTES_DIR=&quot;$HOME/gn&quot;
-CONFIG_FILE=&quot;$NOTES_DIR/gn.conf&quot;
-
-mkdir -p &quot;$NOTES_DIR&quot;
-
-for cmd in curl grep sed awk base64 tr; do
-    command -v &quot;$cmd&quot; &gt;/dev/null 2&gt;&amp;1 || { echo &quot;Error: &#x27;$cmd&#x27; is required but not installed.&quot; &gt;&amp;2; exit 1; }
-done
-
-# --- Config ---
-if [ -f &quot;$CONFIG_FILE&quot; ]; then
-    chmod 600 &quot;$CONFIG_FILE&quot;
-    while IFS=&#x27;=&#x27; read -r key value; do
-        key=$(echo &quot;$key&quot; | tr -d &#x27; &#x27;)
-        [ -z &quot;$key&quot; ] &amp;&amp; continue
-        case &quot;$key&quot; in \#*) continue ;; esac
-
-        value=$(echo &quot;$value&quot; | sed -e &#x27;s/^[[:space:]]*//&#x27; -e &#x27;s/[[:space:]]*$//&#x27; -e &#x27;s/[[:space:]]*#.*//&#x27;)
-        case &quot;$value&quot; in \&#x27;*\&#x27;|\&quot;*\&quot; ) value=$(echo &quot;$value&quot; | sed &#x27;s/^.\(.*\).$/\1/&#x27;) ;; esac
-
-        case &quot;$key&quot; in
-            gn_USER)               gn_USER=&quot;$value&quot; ;;
-            gn_PASS)               gn_PASS=&quot;$value&quot; ;;
-            gn_PATH)               gn_PATH=&quot;$value&quot; ;;
-            gn_URL)                gn_URL=&quot;$value&quot; ;;
-            GIT_TOKEN)             GIT_TOKEN=&quot;$value&quot; ;;
-            GIT_OWNER)             GIT_OWNER=&quot;$value&quot; ;;
-            GIT_REPO)              GIT_REPO=&quot;$value&quot; ;;
-            GIT_API)               GIT_API=&quot;$value&quot; ;;
-            DROPBOX_APP_KEY)       DROPBOX_APP_KEY=&quot;$value&quot; ;;
-            DROPBOX_APP_SECRET)    DROPBOX_APP_SECRET=&quot;$value&quot; ;;
-            DROPBOX_REFRESH_TOKEN) DROPBOX_REFRESH_TOKEN=&quot;$value&quot; ;;
-            DROPBOX_PATH)          DROPBOX_PATH=&quot;$value&quot; ;;
-        esac
-    done &lt; &quot;$CONFIG_FILE&quot;
-fi
-
-# --- First-run / reconfigure setup ---
-if [ -z &quot;$gn_USER&quot; ] &amp;&amp; [ -z &quot;$GIT_TOKEN&quot; ] &amp;&amp; [ -z &quot;$DROPBOX_APP_KEY&quot; ]; then
-    echo &quot;No config found at $CONFIG_FILE - let&#x27;s set one up.&quot;
-    echo &quot;Select your provider:&quot;
-    echo &quot;1) Koofr (WebDAV)&quot;
-    echo &quot;2) Custom WebDAV Server&quot;
-    echo &quot;3) GitHub&quot;
-    echo &quot;4) Dropbox&quot;
-    printf &quot;Choice [1-4]: &quot;
-    read -r provider_choice
-
-    case &quot;$provider_choice&quot; in
-        2)
-            printf &quot;WebDAV Server URL (e.g., https://example.com/remote.php/dav/files/user/): &quot;
-            read -r gn_URL
-            printf &quot;Username: &quot;
-            read -r gn_USER
-            printf &quot;App Password (input hidden): &quot;
-            stty -echo; read -r gn_PASS; stty echo; echo
-            printf &quot;Remote notes folder inside WebDAV [/notes]: &quot;
-            read -r gn_PATH
-            gn_PATH=&quot;${gn_PATH:-/notes}&quot;
-            ;;
-        3)
-            printf &quot;GitHub Personal Access Token (input hidden): &quot;
-            stty -echo; read -r GIT_TOKEN; stty echo; echo
-            printf &quot;GitHub username (repo owner): &quot;
-            read -r GIT_OWNER
-            printf &quot;Repository name: &quot;
-            read -r GIT_REPO
-            ;;
-        4)
-            printf &quot;Dropbox App Key: &quot;
-            read -r DROPBOX_APP_KEY
-            printf &quot;Dropbox App Secret (input hidden): &quot;
-            stty -echo; read -r DROPBOX_APP_SECRET; stty echo; echo
-            printf &quot;Dropbox Refresh Token (input hidden): &quot;
-            stty -echo; read -r DROPBOX_REFRESH_TOKEN; stty echo; echo
-            printf &quot;Remote notes folder in Dropbox [/notes]: &quot;
-            read -r DROPBOX_PATH
-            DROPBOX_PATH=&quot;${DROPBOX_PATH:-/notes}&quot;
-            ;;
-        *)
-            gn_URL=&quot;https://app.koofr.net/dav/Koofr&quot;
-            printf &quot;Koofr email/username: &quot;
-            read -r gn_USER
-            printf &quot;Koofr app password (input hidden): &quot;
-            stty -echo; read -r gn_PASS; stty echo; echo
-            printf &quot;Remote notes folder [/notes]: &quot;
-            read -r gn_PATH
-            gn_PATH=&quot;${gn_PATH:-/notes}&quot;
-            ;;
-    esac
-
-    printf &quot;Save this config for future runs? [Y/n] &quot;
-    read -r save
-    case &quot;$save&quot; in
-        [Nn]|[Nn][Oo]) echo &quot;Using credentials for this session only.&quot; ;;
-        *)
-            umask 077
-            {
-                if [ -n &quot;$GIT_TOKEN&quot; ]; then
-                    printf &#x27;GIT_TOKEN=%s\nGIT_OWNER=%s\nGIT_REPO=%s\n&#x27; &quot;$GIT_TOKEN&quot; &quot;$GIT_OWNER&quot; &quot;$GIT_REPO&quot;
-                elif [ -n &quot;$DROPBOX_APP_KEY&quot; ]; then
-                    cat &lt;&lt;EOF
-DROPBOX_APP_KEY=$DROPBOX_APP_KEY
-DROPBOX_APP_SECRET=$DROPBOX_APP_SECRET
-DROPBOX_REFRESH_TOKEN=$DROPBOX_REFRESH_TOKEN
-DROPBOX_PATH=$DROPBOX_PATH
-EOF
-                else
-                    printf &#x27;gn_URL=%s\ngn_USER=%s\ngn_PASS=%s\ngn_PATH=%s\n&#x27; &quot;$gn_URL&quot; &quot;$gn_USER&quot; &quot;$gn_PASS&quot; &quot;$gn_PATH&quot;
-                fi
-            } &gt; &quot;$CONFIG_FILE&quot;
-            chmod 600 &quot;$CONFIG_FILE&quot;
-            echo &quot;Saved to $CONFIG_FILE&quot;
-            ;;
-    esac
-fi
-
-# --- Detect Sync Engine ---
-SYNC_ENGINE=&quot;&quot;
-if [ -n &quot;$GIT_TOKEN&quot; ] &amp;&amp; [ -n &quot;$GIT_OWNER&quot; ] &amp;&amp; [ -n &quot;$GIT_REPO&quot; ]; then
-    SYNC_ENGINE=&quot;GITHUB&quot;
-    GIT_API=&quot;${GIT_API:-https://api.github.com/repos/${GIT_OWNER}/${GIT_REPO}/contents}&quot;
-elif [ -n &quot;$DROPBOX_APP_KEY&quot; ] &amp;&amp; [ -n &quot;$DROPBOX_APP_SECRET&quot; ] &amp;&amp; [ -n &quot;$DROPBOX_REFRESH_TOKEN&quot; ]; then
-    SYNC_ENGINE=&quot;DROPBOX&quot;
-    DROPBOX_PATH=&quot;${DROPBOX_PATH:-/notes}&quot;
-    DROPBOX_PATH=&quot;/${DROPBOX_PATH#/}&quot;
-    [ &quot;$DROPBOX_PATH&quot; = &quot;//&quot; ] &amp;&amp; DROPBOX_PATH=&quot;/&quot;
-elif [ -n &quot;$gn_USER&quot; ] &amp;&amp; [ -n &quot;$gn_PASS&quot; ] &amp;&amp; [ -n &quot;$gn_URL&quot; ]; then
-    SYNC_ENGINE=&quot;WEBDAV&quot;
-    gn_URL=&quot;${gn_URL%/}&quot;
-    gn_PATH=&quot;${gn_PATH:-/notes}&quot;
-    case &quot;$gn_PATH&quot; in /*) ;; *) gn_PATH=&quot;/$gn_PATH&quot; ;; esac
-    [ &quot;$gn_PATH&quot; = &quot;//&quot; ] &amp;&amp; gn_PATH=&quot;/&quot;
-else
-    echo &quot;Error: gn.conf is incomplete. Provide WebDAV (gn_URL, gn_USER, gn_PASS),&quot; &gt;&amp;2
-    echo &quot;GitHub (GIT_TOKEN, GIT_OWNER, GIT_REPO), or Dropbox (DROPBOX_APP_KEY,&quot; &gt;&amp;2
-    echo &quot;DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN) credentials.&quot; &gt;&amp;2
-    exit 1
-fi
-
-# --- Dropbox Auth Init ---
-if [ &quot;$SYNC_ENGINE&quot; = &quot;DROPBOX&quot; ]; then
-    dropbox_refresh() {
-        local resp pfile
-        pfile=$(mktemp); chmod 600 &quot;$pfile&quot;
-        cat &lt;&lt;EOF &gt; &quot;$pfile&quot;
-grant_type=refresh_token&amp;refresh_token=${DROPBOX_REFRESH_TOKEN}&amp;client_id=${DROPBOX_APP_KEY}&amp;client_secret=${DROPBOX_APP_SECRET}
-EOF
-        resp=$(curl -s -X POST &quot;https://api.dropbox.com/oauth2/token&quot; --data-binary &quot;@$pfile&quot;)
-        rm -f &quot;$pfile&quot;
-        DROPBOX_ACCESS_TOKEN=$(echo &quot;$resp&quot; | awk -F&#x27;&quot;&#x27; &#x27;{for(i=1;i&lt;=NF;i++) if($i==&quot;access_token&quot;) {print $(i+2); exit}}&#x27;)
-        [ -z &quot;$DROPBOX_ACCESS_TOKEN&quot; ] &amp;&amp; { echo &quot;Error: Dropbox token refresh failed: $resp&quot; &gt;&amp;2; exit 1; }
-    }
-    dropbox_refresh
-fi
-
-EDITOR=&quot;${EDITOR:-nano}&quot;
-
-# --- Helpers ---
-show_help() {
-    local remote_info
-    case &quot;$SYNC_ENGINE&quot; in
-        GITHUB)  remote_info=&quot;GitHub: ${GIT_OWNER}/${GIT_REPO}&quot; ;;
-        DROPBOX) remote_info=&quot;Dropbox: ${DROPBOX_PATH}&quot; ;;
-        *)       remote_info=&quot;WebDAV: ${gn_URL}${gn_PATH}&quot; ;;
-    esac
-    cat &lt;&lt;EOF
-Usage: gn [options] [note]
-
-  -h          Show this help
-  -t          Open today&#x27;s note (YYYY-MM-DD)
-  -d NOTE     Delete a note (local + remote)
-  -r OLD NEW  Rename a note (local + remote)
-  -s          Sync (pull) all remote notes down to local directory
-  -c          Clear saved credentials and reconfigure
-
-Engine: $SYNC_ENGINE
-Remote: $remote_info
-EOF
-    exit 0
-}
-
-api_curl() {
-    local hdr rc
-    if [ &quot;$SYNC_ENGINE&quot; = &quot;WEBDAV&quot; ]; then
-        local nf host
-        host=$(echo &quot;$gn_URL&quot; | awk -F/ Kishor &#x27;{print $3}&#x27;)
-        nf=$(mktemp); chmod 600 &quot;$nf&quot;
-        printf &#x27;machine %s\nlogin %s\npassword %s\n&#x27; &quot;$host&quot; &quot;$gn_USER&quot; &quot;$gn_PASS&quot; &gt; &quot;$nf&quot;
-        curl -s --netrc-file &quot;$nf&quot; &quot;$@&quot;; rc=$?
-        rm -f &quot;$nf&quot;; return $rc
-    else
-        hdr=$(mktemp); chmod 600 &quot;$hdr&quot;
-        if [ &quot;$SYNC_ENGINE&quot; = &quot;GITHUB&quot; ]; then
-            echo &quot;Authorization: token $GIT_TOKEN&quot; &gt; &quot;$hdr&quot;
-        else
-            echo &quot;Authorization: Bearer $DROPBOX_ACCESS_TOKEN&quot; &gt; &quot;$hdr&quot;
-        fi
-        curl -s -H &quot;@$hdr&quot; &quot;$@&quot;; rc=$?
-        rm -f &quot;$hdr&quot;; return $rc
-    fi
-}
-
-urlenc() {
-    local s=&quot;$1&quot; out=&quot;&quot; c i
-    for (( i=0; i&lt;${#s}; i++ )); do
-        c=&quot;${s:$i:1}&quot;
-        case &quot;$c&quot; in
-            [a-zA-Z0-9./_-]) out+=&quot;$c&quot; ;;
-            *) out+=$(printf &#x27;%%%02X&#x27; &quot;&#x27;$c&quot;) ;;
-        esac
-    done
-    echo &quot;$out&quot;
-}
-
-urldec() {
-    echo &quot;$1&quot; | awk &#x27;{
-        gsub(/\+/, &quot; &quot;);
-        while (match($0, /%[0-9a-fA-F]{2}/)) {
-            hex = substr($0, RSTART+1, 2);
-            dec = 0;
-            for (i=1; i&lt;=2; i++) {
-                c = substr(hex, i, 1);
-                if (c ~ /[A-F]/) { dec = dec * 16 + (index(&quot;ABCDEF&quot;, c) + 9) }
-                else if (c ~ /[a-f]/) { dec = dec * 16 + (index(&quot;abcdef&quot;, c) + 9) }
-                else { dec = dec * 16 + c }
-            }
-            printf &quot;%s%c&quot;, substr($0, 1, RSTART-1), dec;
-            $0 = substr($0, RSTART+RLENGTH);
-        }
-        print $0;
-    }&#x27;
-}
-
-get_file_hash() {
-    if command -v md5sum &gt;/dev/null 2>&1; then md5sum &quot;$1&quot; 2>/dev/null | awk '{print $1}'
-    elif command -v shasum &gt;/dev/null 2>&1; then shasum &quot;$1&quot; 2>/dev/null | awk '{print $1}'
-    elif command -v md5 &gt;/dev/null 2>&1; then md5 -q &quot;$1&quot; 2>/dev/null || md5 &quot;$1&quot; 2>/dev/null | awk '{print $1}'
-    else ls -ln &quot;$1&quot; 2>/dev/null | awk '{print $5,$6,$7,$8}'
-    fi
-}
-
-remote_url() { echo &quot;${gn_URL}$(urlenc &quot;${gn_PATH}/$1&quot;)&quot;; }
-
-remote_mkdir() {
-    local dir=&quot;$1&quot; path=&quot;&quot; part parts target
-    if [ -z &quot;$dir&quot; ] || [ &quot;$dir" = "." ]; then target="$gn_PATH"; else target="$gn_PATH/$dir"; fi
-    IFS='/' read -ra parts <<< "$target"
-    for part in "${parts[@]}"; do
-        [ -z "$part" ] && continue
-        path="$path/$part"
-        api_curl -X MKCOL "${gn_URL}$(urlenc "$path")" -o /dev/null
-    done
-}
-
-pull_note() {
-    local file=&quot;$1&quot;
-
-    if [ &quot;$SYNC_ENGINE&quot; = &quot;GITHUB&quot; ]; then
-        local url resp http_code content REPLY
-        url=&quot;${GIT_API}/$file&quot;
-        resp=$(api_curl -w &quot;\n%{http_code}&quot; &quot;$url&quot;)
-        http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
-        REPLY=&quot;${resp%$&#x27;\n&#x27;*}&quot;
-        [ &quot;$http_code&quot; = &quot;404&quot; ] &amp;&amp; return 0
-        [ &quot;$http_code&quot; != &quot;200&quot; ] &amp;&amp; { echo &quot;Error: Pull failed (HTTP $http_code): $REPLY&quot; &gt;&amp;2; exit 1; }
-        content=$(echo &quot;$REPLY&quot; | awk -F&#x27;&quot;&#x27; &#x27;{for(i=1;i&lt;=NF;i++) if($i==&quot;content&quot;) {print $(i+2); exit}}&#x27; | tr -d &#x27;\\ n[:space:]&quot;&#x27;)
-        [ -n &quot;$content&quot; ] &amp;&amp; [ &quot;$content&quot; != &quot;null&quot; ] &amp;&amp; {
-            echo &quot;$content&quot; | base64 -d &gt; &quot;$file&quot; 2&gt;/dev/null \
-                || echo &quot;$content&quot; | base64 -D &gt; &quot;$file&quot; 2&gt;/dev/null
-        }
-
-    elif [ &quot;$SYNC_ENGINE&quot; = &quot;DROPBOX&quot; ]; then
-        local path arg http_code
-        path=$(printf &#x27;%s/%s&#x27; &quot;$DROPBOX_PATH&quot; &quot;$file&quot; | sed &#x27;s#//*#/#g&#x27;)
-        arg=$(printf &#x27;{&quot;path&quot;:&quot;%s&quot;}&#x27; &quot;$path&quot;)
-        http_code=$(api_curl -o &quot;$file.tmp&quot; -w &quot;%{http_code}&quot; -X POST \
-            &quot;https://content.dropboxapi.com/2/files/download&quot; \
-            -H &quot;Dropbox-API-Arg: $arg&quot;)
-        case &quot;$http_code&quot; in
-            200) mv &quot;$file.tmp&quot; &quot;$file&quot; ;;
-            409) rm -f &quot;$file.tmp&quot; ;;
-            *)   rm -f &quot;$file.tmp&quot;; echo &quot;Error: Dropbox pull failed (HTTP $http_code).&quot; &gt;&amp;2; exit 1 ;;
-        esac
-
-    else
-        local url http_code
-        url=$(remote_url &quot;$file&quot;)
-        http_code=$(api_curl -w &quot;%{http_code}&quot; -o &quot;$file&quot; &quot;$url&quot;)
-        case &quot;$http_code&quot; in
-            200) ;;
-            404) rm -f &quot;$file&quot; ;;
-            *) echo &quot;Error: Pull failed (HTTP $http_code).&quot; &gt;&amp;2; exit 1 ;;
-        esac
-    fi
-}
-
-push_note() {
-    local file=&quot;$1&quot;
-
-    if [ &quot;$SYNC_ENGINE&quot; = &quot;GITHUB&quot; ]; then
-        local url sha sha_resp http_code content msg pfile REPLY
-        msg=&quot;gn: update $file $(date &#x27;+%Y-%m-%d %H:%M:%S&#x27;)&quot;
-        url=&quot;${GIT_API}/$file&quot;
-        content=$(base64 -w0 &lt; &quot;$file&quot; 2&gt;/dev/null || base64 &lt; &quot;$file&quot; | tr -d &#x27;\n&#x27;)
-        pfile=$(mktemp); chmod 600 &quot;$pfile&quot;
-        sha_resp=$(api_curl -s &quot;$url&quot;)
-        sha=$(echo &quot;$sha_resp&quot; | awk -F&#x27;&quot;&#x27; &#x27;{for(i=1;i&lt;=NF;i++) if($i==&quot;sha&quot;) {print $(i+2); exit}}&#x27;)
-        if [ -n &quot;$sha&quot; ]; then
-            printf &#x27;{&quot;message&quot;:&quot;%s&quot;,&quot;content&quot;:&quot;%s&quot;,&quot;sha&quot;:&quot;%s&quot;,&quot;branch&quot;:&quot;main&quot;}&#x27; \
-                &quot;$msg&quot; &quot;$content&quot; &quot;$sha&quot; &gt; &quot;$pfile&quot;
-        else
-            printf &#x27;{&quot;message&quot;:&quot;%s&quot;,&quot;content&quot;:&quot;%s&quot;,&quot;branch&quot;:&quot;main&quot;}&#x27; \
-                &quot;$msg&quot; &quot;$content&quot; &gt; &quot;$pfile&quot;
-        fi
-        resp=$(api_curl -w &quot;\n%{http_code}&quot; -X PUT -H &quot;Content-Type: application/json&quot; --data-binary &quot;@$pfile&quot; &quot;$url&quot;)
-        rm -f &quot;$pfile&quot;
-        http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
-        REPLY=&quot;${resp%$&#x27;\n&#x27;*}&quot;
-        [[ &quot;$http_code&quot; =~ ^(200|201)$ ]] || { echo &quot;Error: Push failed (HTTP $http_code): $REPLY&quot; &gt;&amp;2; exit 1; }
-
-    elif [ &quot;$SYNC_ENGINE&quot; = &quot;DROPBOX&quot; ]; then
-        local path arg resp http_code REPLY
-        path=$(printf &#x27;%s/%s&#x27; &quot;$DROPBOX_PATH&quot; &quot;$file&quot; | sed &#x27;s#//*#/#g&#x27;)
-        arg=$(printf &#x27;{&quot;path&quot;:&quot;%s&quot;,&quot;mode&quot;:&quot;overwrite&quot;,&quot;autorename&quot;:false,&quot;mute&quot;:true}&#x27; &quot;$path&quot;)
-        resp=$(api_curl -w &quot;\n%{http_code}&quot; -X POST \
-            &quot;https://content.dropboxapi.com/2/files/upload&quot; \
-            -H &quot;Dropbox-API-Arg: $arg&quot; \
-            -H &quot;Content-Type: application/octet-stream&quot; \
-            --data-binary &quot;@$file&quot;)
-        http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
-        REPLY=&quot;${resp%$&#x27;\n&#x27;*}&quot;
-        [ &quot;$http_code&quot; = &quot;200&quot; ] || { echo &quot;Error: Dropbox push failed (HTTP $http_code): $REPLY&quot; &gt;&amp;2; exit 1; }
-
-    else
-        local url http_code dir
-        dir=$(dirname &quot;$file&quot;)
-        remote_mkdir &quot;$dir&quot;
-        url=$(remote_url &quot;$file&quot;)
-        http_code=$(api_curl -w &quot;%{http_code}&quot; -o /dev/null -X PUT --data-binary "@$file" "$url")
-        case "$http_code" in
-            200|201|204) ;;
-            *) echo "Error: Push failed (HTTP $http_code)." >&2; exit 1 ;;
-        esac
-    fi
-}
-
-remote_delete() {
-    local file=&quot;$1&quot; msg=&quot;${2:-gn: delete $1}&quot;
-
-    if [ &quot;$SYNC_ENGINE&quot; = &quot;GITHUB&quot; ]; then
-        local url sha sha_resp http_code resp pfile REPLY
-        url=&quot;${GIT_API}/$file&quot;
-        pfile=$(mktemp); chmod 600 &quot;$pfile&quot;
-        sha_resp=$(api_curl -s &quot;$url&quot;)
-        sha=$(echo &quot;$sha_resp&quot; | awk -F&#x27;&quot;&#x27; &#x27;{for(i=1;i&lt;=NF;i++) if($i==&quot;sha&quot;) {print $(i+2); exit}}&#x27;)
-        if [ -z &quot;$sha&quot; ]; then rm -f &quot;$pfile&quot;; return 0; fi
-        printf &#x27;{&quot;message&quot;:&quot;%s&quot;,&quot;sha&quot;:&quot;%s&quot;,&quot;branch&quot;:&quot;main&quot;}\x27; &quot;$msg&quot; &quot;$sha&quot; &gt; &quot;$pfile&quot;
-        resp=$(api_curl -w &quot;\n%{http_code}&quot; -X DELETE -H &quot;Content-Type: application/json&quot; --data-binary &quot;@$pfile&quot; &quot;$url&quot;)
-        rm -f &quot;$pfile&quot;
-        http_code=&quot;${resp##*$&#x27;\n&#x27;}&quot;
-        [[ &quot;$http_code&quot; =~ ^(200|204)$ ]] || echo &quot;Warning: Remote delete failed (HTTP $http_code).&quot; &gt;&amp;2
-
-    elif [ &quot;$SYNC_ENGINE&quot; = &quot;DROPBOX&quot; ]; then
-        local path arg resp http_code
-        path=$(printf &#x27;%s/%s&#x27; &quot;$DROPBOX_PATH&quot; &quot;$file&quot; | sed &#x27;s#//*#/#g&#x27;)
-        arg=$(printf &#x27;{&quot;path&quot;:&quot;%s&quot;}&#x27; &quot;$path&quot;)
-        resp=$(api_curl -w &quot;\n%{http_code}&quot; -X POST \
-            -H "Content-Type: application/json" --data-binary "$arg" \
-            "https://api.dropboxapi.com/2/files/delete_v2")
-        http_code="${resp##*$'\n'}"
-        [[ "$http_code" =~ ^(200|409)$ ]] || echo "Warning: Dropbox delete failed (HTTP $http_code)." >&2
-
-    else
-        local url http_code
-        url=$(remote_url "$file")
-        http_code=$(api_curl -w "%{http_code}" -o /dev/null -X DELETE "$url")
-        case "$http_code" in 200|204|404) ;; *) echo "Warning: Remote delete failed (HTTP $http_code)." >&2 ;; esac
-    fi
-}
-
-remote_rename() {
-    local old=&quot;$1&quot; new=&quot;$2&quot;
-
-    if [ &quot;$SYNC_ENGINE&quot; = &quot;GITHUB&quot; ] || [ &quot;$SYNC_ENGINE&quot; = &quot;DROPBOX&quot; ]; then
-        cp &quot;$NOTES_DIR/$old&quot; &quot;$NOTES_DIR/$new&quot;
-        push_note &quot;$new&quot;
-        remote_delete &quot;$old&quot; &quot;gn: rename $old to $new&quot;
-        rm -f &quot;$NOTES_DIR/$new&quot;
-    else
-        local src dst http_code dir
-        dir=$(dirname &quot;$new&quot;)
-        remote_mkdir &quot;$dir&quot;
-        src=$(remote_url &quot;$old&quot;)
-        dst=$(remote_url &quot;$new&quot;)
-        http_code=$(api_curl -w &quot;%{http_code}&quot; -o /dev/null -X MOVE -H &quot;Destination: $dst&quot; -H &quot;Overwrite: F&quot; &quot;$src&quot;)
-        case &quot;$http_code&quot; in 201|204|412|404) ;; *) echo &quot;Warning: Remote rename failed (HTTP $http_code).&quot; &gt;&amp;2 ;; esac
-    fi
-}
-
-delete_note() {
-    local file=&quot;$1&quot;
-    case &quot;$file&quot; in *.md) ;; *) file=&quot;${file}.md&quot; ;; esac
-    [ -f &quot;$NOTES_DIR/$file&quot; ] || { echo &quot;Error: &#x27;$file&#x27; not found.&quot;; exit 1; }
-    printf &quot;Delete &#x27;%s&#x27;? This cannot be undone. [y/N] &quot; &quot;$file&quot;
-    read -r confirm
-    case &quot;$confirm&quot; in [Yy]|[Yy][Ee][Ss]) ;; *) echo &quot;Aborted.&quot;; exit 0 ;; esac
-    remote_delete &quot;$file&quot; &quot;gn: delete $file&quot;
-    rm &quot;$NOTES_DIR/$file&quot;
-    echo &quot;Deleted &#x27;$file&#x27;.&quot;
-    exit 0
-}
-
-rename_note() {
-    local old=&quot;$1&quot; new=&quot;$2&quot;
-    case &quot;$old&quot; in *.md) ;; *) old=&quot;${old}.md&quot; ;; esac
-    case &quot;$new" in *.md) ;; *) new="${new}.md" ;; esac
-    [ -f "$NOTES_DIR/$old" ] || { echo "Error: '$old' not found."; exit 1; }
-    [ -f "$NOTES_DIR/$new" ] && { echo "Error: '$new' already exists."; exit 1; }
-    remote_rename "$old" "$new"
-    [ "$(dirname "$new")" != "." ] && mkdir -p "$NOTES_DIR/$(dirname "$new")"
-    mv "$NOTES_DIR/$old" "$NOTES_DIR/$new"
-    echo "Renamed '$old' to '$new'."
-    exit 0
-}
-
-sync_all_remote() {
-    echo "Fetching remote file list... [$SYNC_ENGINE]"
-
-    if [ "$SYNC_ENGINE" = "GITHUB" ]; then
-        local resp http_code REPLY paths path
-        resp=$(api_curl -w "\n%{http_code}" "${GIT_API}")
-        http_code="${resp##*$'\n'}"
-        REPLY="${resp%$'\n'*}"
-        [ "$http_code" != "200" ] && { echo "Error: Could not list remote files (HTTP $http_code)." >&2; exit 1; }
-        paths=$(echo "$REPLY" | awk -F'"' '{for(i=1;i<=NF;i++) if($i=="name") print $(i+2)}' | grep '\.md$')
-        echo "$paths" | while IFS= read -r path; do
-            [ -z "$path" ] && continue
-            echo "Syncing: $path"
-            (cd "$NOTES_DIR" && pull_note "$path")
-        done
-
-    elif [ "$SYNC_ENGINE" = "DROPBOX" ]; then
-        local resp http_code REPLY arg paths path
-        arg=$(printf '{"path":"%s","recursive":true}' "$DROPBOX_PATH")
-        resp=$(api_curl -w "\n%{http_code}" -X POST \
-            -H "Content-Type: application/json" --data-binary "$arg" \
-            "https://api.dropboxapi.com/2/files/list_folder")
-        http_code="${resp##*$'\n'}"
-        REPLY="${resp%$'\n'*}"
-        [ "$http_code" != "200" ] && { echo "Error: Could not list remote files (HTTP $http_code)." >&2; exit 1; }
-        paths=$(echo "$REPLY" | awk -F'"' '{for(i=1;i<=NF;i++) if($i=="path_display") print $(i+2)}' | grep '\.md$')
-        echo "$paths" | while IFS= read -r path; do
-            [ -z "$path" ] && continue
-            rel_path=$(echo "$path" | sed "s|^$DROPBOX_PATH/||" | sed 's|^/||')
-            echo "Syncing: $rel_path"
-            dir=$(dirname "$rel_path")
-            [ "$dir" != "." ] && mkdir -p "$NOTES_DIR/$dir"
-            (cd "$NOTES_DIR" && pull_note "$rel_path")
-        done
-
-    else
-        local base_encoded_path xml_response raw_paths path dec_path rel_path dir
-        base_encoded_path=$(urlenc "$gn_PATH")
-        xml_response=$(api_curl -X PROPFIND -H "Depth: 1" -H "Content-Type: text/xml" "${gn_URL}${base_encoded_path}")
-        if [ -z "$xml_response" ]; then
-            echo "Error: Could not retrieve remote file list." >&2; exit 1
-        fi
-        raw_paths=$(echo "$xml_response" | tr -d '\n\r' | sed -E 's/<\/[^>]*href>//g' | sed -E 's/<[^>]*href>/\n/g' | grep -v '^[[:space:]]*$')
-        echo "$raw_paths" | while IFS= read -r path; do
-            [ -z "$path" ] && continue
-            dec_path=$(urldec "$path")
-            case "$dec_path" in
-                *"$gn_PATH"*.*.md)
-                    rel_path=$(echo "$dec_path" | sed "s|.*$gn_PATH||" | sed 's|^/||')
-                    echo "Syncing: $rel_path"
-                    dir=$(dirname "$rel_path")
-                    [ "$dir" != "." ] && mkdir -p "$NOTES_DIR/$dir"
-                    (cd "$NOTES_DIR" && pull_note "$rel_path")
-                    ;;
-            esac
-        done
-    fi
-
-    echo "Sync complete."
-    exit 0
-}
-
-reconfigure() {
-    rm -f "$CONFIG_FILE"
-    echo "Saved config cleared. Run gn again to set up new credentials."
-    exit 0
-}
-
-# --- Entry Point ---
-if [ "$1" = "-r" ]; then
-    [ -z "$2" ] || [ -z "$3" ] && { echo "Usage: gn -r OLD NEW"; exit 1; }
-    rename_note "$2" "$3"
-fi
-
-ACTION_RUN=0
-while getopts "htcd:s" opt; do
-    case $opt in
-        h) show_help ;;
-        t) NOTE_NAME=$(date '+%Y-%m-%d') ;;
-        c) ACTION_RUN=1; reconfigure ;;
-        d) ACTION_RUN=1; delete_note "$OPTARG" ;;
-        s) ACTION_RUN=1; sync_all_remote ;;
-        *) show_help ;;
-    esac
-done
-[ "$ACTION_RUN" -eq 1 ] && exit 0
-shift $((OPTIND - 1))
-
-[ -z "$NOTE_NAME" ] && NOTE_NAME="${1:-note}\x27
-if [ "$NOTE_NAME" = "gn.conf" ] || [ "$NOTE_NAME" = "gn.sh" ]; then
-    echo "Error: Cannot open runtime files via gn."
-    exit 1
-fi
-
-case "$NOTE_NAME" in *.md) ;; *) NOTE_NAME="${NOTE_NAME}.md" ;; esac
-
-cd "$NOTES_DIR" || { echo "Error: Cannot access $NOTES_DIR"; exit 1; }
-[ "$(dirname "$NOTE_NAME")" != "." ] && mkdir -p "$(dirname "$NOTE_NAME")"
-
-echo "Fetching... [$SYNC_ENGINE]"
-pull_note "$NOTE_NAME"
-
-PRE_SHA=$(get_file_hash "$NOTE_NAME")
-$EDITOR "$NOTE_NAME"
-
-[ -f "$NOTE_NAME" ] || { echo "Note not saved. Cancelled."; exit 0; }
-
-POST_SHA=$(get_file_hash "$NOTE_NAME")
-if [ "$PRE_SHA" = "$POST_SHA" ]; then
-    echo "No changes. Sync skipped."
-else
-    echo "Pushing... [$SYNC_ENGINE]"
-    push_note "$NOTE_NAME"
-    echo "Done."
-fi
-</code></pre>
+                    <pre><code id="full-script">Loading gn.sh...</code></pre>
                 </div>
             </section>
 
@@ -1232,21 +584,57 @@ fi
         </div>
 
         <script>
-            document.querySelectorAll(".copy-btn").forEach(function (btn) {
-                btn.addEventListener("click", function () {
-                    var target = document.getElementById(
-                        btn.getAttribute("data-copy-target"),
-                    );
-                    var text = target.textContent;
-                    navigator.clipboard.writeText(text).then(function () {
-                        var original = btn.textContent;
-                        btn.textContent = "Copied";
-                        btn.classList.add("copied");
-                        setTimeout(function () {
-                            btn.textContent = original;
-                            btn.classList.remove("copied");
-                        }, 1500);
+            // Copy buttons for inline code blocks
+            document
+                .querySelectorAll(".copy-btn[data-copy-target]")
+                .forEach(function (btn) {
+                    btn.addEventListener("click", function () {
+                        var target = document.getElementById(
+                            btn.getAttribute("data-copy-target"),
+                        );
+                        navigator.clipboard
+                            .writeText(target.textContent)
+                            .then(function () {
+                                var original = btn.textContent;
+                                btn.textContent = "Copied";
+                                btn.classList.add("copied");
+                                setTimeout(function () {
+                                    btn.textContent = original;
+                                    btn.classList.remove("copied");
+                                }, 1500);
+                            });
                     });
+                });
+
+            // Fetch gn.sh and populate the source block
+            var scriptEl = document.getElementById("full-script");
+            var copyBtn = document.getElementById("script-copy-btn");
+            var rawScript = "";
+
+            fetch("./gn.sh")
+                .then(function (res) {
+                    if (!res.ok) throw new Error("HTTP " + res.status);
+                    return res.text();
+                })
+                .then(function (text) {
+                    rawScript = text;
+                    scriptEl.textContent = text;
+                    copyBtn.removeAttribute("disabled");
+                })
+                .catch(function () {
+                    scriptEl.textContent =
+                        "Could not load gn.sh. Download the file directly using the link above.";
+                });
+
+            copyBtn.addEventListener("click", function () {
+                if (!rawScript) return;
+                navigator.clipboard.writeText(rawScript).then(function () {
+                    copyBtn.textContent = "Copied";
+                    copyBtn.classList.add("copied");
+                    setTimeout(function () {
+                        copyBtn.textContent = "Copy";
+                        copyBtn.classList.remove("copied");
+                    }, 1500);
                 });
             });
         </script>
