@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # gn - Get Notes
-# A zero-dependency CLI tool to sync markdown notes via GitHub or Koofr.
+# A zero-dependency CLI tool to sync markdown notes via GitHub or WebDAV.
 # Web: gn-notes.pages.dev. Author: Barney Matthews. License: MIT
 
 NOTES_DIR="$HOME/gn"
@@ -25,7 +25,7 @@ if [ -f "$CONFIG_FILE" ]; then
         key=$(echo "$key" | tr -d ' ')
         [[ -z "$key" || "$key" =~ ^# ]] && continue
 
-        value="${value%%#*}"
+        value="${value%%#*}$"
         value=$(echo "$value" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
         [[ "$value" =~ ^[\'\"](.*)[\'\"]$ ]] && value="${BASH_REMATCH[1]}"
         case "$key" in
@@ -47,7 +47,9 @@ if [ -z "$gn_USER" ] && [ -z "$GIT_TOKEN" ]; then
     echo "Select your provider:"
     echo "1) GitHub"
     echo "2) Koofr"
-    printf "Choice [1-2]: "
+    echo "3) TAB.DIGITAL"
+    echo "4) The Good Cloud"
+    printf "Choice [1-4]: "
     read -r provider_choice
 
     case "$provider_choice" in
@@ -58,6 +60,28 @@ if [ -z "$gn_USER" ] && [ -z "$GIT_TOKEN" ]; then
             read -r GIT_OWNER
             printf "Repository name: "
             read -r GIT_REPO
+            ;;
+        3)
+            printf "TAB.DIGITAL Username: "
+            read -r gn_USER
+            gn_URL="https://cloud.tab.digital/remote.php/dav/files/${gn_USER}"
+            printf "TAB.DIGITAL App Password (input hidden): "
+            stty -echo; read -r gn_PASS; stty echo; echo
+            printf "Remote notes folder [/gn]: "
+            read -r gn_PATH
+            gn_PATH="${gn_PATH:-/gn}"
+            ;;
+        4)
+            printf "The Good Cloud Username: "
+            read -r gn_USER
+            printf "The Good Cloud Subdomain (e.g., nu or nl): "
+            read -r tgc_sub
+            gn_URL="https://${tgc_sub}.thegood.cloud/remote.php/dav/files/${gn_USER}"
+            printf "The Good Cloud App Password (input hidden): "
+            stty -echo; read -r gn_PASS; stty echo; echo
+            printf "Remote notes folder [/gn]: "
+            read -r gn_PATH
+            gn_PATH="${gn_PATH:-/gn}"
             ;;
         *)
             gn_URL="https://app.koofr.net/dav/Koofr"
@@ -96,13 +120,18 @@ if [ -n "$GIT_TOKEN" ] && [ -n "$GIT_OWNER" ] && [ -n "$GIT_REPO" ]; then
     SYNC_ENGINE="GITHUB"
     GIT_API="${GIT_API:-https://api.github.com/repos/${GIT_OWNER}/${GIT_REPO}/contents}"
 elif [ -n "$gn_USER" ] && [ -n "$gn_PASS" ] && [ -n "$gn_URL" ]; then
-    SYNC_ENGINE="KOOFR"
+    # Generalize Koofr, TAB.DIGITAL, and The Good Cloud under standard WebDAV
+    if [[ "$gn_URL" =~ koofr\.net ]]; then
+        SYNC_ENGINE="KOOFR"
+    else
+        SYNC_ENGINE="WEBDAV"
+    fi
     gn_URL="${gn_URL%/}"
     gn_PATH="${gn_PATH:-/notes}"
     gn_PATH="/${gn_PATH#/}"
     [ "$gn_PATH" = "//" ] && gn_PATH="/"
 else
-    echo "Error: gn.conf is incomplete. Provide GitHub or Koofr credentials." >&2
+    echo "Error: gn.conf is incomplete. Provide GitHub or WebDAV credentials." >&2
     exit 1
 fi
 
@@ -112,7 +141,8 @@ show_help() {
     local remote_info
     case "$SYNC_ENGINE" in
         GITHUB)  remote_info="GitHub: ${GIT_OWNER}/${GIT_REPO}" ;;
-        *)       remote_info="Koofr: ${gn_URL}${gn_PATH}" ;;
+        KOOFR)   remote_info="Koofr: ${gn_URL}${gn_PATH}" ;;
+        WEBDAV)  remote_info="WebDAV: ${gn_URL}${gn_PATH}" ;;
     esac
     cat <<EOF
 Usage: gn [options] [note]
@@ -139,7 +169,7 @@ EOF
 
 api_curl() {
     local hdr rc
-    if [ "$SYNC_ENGINE" = "KOOFR" ]; then
+    if [ "$SYNC_ENGINE" = "KOOFR" ] || [ "$SYNC_ENGINE" = "WEBDAV" ]; then
         local host
         host=$(echo "$gn_URL" | awk -F/ '{print $3}')
         nf=$(mktemp); chmod 600 "$nf"
@@ -195,7 +225,6 @@ get_file_hash() {
 
 # --- Pure POSIX Engines for Base64 and JSON ---
 
-# Stateful micro-JSON parser (Handles arbitrary formatting and spaces)
 posix_parse_json() {
     local target_key="$1"
     awk -v target="$target_key" '
@@ -205,7 +234,6 @@ posix_parse_json() {
     '
 }
 
-# Native Awk Base64 Encoder
 posix_b64encode() {
     awk '
     BEGIN {
@@ -243,7 +271,6 @@ posix_b64encode() {
     '
 }
 
-# Native Awk Base64 Decoder
 posix_b64decode() {
     awk '
     BEGIN {
@@ -297,7 +324,7 @@ remote_mkdir() {
     for part in "${parts[@]}"; do
         [ -z "$part" ] && continue
         path="$path/$part"
-        [ "$SYNC_ENGINE" = "KOOFR" ] && api_curl -X MKCOL "${gn_URL}$(urlenc "$path")" -o /dev/null
+        [ "$SYNC_ENGINE" = "KOOFR" ] || [ "$SYNC_ENGINE" = "WEBDAV" ] && api_curl -X MKCOL "${gn_URL}$(urlenc "$path")" -o /dev/null
     done
 }
 
@@ -312,11 +339,9 @@ pull_note() {
         [ "$http_code" = "404" ] && return 0
         [ "$http_code" != "200" ] && { echo "Error: Pull failed (HTTP $http_code)" >&2; exit 1; }
 
-        # FIX: Drop sed. Use stateful POSIX awk tokenizing logic.
         content=$(echo "$REPLY" | posix_parse_json "content" | tr -d '\n\r ')
 
         if [ -n "$content" ] && [ "$content" != "null" ]; then
-            # FIX: Platform-safe purely native Awk base64 processing
             echo "$content" | posix_b64decode > "$file"
         fi
     else
@@ -340,13 +365,11 @@ push_note() {
         safe_file=$(printf '%s' "$file" | sed 's/\\/\\\\/g; s/"/\\"/g')
         url="${GIT_API}/${safe_file}"
 
-        # FIX: Pure POSIX native base64 text-packing step
         content=$(posix_b64encode < "$file")
 
         pfile=$(mktemp); chmod 600 "$pfile"
         sha_resp=$(api_curl -s "$url")
 
-        # FIX: Token-parse JSON object layout properly
         sha=$(echo "$sha_resp" | posix_parse_json "sha")
 
         if [ -n "$sha" ] && [ "$sha" != "null" ]; then
@@ -380,7 +403,6 @@ remote_delete() {
         pfile=$(mktemp); chmod 600 "$pfile"
         sha_resp=$(api_curl -s "$url")
 
-        # FIX: Parse with the tokenizer
         sha=$(echo "$sha_resp" | posix_parse_json "sha")
 
         if [ -z "$sha" ] || [ "$sha" = "null" ]; then rm -f "$pfile"; return 0; fi
@@ -438,7 +460,6 @@ sync_all_remote() {
         local resp
         resp=$(api_curl -s "${GIT_API}")
 
-        # Extract file names robustly using structural symbols as separators
         echo "$resp" | awk '
         BEGIN { RS="[{},]" }
         /\"name\":/ {
