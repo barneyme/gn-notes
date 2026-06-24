@@ -1,6 +1,6 @@
 # gn // get notes
 
-'gn' is a simple bash script that pulls a markdown note from cloud storage, opens it in $EDITOR, and pushes it back if you changed anything. Supports standard WebDAV endpoints (Koofr, TAB.DIGITAL, The Good Cloud) and GitHub. No git, no daemons, no heavy apps to install - just curl and a local folder.
+'gn' is a simple bash script that pulls a markdown note from cloud storage, opens it in $EDITOR, and pushes it back if you changed anything. Supports standard WebDAV endpoints (Koofr and GitHub. No git, no daemons, no heavy apps to install - just curl and a local folder.
 
 Just:
 
@@ -18,8 +18,6 @@ Just:
 - Works with any editor through `$EDITOR`
 - Syncs notes through:
   - Koofr (WebDAV)
-  - TAB.DIGITAL (NextCloud)
-  - The Good Cloud (NextCloud)
   - GitHub repositories
 - Automatic pull → edit → push workflow
 - Search notes with grep
@@ -418,5 +416,5 @@ MIT
 Barney Matthews
 
 ```text
-https://barney.me
+https://tuxs.me
 ```
