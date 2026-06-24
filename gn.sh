@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # gn - Get Notes
 # A zero-dependency CLI tool to sync markdown notes via GitHub or WebDAV.
-# Web: gn-notes.pages.dev. Author: Barney Matthews. License: MIT
+# Web: gn.tuxs.me. Author: Barney Matthews. License: MIT
 
 NOTES_DIR="$HOME/gn"
 CONFIG_FILE="$NOTES_DIR/gn.conf"
@@ -25,7 +25,7 @@ if [ -f "$CONFIG_FILE" ]; then
         key=$(echo "$key" | tr -d ' ')
         [[ -z "$key" || "$key" =~ ^# ]] && continue
 
-        value="${value%%#*}$"
+        value="${value%%#*}"
         value=$(echo "$value" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
         [[ "$value" =~ ^[\'\"](.*)[\'\"]$ ]] && value="${BASH_REMATCH[1]}"
         case "$key" in
@@ -46,9 +46,9 @@ if [ -z "$gn_USER" ] && [ -z "$GIT_TOKEN" ]; then
     echo "No config found at $CONFIG_FILE - let's set one up."
     echo "Select your provider:"
     echo "1) GitHub"
-    echo "2) Koofr"
-    echo "3) TAB.DIGITAL"
-    echo "4) The Good Cloud"
+    echo "2) Nextcloud"
+    echo "3) Koofr"
+    echo "4) WebDAV (generic)"
     printf "Choice [1-4]: "
     read -r provider_choice
 
@@ -61,33 +61,36 @@ if [ -z "$gn_USER" ] && [ -z "$GIT_TOKEN" ]; then
             printf "Repository name: "
             read -r GIT_REPO
             ;;
-        3)
-            printf "TAB.DIGITAL Username: "
+        2)
+            printf "Nextcloud instance URL (e.g., https://cloud.example.com): "
+            read -r nc_host
+            nc_host="${nc_host%/}"
+            printf "Nextcloud username: "
             read -r gn_USER
-            gn_URL="https://cloud.tab.digital/remote.php/dav/files/${gn_USER}"
-            printf "TAB.DIGITAL App Password (input hidden): "
+            gn_URL="${nc_host}/remote.php/dav/files/${gn_USER}"
+            printf "Nextcloud app password (input hidden): "
             stty -echo; read -r gn_PASS; stty echo; echo
             printf "Remote notes folder [/gn]: "
             read -r gn_PATH
             gn_PATH="${gn_PATH:-/gn}"
             ;;
-        4)
-            printf "The Good Cloud Username: "
+        3)
+            gn_URL="https://app.koofr.net/dav/Koofr"
+            printf "Koofr email/username: "
             read -r gn_USER
-            printf "The Good Cloud Subdomain (e.g., nu or nl): "
-            read -r tgc_sub
-            gn_URL="https://${tgc_sub}.thegood.cloud/remote.php/dav/files/${gn_USER}"
-            printf "The Good Cloud App Password (input hidden): "
+            printf "Koofr app password (input hidden): "
             stty -echo; read -r gn_PASS; stty echo; echo
             printf "Remote notes folder [/gn]: "
             read -r gn_PATH
             gn_PATH="${gn_PATH:-/gn}"
             ;;
         *)
-            gn_URL="https://app.koofr.net/dav/Koofr"
-            printf "Koofr email/username: "
+            printf "WebDAV base URL (e.g., https://dav.example.com/remote.php/dav/files/user): "
+            read -r gn_URL
+            gn_URL="${gn_URL%/}"
+            printf "WebDAV username: "
             read -r gn_USER
-            printf "Koofr app password (input hidden): "
+            printf "WebDAV password (input hidden): "
             stty -echo; read -r gn_PASS; stty echo; echo
             printf "Remote notes folder [/gn]: "
             read -r gn_PATH
@@ -120,7 +123,6 @@ if [ -n "$GIT_TOKEN" ] && [ -n "$GIT_OWNER" ] && [ -n "$GIT_REPO" ]; then
     SYNC_ENGINE="GITHUB"
     GIT_API="${GIT_API:-https://api.github.com/repos/${GIT_OWNER}/${GIT_REPO}/contents}"
 elif [ -n "$gn_USER" ] && [ -n "$gn_PASS" ] && [ -n "$gn_URL" ]; then
-    # Generalize Koofr, TAB.DIGITAL, and The Good Cloud under standard WebDAV
     if [[ "$gn_URL" =~ koofr\.net ]]; then
         SYNC_ENGINE="KOOFR"
     else
@@ -154,11 +156,10 @@ Usage: gn [options] [note]
   -c          Clear saved credentials and reconfigure
 
 Local commands:
-  ls -lt $NOTES_DIR/*.md          List notes, newest first
-  grep -ril "term" $NOTES_DIR/    Search notes (filenames only)
-  grep -rn "term" $NOTES_DIR/     Search notes (matching lines)
-  find $NOTES_DIR -name "*.md" -mtime -7   Modified last 7 days
-  wc -l $NOTES_DIR/*.md | sort -rn         Largest notes by lines
+  ls -lt $NOTES_DIR/*.md                        List notes, newest first
+  grep -ril "term" $NOTES_DIR/                  Search notes (filenames only)
+  grep -rn "term" $NOTES_DIR/                   Search notes (matching lines)
+  cp -r $NOTES_DIR $NOTES_DIR-$(date +%Y%m%d)   Backup notes directory with date stamp
 
 Engine: $SYNC_ENGINE
 Remote: $remote_info
@@ -178,7 +179,7 @@ api_curl() {
         rm -f "$nf"; return $rc
     else
         hdr=$(mktemp); chmod 600 "$hdr"
-        printf -- '-H "Authorization: Bearer %s"\n' "$GIT_TOKEN" > "$hdr"
+        printf 'header = "Authorization: Bearer %s"\n' "$GIT_TOKEN" > "$hdr"
         curl -s -K "$hdr" "$@"; rc=$?
         rm -f "$hdr"; return $rc
     fi
@@ -216,21 +217,46 @@ urldec() {
 }
 
 get_file_hash() {
-    if command -v md5sum >/dev/null 2>&1; then md5sum "$1" 2>/dev/null | awk '{print $1}'
-    elif command -v shasum >/dev/null 2>&1; then shasum "$1" 2>/dev/null | awk '{print $1}'
-    elif command -v md5 >/dev/null 2>&1; then md5 -q "$1" 2>/dev/null || md5 "$1" 2>/dev/null | awk '{print $1}'
-    else ls -ln "$1" 2>/dev/null | awk '{print $5,$6,$7,$8}'
+    if command -v md5sum >/dev/null 2>&1; then
+        md5sum "$1" 2>/dev/null | awk '{print $1}'
+    elif command -v shasum >/dev/null 2>&1; then
+        shasum "$1" 2>/dev/null | awk '{print $1}'
+    elif command -v md5 >/dev/null 2>&1; then
+        if md5 -q "$1" >/dev/null 2>&1; then
+            md5 -q "$1" 2>/dev/null
+        else
+            md5 "$1" 2>/dev/null | awk '{print $NF}'
+        fi
+    else
+        ls -ln "$1" 2>/dev/null | awk '{print $5,$6,$7,$8}'
     fi
 }
 
 # --- Pure POSIX Engines for Base64 and JSON ---
 
+# Bulletproof line/string parser instead of regular expression record splitting
 posix_parse_json() {
     local target_key="$1"
     awk -v target="$target_key" '
-    BEGIN { RS="[{}:, \t\n\"]" }
-    $0 == target { found = 1; next }
-    found && $0 != "" { print $0; exit }
+    {
+        idx = index($0, "\"" target "\"");
+        if (idx > 0) {
+            str = substr($0, idx + length(target) + 2);
+            col = index(str, ":");
+            if (col > 0) {
+                str = substr(str, col + 1);
+                q1 = index(str, "\"");
+                if (q1 > 0) {
+                    str = substr(str, q1 + 1);
+                    q2 = index(str, "\"");
+                    if (q2 > 0) {
+                        print substr(str, 1, q2 - 1);
+                        exit;
+                    }
+                }
+            }
+        }
+    }
     '
 }
 
@@ -238,36 +264,38 @@ posix_b64encode() {
     awk '
     BEGIN {
         split("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h i j k l m n o p q r s t u v w x y z 0 1 2 3 4 5 6 7 8 9 + /", b64, " ");
+        for(i=0; i<256; i++) { c=sprintf("%c", i); chrmap[c]=i }
         ORS=""; BINMODE=1;
+        nbytes=0;
     }
     {
-        len = length($0);
-        for(i=1; i<=len; i+=3) {
-            c1 = ord(substr($0, i, 1));
-            c2 = (i+1 <= len) ? ord(substr($0, i+1, 1)) : 0;
-            c3 = (i+2 <= len) ? ord(substr($0, i+2, 1)) : 0;
-
-            print b64[1 + int(c1 / 4)];
-            print b64[1 + (lshift_posix(and_posix(c1, 3), 4) + int(c2 / 16))];
-
-            if (i+1 <= len) print b64[1 + (lshift_posix(and_posix(c2, 15), 2) + int(c3 / 64))];
+        line = $0;
+        n = length(line);
+        for(i=1; i<=n; i++) bytes[nbytes++] = chrmap[substr(line,i,1)];
+        bytes[nbytes++] = 10;
+    }
+    END {
+        if (nbytes > 0 && bytes[nbytes-1] == 10) nbytes--;
+        for(i=0; i<nbytes; i+=3) {
+            c1 = bytes[i];
+            c2 = (i+1 < nbytes) ? bytes[i+1] : 0;
+            c3 = (i+2 < nbytes) ? bytes[i+2] : 0;
+            print b64[1 + int(c1/4)];
+            print b64[1 + (and_posix(c1,3)*16 + int(c2/16))];
+            if (i+1 < nbytes) print b64[1 + (and_posix(c2,15)*4 + int(c3/64))];
             else print "=";
-
-            if (i+2 <= len) print b64[1 + and_posix(c3, 63)];
+            if (i+2 < nbytes) print b64[1 + and_posix(c3,63)];
             else print "=";
         }
     }
-    function ord(c) { return chrmap[c] }
-    function and_posix(a, b) {
-        local_res = 0; bit = 1;
-        while(a > 0 && b > 0) {
-            if (a % 2 == 1 && b % 2 == 1) local_res += bit;
-            a = int(a / 2); b = int(b / 2); bit *= 2;
+    function and_posix(a, b,    r, bit) {
+        r=0; bit=1;
+        while(a>0 && b>0) {
+            if (a%2==1 && b%2==1) r+=bit;
+            a=int(a/2); b=int(b/2); bit*=2;
         }
-        return local_res;
+        return r;
     }
-    function lshift_posix(v, n) { while(n-- > 0) v *= 2; return v; }
-    BEGIN { for(i=0; i<256; i++) { c=sprintf("%c", i); chrmap[c]=i } }
     '
 }
 
@@ -282,28 +310,32 @@ posix_b64decode() {
         gsub(/[^A-Za-z0-9\+\/=]/, "");
         len = length($0);
         for(i=1; i<=len; i+=4) {
-            b1 = alphabet[substr($0, i, 1)];
-            b2 = alphabet[substr($0, i+1, 1)];
+            s1 = substr($0, i, 1);
+            s2 = substr($0, i+1, 1);
+            if (s1 == "" || s2 == "") continue;
+
+            b1 = alphabet[s1];
+            b2 = alphabet[s2];
             b3 = substr($0, i+2, 1);
             b4 = substr($0, i+3, 1);
 
             c1 = lshift_posix(b1, 2) + int(b2 / 16);
-            print sprintf("%c", c1);
+            printf "%c", c1;
 
             if (b3 != "=" && b3 != "") {
                 v3 = alphabet[b3];
                 c2 = lshift_posix(and_posix(b2, 15), 4) + int(v3 / 4);
-                print sprintf("%c", c2);
+                printf "%c", c2;
 
                 if (b4 != "=" && b4 != "") {
                     v4 = alphabet[b4];
                     c3 = lshift_posix(and_posix(v3, 3), 6) + v4;
-                    print sprintf("%c", c3);
+                    printf "%c", c3;
                 }
             }
         }
     }
-    function and_posix(a, b) {
+    function and_posix(a, b,    local_res, bit) {
         local_res = 0; bit = 1;
         while(a > 0 && b > 0) {
             if (a % 2 == 1 && b % 2 == 1) local_res += bit;
@@ -351,7 +383,18 @@ pull_note() {
         case "$http_code" in
             200) mv "$file.tmp" "$file" ;;
             404) rm -f "$file.tmp" "$file" ;;
-            *)   rm -f "$file.tmp"; echo "Error: Pull failed." >&2; exit 1 ;;
+            429)
+                rm -f "$file.tmp"
+                echo "Rate limited by server (HTTP 429), retrying in 5s..." >&2
+                sleep 5
+                http_code=$(api_curl -w "%{http_code}" -o "$file.tmp" "$url")
+                case "$http_code" in
+                    200) mv "$file.tmp" "$file" ;;
+                    404) rm -f "$file.tmp" "$file" ;;
+                    *)   rm -f "$file.tmp"; echo "Error: Pull failed after retry (HTTP $http_code) url=$url" >&2; exit 1 ;;
+                esac
+                ;;
+            *)   rm -f "$file.tmp"; echo "Error: Pull failed (HTTP $http_code) url=$url" >&2; exit 1 ;;
         esac
     fi
 }
@@ -370,12 +413,12 @@ push_note() {
         pfile=$(mktemp); chmod 600 "$pfile"
         sha_resp=$(api_curl -s "$url")
 
-        sha=$(echo "$sha_resp" | posix_parse_json "sha")
+        sha=$(echo "$sha_resp" | grep -o '"sha"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed -E 's/"sha"[[:space:]]*:[[:space:]]*"//;s/"$//')
 
         if [ -n "$sha" ] && [ "$sha" != "null" ]; then
-            printf '{"message":"%s","content":"%s","sha":"%s"}' "$safe_msg" "$content" "$sha" > "$pfile"
+            printf '%s' "{\"message\":\"${safe_msg}\",\"content\":\"${content}\",\"sha\":\"${sha}\"}" > "$pfile"
         else
-            printf '{"message":"%s","content":"%s"}' "$safe_msg" "$content" > "$pfile"
+            printf '%s' "{\"message\":\"${safe_msg}\",\"content\":\"${content}\"}" > "$pfile"
         fi
         resp=$(api_curl -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" --data-binary "@$pfile" "$url")
         rm -f "$pfile"
@@ -390,7 +433,7 @@ push_note() {
         http_code=$(api_curl -w "%{http_code}" -o /dev/null -X PUT --data-binary "@$file" "$url")
         case "$http_code" in
             200|201|204) ;;
-            *) echo "Error: Push failed." >&2; exit 1 ;;
+            *) echo "Error: Push failed (HTTP $http_code) url=$url" >&2; exit 1 ;;
         esac
     fi
 }
@@ -403,11 +446,11 @@ remote_delete() {
         pfile=$(mktemp); chmod 600 "$pfile"
         sha_resp=$(api_curl -s "$url")
 
-        sha=$(echo "$sha_resp" | posix_parse_json "sha")
+        sha=$(echo "$sha_resp" | grep -o '"sha"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed -E 's/"sha"[[:space:]]*:[[:space:]]*"//;s/"$//')
 
         if [ -z "$sha" ] || [ "$sha" = "null" ]; then rm -f "$pfile"; return 0; fi
         printf '{"message":"%s","sha":"%s"}' "$msg" "$sha" > "$pfile"
-        resp=$(api_curl -w "\n%{http_code}" -X DELETE -H "Content-Type: application/json" --data-binary "@$pfile" "$url")
+        resp=$(api_curl -w "\n%{http_code}" -X PUT -H "Content-Type: application/json" --data-binary "@$pfile" "$url")
         rm -f "$pfile"
     else
         local url; url=$(remote_url "$file")
@@ -418,10 +461,10 @@ remote_delete() {
 remote_rename() {
     local old="$1" new="$2"
     if [ "$SYNC_ENGINE" = "GITHUB" ]; then
-        cp "$NOTES_DIR/$old" "$NOTES_DIR/$new"
-        (cd "$NOTES_DIR" && push_note "$new")
+        cp "$old" "$new"
+        push_note "$new"
         remote_delete "$old" "gn: rename $old to $new"
-        rm -f "$NOTES_DIR/$new"
+        rm -f "$new"
     else
         local src dst; src=$(remote_url "$old"); dst=$(remote_url "$new")
         remote_mkdir "$(dirname "$new")"
@@ -432,12 +475,12 @@ remote_rename() {
 delete_note() {
     local file="$1"
     case "$file" in *.md) ;; *) file="${file}.md" ;; esac
-    [ -f "$NOTES_DIR/$file" ] || { echo "Error: '$file' not found."; exit 1; }
+    [ -f "$file" ] || { echo "Error: '$file' not found."; exit 1; }
     printf "Delete '%s'? [y/N] " "$file"
     read -r confirm
     case "$confirm" in [Yy]*) ;; *) echo "Aborted."; exit 0 ;; esac
     remote_delete "$file"
-    rm "$NOTES_DIR/$file"
+    rm "$file"
     echo "Deleted."
     exit 0
 }
@@ -446,10 +489,10 @@ rename_note() {
     local old="$1" new="$2"
     case "$old" in *.md) ;; *) old="${old}.md" ;; esac
     case "$new" in *.md) ;; *) new="${new}.md" ;; esac
-    [ -f "$NOTES_DIR/$old" ] || { echo "Error: '$old' not found."; exit 1; }
+    [ -f "$old" ] || { echo "Error: '$old' not found."; exit 1; }
     remote_rename "$old" "$new"
-    mkdir -p "$NOTES_DIR/$(dirname "$new")" 2>/dev/null
-    mv "$NOTES_DIR/$old" "$NOTES_DIR/$new"
+    mkdir -p "$(dirname "$new")" 2>/dev/null
+    mv "$old" "$new"
     echo "Renamed."
     exit 0
 }
@@ -466,7 +509,7 @@ sync_all_remote() {
             gsub(/.*\"name\":\"|\"/, "");
             if ($0 ~ /\.md$/) print $0;
         }' | while read -r path; do
-            [ -n "$path" ] && (cd "$NOTES_DIR" && pull_note "$path")
+            [ -n "$path" ] && pull_note "$path"
         done
     else
         local base_encoded_path xml_response
@@ -476,8 +519,8 @@ sync_all_remote() {
             local dec_path; dec_path=$(urldec "$path")
             if [[ "$dec_path" =~ .*"$gn_PATH"/(.*\.md)$ ]]; then
                 local rel_path="${BASH_REMATCH[1]}"
-                mkdir -p "$NOTES_DIR/$(dirname "$rel_path")" 2>/dev/null
-                (cd "$NOTES_DIR" && pull_note "$rel_path")
+                mkdir -p "$(dirname "$rel_path")" 2>/dev/null
+                pull_note "$rel_path"
             fi
         done
     fi
@@ -488,6 +531,8 @@ sync_all_remote() {
 reconfigure() { rm -f "$CONFIG_FILE"; echo "Config cleared."; exit 0; }
 
 # --- Execution Entry ---
+cd "$NOTES_DIR" || exit 1
+
 if [ "$1" = "-r" ]; then rename_note "$2" "$3"; fi
 ACTION_RUN=0
 while getopts "hcd:s" opt; do
@@ -506,7 +551,6 @@ NOTE_NAME="${1:-note}"
 if [[ "$NOTE_NAME" == *..* ]] || [ "$NOTE_NAME" = "gn.conf" ]; then exit 1; fi
 case "$NOTE_NAME" in *.md) ;; *) NOTE_NAME="${NOTE_NAME}.md" ;; esac
 
-cd "$NOTES_DIR" || exit 1
 mkdir -p "$(dirname "$NOTE_NAME")" 2>/dev/null
 
 pull_note "$NOTE_NAME"
