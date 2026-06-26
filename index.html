@@ -6,105 +6,191 @@
         <title>gn - get Notes</title>
         <link
             rel="icon"
-            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='black'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-family='Georgia,serif' font-size='22' fill='white'>g</text></svg>"
+            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='black'/><text y='75' x='18' font-family='monospace' font-weight='bold' font-size='80' fill='%2339ff14'>g</text></svg>"
         />
         <style>
+            @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap");
+
             :root {
-                --bg: #0b0d0f;
-                --panel: #11141a;
-                --border: #232830;
-                --text: #c9d1d9;
-                --dim: #6b7280;
-                --accent: #7ad7a4;
-                --accent-dim: #4f8a6b;                --amber: #e6b673;
+                --green: #39ff14;
+                --green-dim: #1a8a00;
+                --green-faint: #0d4400;
+                --green-glow: rgba(57, 255, 20, 0.18);
+                --amber: #ffb300;
+                --bg: #0a0f0a;
+                --bg2: #0d130d;
+                --border: #1f3a1f;
+                --text: #c8e6c9;
+                --muted: #4caf50;
+                --error: #ff4444;
+                --panel: #0b160b;
+                --dim: #3a6e3a;
             }
 
             * {
+                margin: 0;
+                padding: 0;
                 box-sizing: border-box;
             }
 
-            html,
+            html {
+                scroll-behavior: smooth;
+            }
+
             body {
-                margin: 0;
-                padding: 0;
-                background: var(--bg);
+                font:
+                    1em/1.7 "Share Tech Mono",
+                    monospace;
                 color: var(--text);
-                font-family: "IBM Plex Mono", "Courier New", monospace;
-                font-size: 15px;
-                line-height: 1.65;
+                background: var(--bg);
+                padding: 20px;
+                min-height: 100vh;
+                background-image: repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.08) 2px,
+                    rgba(0, 0, 0, 0.08) 4px
+                );
+            }
+
+            body::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                background: radial-gradient(
+                    ellipse at 50% 40%,
+                    rgba(57, 255, 20, 0.04) 0%,
+                    transparent 70%
+                );
+                pointer-events: none;
+                z-index: 0;
             }
 
             a {
-                color: var(--accent);
+                color: var(--green);
                 text-decoration: none;
             }
             a:hover {
+                color: var(--green);
                 text-decoration: underline;
             }
 
             .wrap {
-                max-width: 760px;
+                max-width: 860px;
                 margin: 0 auto;
-                padding: 48px 24px 96px;
+                background: var(--bg2);
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                box-shadow:
+                    0 0 0 1px #0d1a0d,
+                    0 0 30px rgba(57, 255, 20, 0.08),
+                    0 0 60px rgba(57, 255, 20, 0.04);
+                position: relative;
+                z-index: 1;
+                overflow: hidden;
             }
 
+            .bar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: #111a11;
+                border-bottom: 1px solid var(--border);
+                padding: 8px 16px;
+                font-size: 0.7em;
+                color: #2a4a2a;
+            }
+            .bar .dots {
+                letter-spacing: 6px;
+            }
+            .bar .label {
+                letter-spacing: 1px;
+            }
+
+            .inner {
+                padding: 34px 40px 44px;
+            }
+
+            /* ---- header ---- */
             header {
-                margin-bottom: 40px;
+                margin-bottom: 32px;
             }
 
-            .prompt {
-                color: var(--dim);
-                font-size: 13px;
+            .prompt-line {
+                color: var(--green-dim);
+                font-size: 0.85em;
                 margin-bottom: 6px;
             }
-
-            .prompt::before {
+            .prompt-line::before {
                 content: "$ ";
-                color: var(--accent-dim);
             }
 
             h1 {
-                font-size: 28px;
-                font-weight: 600;
-                margin: 0 0 6px;
-                letter-spacing: -0.02em;
+                font-family: "VT323", monospace;
+                font-size: 2.6em;
+                color: var(--green);
+                text-shadow:
+                    0 0 10px rgba(57, 255, 20, 0.6),
+                    0 0 30px rgba(57, 255, 20, 0.2);
+                letter-spacing: 1px;
+                line-height: 1.1;
+                margin: 0 0 4px;
             }
 
             h1 .engine {
-                color: var(--accent);
+                color: var(--muted);
+                font-size: 0.75em;
             }
 
             .tagline {
-                color: var(--dim);
-                margin: 0;
+                color: var(--muted);
+                font-size: 0.85em;
+                margin: 4px 0 0;
+            }
+            .tagline::before {
+                content: "// ";
+                color: var(--green-dim);
             }
 
+            /* ---- section headings ---- */
             h2 {
-                font-size: 16px;
-                font-weight: 600;
+                font-family: "Share Tech Mono", monospace;
+                font-size: 0.85em;
+                font-weight: normal;
                 text-transform: uppercase;
-                letter-spacing: 0.08em;
-                color: var(--accent);
-                margin: 48px 0 16px;
-                padding-bottom: 8px;
+                letter-spacing: 0.12em;
+                color: var(--green);
+                margin: 40px 0 14px;
+                padding-bottom: 6px;
                 border-bottom: 1px solid var(--border);
+            }
+            h2::before {
+                content: "## ";
+                color: var(--green-dim);
             }
 
             h3 {
-                font-size: 14px;
-                font-weight: 600;
+                font-size: 0.88em;
+                font-weight: normal;
                 color: var(--amber);
-                margin: 24px 0 12px;
+                margin: 22px 0 10px;
+            }
+            h3::before {
+                content: "> ";
+                color: var(--green-dim);
             }
 
             p {
                 color: var(--text);
+                margin-bottom: 12px;
             }
 
             .dim {
                 color: var(--dim);
             }
 
+            /* ---- code ---- */
             .code-block {
                 position: relative;
                 margin: 12px 0;
@@ -113,21 +199,24 @@
             pre {
                 background: var(--panel);
                 border: 1px solid var(--border);
-                border-radius: 6px;
-                padding: 16px 18px;
+                border-radius: 2px;
+                padding: 14px 16px;
                 overflow-x: auto;
-                font-size: 13.5px;
-                line-height: 1.7;
+                font:
+                    0.9em/1.7 "Share Tech Mono",
+                    monospace;
                 margin: 0;
+                color: var(--text);
             }
 
             code {
-                font-family: inherit;
+                font-family: "Share Tech Mono", monospace;
                 background: var(--panel);
                 border: 1px solid var(--border);
-                border-radius: 4px;
-                padding: 1px 6px;
-                font-size: 0.92em;
+                border-radius: 2px;
+                padding: 1px 5px;
+                font-size: 0.9em;
+                color: var(--green);
             }
 
             pre code {
@@ -135,6 +224,7 @@
                 border: none;
                 padding: 0;
                 display: block;
+                color: inherit;
             }
 
             .comment {
@@ -144,7 +234,7 @@
                 color: var(--amber);
             }
             .flag {
-                color: var(--accent);
+                color: var(--green);
             }
 
             .copy-btn {
@@ -154,44 +244,67 @@
                 background: var(--bg);
                 color: var(--dim);
                 border: 1px solid var(--border);
-                border-radius: 4px;
-                font-family: inherit;
-                font-size: 11px;
+                border-radius: 2px;
+                font-family: "Share Tech Mono", monospace;
+                font-size: 0.7em;
                 text-transform: uppercase;
-                letter-spacing: 0.06em;
-                padding: 5px 10px;
+                letter-spacing: 0.08em;
+                padding: 4px 10px;
                 cursor: pointer;
                 transition:
-                    color 0.15s ease,
-                    border-color 0.15s ease;
+                    color 0.15s,
+                    border-color 0.15s;
             }
-
             .copy-btn:hover {
-                color: var(--accent);
-                border-color: var(--accent-dim);
+                color: var(--green);
+                border-color: var(--green-dim);
             }
-
             .copy-btn.copied {
-                color: var(--accent);
-                border-color: var(--accent-dim);
+                color: var(--green);
+                border-color: var(--green-dim);
             }
 
             .script-block pre {
                 max-height: 480px;
                 overflow-y: auto;
             }
-
             .script-block .copy-btn {
                 top: 12px;
                 right: 12px;
             }
 
+            /* ---- download button ---- */
+            .download {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                margin-top: 12px;
+                padding: 10px 18px;
+                background: var(--panel);
+                border: 1px solid var(--green-dim);
+                border-radius: 2px;
+                color: var(--green);
+                font-weight: normal;
+                transition:
+                    border-color 0.15s,
+                    background 0.15s;
+            }
+            .download:hover {
+                border-color: var(--green);
+                background: var(--green-faint);
+                text-decoration: none;
+            }
+            .download .arrow {
+                color: var(--dim);
+            }
+
+            /* ---- table ---- */
             table {
                 width: 100%;
                 border-collapse: collapse;
-                font-size: 14px;
+                font-size: 0.9em;
+                margin: 12px 0;
             }
-
             th,
             td {
                 text-align: left;
@@ -199,237 +312,186 @@
                 border-bottom: 1px solid var(--border);
                 vertical-align: top;
             }
-
             th {
                 color: var(--dim);
-                font-weight: 500;
+                font-weight: normal;
                 text-transform: uppercase;
-                font-size: 11px;
-                letter-spacing: 0.08em;
+                font-size: 0.78em;
+                letter-spacing: 0.1em;
             }
-
             td code {
                 white-space: nowrap;
             }
-
-            .download {
-                display: inline-flex;
-                align-items: center;
-                gap: 10px;
-                margin-top: 12px;
-                padding: 12px 20px;
-                background: var(--panel);
-                border: 1px solid var(--accent-dim);
-                border-radius: 6px;
-                color: var(--accent);
-                font-weight: 600;
-                transition:
-                    border-color 0.15s ease,
-                    transform 0.1s ease;
+            tr:hover td {
+                background: var(--green-faint);
             }
 
-            .download:hover {
-                border-color: var(--accent);
-                text-decoration: none;
-                transform: translateY(-1px);
-            }
-
-            .download .arrow {
-                color: var(--dim);
-            }
-
+            /* ---- notes / callouts ---- */
             .note {
                 border-left: 2px solid var(--amber);
-                padding: 4px 0 4px 16px;
+                padding: 6px 0 6px 16px;
                 color: var(--text);
-                margin: 16px 0;
+                margin: 14px 0;
+                background: rgba(255, 179, 0, 0.04);
             }
-
             .note .label {
                 color: var(--amber);
-                font-weight: 600;
+                font-weight: normal;
                 text-transform: uppercase;
-                font-size: 11px;
-                letter-spacing: 0.08em;
+                font-size: 0.78em;
+                letter-spacing: 0.1em;
                 display: block;
                 margin-bottom: 4px;
             }
 
-            ol,
-            ul {
-                padding-left: 22px;
+            .privacy-note {
+                border-left: 2px solid var(--green-dim);
+                padding: 6px 0 6px 16px;
+                color: var(--muted);
+                margin: 20px 0 0;
+                font-size: 0.88em;
+                background: rgba(57, 255, 20, 0.03);
+            }
+            .privacy-note strong {
+                color: var(--green);
             }
 
-            ol li,
-            ul li {
-                margin-bottom: 8px;
-            }
-
-            footer {
-                margin-top: 64px;
-                padding-top: 24px;
-                border-top: 1px solid var(--border);
-                color: var(--dim);
-                font-size: 13px;
-                display: flex;
-                justify-content: space-between;
-                flex-wrap: wrap;
-                gap: 8px;
-            }
-
-            footer a {
-                color: var(--dim);
-            }
-            footer a:hover {
-                color: var(--accent);
-            }
-
+            /* ---- ext links ---- */
             .ext-links {
                 display: flex;
                 gap: 20px;
                 flex-wrap: wrap;
                 margin-top: 10px;
-                padding: 10px 14px;
+                padding: 8px 14px;
                 background: var(--panel);
                 border: 1px dashed var(--border);
-                border-radius: 4px;
-                font-size: 13px;
+                border-radius: 2px;
+                font-size: 0.88em;
             }
-
             .ext-links a {
-                color: var(--accent);
-                text-decoration: none;
+                color: var(--green);
             }
-
             .ext-links a:hover {
                 text-decoration: underline;
             }
 
-            .privacy-note {
-                border-left: 2px solid var(--accent-dim);
-                padding: 4px 0 4px 16px;
-                color: var(--dim);
-                margin: 20px 0 0;
-                font-size: 13px;
+            /* ---- lists ---- */
+            ol,
+            ul {
+                padding-left: 22px;
+                color: var(--text);
+            }
+            ol li,
+            ul li {
+                margin-bottom: 8px;
             }
 
-            .privacy-note strong {
-                color: var(--accent);
+            /* ---- footer ---- */
+            footer {
+                margin-top: 40px;
+                padding-top: 18px;
+                border-top: 1px solid var(--border);
+                font-size: 0.8em;
+                color: var(--muted);
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px 18px;
+                justify-content: space-between;
+            }
+            footer a {
+                color: var(--green-dim);
+                border-bottom: 1px dotted var(--green-dim);
+            }
+            footer a:hover {
+                color: var(--green);
+                border-color: var(--green);
             }
 
-            @media (max-width: 600px) {
-                .wrap {
-                    padding: 32px 16px 64px;
+            section {
+                margin-bottom: 8px;
+            }
+
+            @media (max-width: 620px) {
+                .inner {
+                    padding: 24px 18px 32px;
                 }
                 h1 {
-                    font-size: 24px;
+                    font-size: 2em;
                 }
                 footer {
                     flex-direction: column;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                html {
+                    scroll-behavior: auto;
                 }
             }
         </style>
     </head>
     <body>
         <div class="wrap">
-            <header>
-                <div class="prompt">whoami</div>
-                <h1>gn <span class="engine">// get notes</span></h1>
-                <p class="tagline">
-                    Zero-dependency markdown notes, synced to Koofr WebDAV or
-                    GitHub.
-                </p>
-            </header>
+            <div class="bar">
+                <span class="dots">● ● ●</span>
+                <span class="label">barney@tuxs:~/gn - 80×24</span>
+            </div>
 
-            <section>
-                <p>
-                    <code>gn</code> is a simple bash script that pulls a
-                    markdown note from cloud storage, opens it in
-                    <code>$EDITOR</code>, and pushes it back if you changed
-                    anything. Supports Koofr (WebDAV) and GitHub. No git, no
-                    daemons, no heavy apps to install - just
-                    <code>curl</code> and a local folder.
-                </p>
-                <h2>Download</h2>
-                <a class="download" href="./gn.sh" download>
-                    <span>↓</span>
-                    <span>gn.sh</span>
-                    <span class="arrow dim">- save to ~/bin/gn, chmod +x</span>
-                </a>
-                <a class="download" href="https://gn-notes.pages.dev/get/index.html" style="margin-top: 10px;">
-                    <span>↓ gn app</span>
-                    <span class="arrow dim">for Mac/Linux/Windows</span>
-                </a>
-            </section>
+            <div class="inner">
+                <header>
+                    <div class="prompt-line">whoami</div>
+                    <h1>gn <span class="engine">// get notes</span></h1>
+                    <p class="tagline">
+                        Zero-dependency plain-text notes, synced to a private
+                        GitHub repo.
+                    </p>
+                </header>
 
-            <section>
-                <h2>Setup</h2>
-                <ol>
-                    <li>
-                        Download <code>gn.sh</code> above and make it run this
-                        to make it executable:
-                    </li>
-                </ol>
+                <section>
+                    <p>
+                        <code>gn</code> is a simple bash script that opens a
+                        plain-text note in <code>$EDITOR</code> and pushes it to
+                        a private GitHub repo via the API. No git, no daemons,
+                        no heavy apps to install - just <code>curl</code> and a
+                        local folder at <code>~/gn</code>.
+                    </p>
+                    <h2>Download</h2>
+                    <a class="download" href="./gn.sh" download>
+                        <span>↓</span>
+                        <span>gn.sh</span>
+                        <span class="arrow dim"
+                            >- save to ~/bin/gn, chmod +x</span
+                        >
+                    </a>
+                </section>
 
-                <div class="code-block">
-                    <button class="copy-btn" data-copy-target="cmd-install">
-                        Copy
-                    </button>
-                    <pre><code id="cmd-install">mv gn.sh ~/bin/gn && chmod +x ~/bin/gn</code></pre>
-                </div>
-
-                <ol start="2">
-                    <li>Prepare your storage provider credentials:</li>
-                </ol>
-
-                <div style="padding-left: 22px">
-                    <h3>Option A: Koofr Cloud Storage</h3>
-                    <ul>
+                <section>
+                    <h2>Setup</h2>
+                    <ol>
                         <li>
-                            Sign up free or log in at
-                            <a
-                                href="https://app.koofr.net"
-                                target="_blank"
-                                rel="noopener"
-                                >app.koofr.net</a
-                            >.
+                            Download <code>gn.sh</code> above and make it
+                            executable:
+                        </li>
+                    </ol>
+
+                    <div class="code-block">
+                        <button class="copy-btn" data-copy-target="cmd-install">
+                            Copy
+                        </button>
+                        <pre><code id="cmd-install">mv gn.sh ~/bin/gn && chmod +x ~/bin/gn</code></pre>
+                    </div>
+
+                    <ol start="2">
+                        <li>
+                            Create a private GitHub repository to hold your
+                            notes (named <code>gn</code>, or anything you like).
                         </li>
                         <li>
-                            Go to
-                            <strong>Account settings &rarr; Password</strong>
-                            and generate an <strong>App Password</strong>. The
-                            script needs this specific app-token, not your main
-                            web portal login password.
+                            Generate a GitHub Personal Access Token (classic)
+                            with the <code>repo</code> scope.
                         </li>
-                    </ul>
+                    </ol>
 
-                    <h3>Option B: GitHub</h3>
-                    <ul>
-                        <li>
-                            <strong>GitHub Account:</strong> If you don't
-                            already have one, create an
-                            <a
-                                href="https://github.com/signup"
-                                target="_blank"
-                                rel="noopener"
-                                >account</a
-                            >.
-                        </li>
-                        <li>
-                            <strong>Private Repository:</strong> Create a
-                            private repository (named <code>gn</code>, or
-                            anything you like) to hold your notes.
-                        </li>
-                        <li>
-                            <strong>Personal Access Token:</strong> Generate a
-                            new Personal Access Token with the
-                            <code>repo</code> scope &mdash; this lets gn read
-                            and write files in your repository over the GitHub
-                            API. The setup menu will ask you to paste in your
-                            token, username, and repository name once; these are
-                            saved to your local config file.
-                        </li>
-                    </ul>
                     <div class="ext-links">
                         <a
                             href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens"
@@ -444,146 +506,139 @@
                             >&#128273; Direct Token Generation Link</a
                         >
                     </div>
-                </div>
 
-                <div class="privacy-note">
-                    <strong>&#128274; Privacy:</strong> Credentials are saved
-                    into <code>~/gn/gn.conf</code> with
-                    <code>chmod 600</code> permissions - only your local user
-                    can read the file.
-                </div>
+                    <div class="privacy-note">
+                        <strong>&#128274; Privacy:</strong> Credentials are
+                        saved into <code>~/gn/gn.conf</code> with
+                        <code>chmod 600</code> permissions - only your local
+                        user can read the file.
+                    </div>
 
-                <ol start="3" style="margin-top: 24px">
-                    <li>
-                        Run the script. If no configuration file is found, it
-                        will run an interactive setup menu to choose your
-                        backend and configure credentials:
-                    </li>
-                </ol>
-                <div class="code-block">
-                    <button class="copy-btn" data-copy-target="cmd-firstrun">
-                        Copy
-                    </button>
-                    <pre><code id="cmd-firstrun">$ gn
-No config found at ~/gn/gn.conf - let's set one up.
-Select your provider:
-1) Koofr (WebDAV)
-2) GitHub
-Choice [1-2]: 2
-GitHub Personal Access Token (input hidden):
-GitHub username (repo owner): your-username
-Repository name: gn
-Save this config for future runs? [Y/n] Y</code></pre>
-                </div>
-                <p class="dim">
-                    To clear or alter your configuration later, run
-                    <code>gn -c</code> to wipe <code>gn.conf</code> and re-run
-                    setup.
-                </p>
-            </section>
+                    <ol start="4" style="margin-top: 24px">
+                        <li>
+                            Run the script. If no configuration file is found,
+                            it will run the interactive setup wizard:
+                        </li>
+                    </ol>
+                    <div class="code-block">
+                        <button
+                            class="copy-btn"
+                            data-copy-target="cmd-firstrun"
+                        >
+                            Copy
+                        </button>
+                        <pre><code id="cmd-firstrun">$ gn
 
-            <section>
-                <h2>Usage</h2>
-                <div class="code-block">
-                    <button class="copy-btn" data-copy-target="cmd-usage">
-                        Copy
-                    </button>
-                    <pre><code id="cmd-usage">gn <span class="flag">[options]</span> <span class="str">[note]</span></code></pre>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Command</th>
-                            <th>What it does</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><code>gn</code></td>
-                            <td>
-                                Open (or create) default <code>note.md</code>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>gn ideas</code></td>
-                            <td>
-                                Open <code>ideas.md</code> - pulls, edits,
-                                pushes if changed
-                            </td>
-                        </tr>
-                        </tr>
-                        <tr>
-                            <td><code>gn -d ideas</code></td>
-                            <td>
-                                Delete a note, local and remote (with
-                                confirmation)
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>gn -r old new</code></td>
-                            <td>
-                                Rename a note, local and remote (WebDAV
-                                <code>MOVE</code>)
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>gn -s</code></td>
-                            <td>
-                                Sync (pull) all remote notes down to local
-                                directory
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>gn -c</code></td>
-                            <td>Clear saved credentials and reconfigure</td>
-                        </tr>
-                        <tr>
-                            <td><code>gn -h</code></td>
-                            <td>Show help</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
+gn.sh setup
 
-            <section>
-                <h2>Notes</h2>
-                <div class="note">
-                    <span class="label">Heads up</span>
-                    Sync is last-write-wins. There's no merge or conflict
-                    detection - if you edit the same note from two machines
-                    without syncing in between, the second push overwrites the
-                    first.
-                </div>
-                <div class="note">
-                    <span class="label">Tip</span>
-                    Notes are raw markdown files in your chosen storage backend,
-                    so you can read and edit them directly via a web browser or
-                    mobile app &mdash; e.g.
-                    <a href="https://app.koofr.net/app/">Koofr</a>,
-                    <a href="https://github.com" target="_blank" rel="noopener"
-                        >GitHub</a
-                    >
-                </div>
-            </section>
+GitHub username: your-username
+Private repo name (must already exist): gn
+Personal Access Token (classic, repo scope): ************
 
-            <section>
-                <h2>Source</h2>
-                <p class="dim">
-                    The full script - copy it directly if you'd rather not
-                    download the file.
-                </p>
-                <div class="code-block script-block">
-                    <button class="copy-btn" id="script-copy-btn" disabled>
-                        Copy
-                    </button>
-                    <pre><code id="full-script">Loading gn.sh...</code></pre>
-                </div>
-            </section>
+Verifying credentials... Config saved. Repo is accessible.</code></pre>
+                    </div>
+                    <p class="dim">
+                        The setup wizard also installs <code>gn</code> into
+                        <code>~/bin</code> or <code>~/.local/bin</code> so you
+                        can run it from anywhere.
+                    </p>
+                </section>
 
-            <footer>
-                <span>gn // get notes</span>
-                <span><a href="https://barney.me">barney.me</a></span>
-            </footer>
+                <section>
+                    <h2>Usage</h2>
+                    <div class="code-block">
+                        <button class="copy-btn" data-copy-target="cmd-usage">
+                            Copy
+                        </button>
+                        <pre><code id="cmd-usage">gn <span class="flag">[options]</span> <span class="str">[name]</span></code></pre>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Command</th>
+                                <th>What it does</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>gn</code></td>
+                                <td>
+                                    Open (or create) <code>gn.txt</code> and
+                                    push to GitHub
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>gn ideas</code></td>
+                                <td>
+                                    Open <code>ideas.txt</code>, push on save
+                                    and quit
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>gn -r</code></td>
+                                <td>
+                                    Rename a note locally and on GitHub
+                                    (interactive)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>gn -d</code></td>
+                                <td>
+                                    Delete a note locally and on GitHub (with
+                                    confirmation)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>gn -b</code></td>
+                                <td>
+                                    Backup all <code>~/gn/*.txt</code> to
+                                    <code>~/gn-YYYY-MM-DD</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>gn -h</code></td>
+                                <td>Show help</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section>
+                    <h2>Notes</h2>
+                    <div class="note">
+                        <span class="label">Heads up</span>
+                        Sync is last-write-wins. There's no merge or conflict
+                        detection - if you edit the same note from two machines
+                        without syncing in between, the second push overwrites
+                        the first.
+                    </div>
+                    <div class="note">
+                        <span class="label">Tip</span>
+                        Notes are plain <code>.txt</code> files stored directly
+                        in your private GitHub repo, so you can read and edit
+                        them from any browser or GitHub mobile app.
+                    </div>
+                </section>
+
+                <section>
+                    <h2>Source</h2>
+                    <p class="dim">
+                        The full script - copy it directly if you'd rather not
+                        download the file.
+                    </p>
+                    <div class="code-block script-block">
+                        <button class="copy-btn" id="script-copy-btn" disabled>
+                            Copy
+                        </button>
+                        <pre><code id="full-script">Loading gn.sh...</code></pre>
+                    </div>
+                </section>
+
+                <footer>
+                    <span>gn // get notes</span>
+                    <span><a href="https://barney.me">barney.me</a></span>
+                </footer>
+            </div>
         </div>
 
         <script>
